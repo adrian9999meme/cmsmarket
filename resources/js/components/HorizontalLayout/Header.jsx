@@ -16,10 +16,10 @@ import NotificationDropdown from "../CommonForBoth/TopbarDropdown/NotificationDr
 import ProfileMenu from "../CommonForBoth/TopbarDropdown/ProfileMenu";
 
 import megamenuImg from "../../../images/megamenu-img.png";
+import logoLight from "../../../images/CMS_logo_big.png";
+import logoDark from "../../../images/CMS_logo_big2.png";
 import logo from "../../../images/logo.svg";
-import logoLight from "../../../images/logo-light.png";
 import logoLightSvg from "../../../images/logo-light.svg";
-import logoDark from "../../../images/logo-dark.png";
 
 // import images
 import github from "../../../images/brands/github.png";
@@ -71,19 +71,19 @@ const Header = props => {
             <div className="navbar-brand-box">
               <Link to="/" className="logo logo-dark">
                 <span className="logo-sm">
-                  <img src={logo} alt="" height="22" />
+                  <img src={logo} alt="" height="50" />
                 </span>
                 <span className="logo-lg">
-                  <img src={logoDark} alt="" height="17" />
+                  <img src={logoDark} alt="" height="60" />
                 </span>
               </Link>
 
               <Link to="/" className="logo logo-light">
                 <span className="logo-sm">
-                  <img src={logoLightSvg} alt="" height="22" />
+                  <img src={logoLightSvg} alt="" height="50" />
                 </span>
                 <span className="logo-lg">
-                  <img src={logoLight} alt="" height="19" />
+                  <img src={logoLight} alt="" height="60" />
                 </span>
               </Link>
             </div>

@@ -9,10 +9,10 @@ import SidebarContent from "./SidebarContent";
 
 import { Link } from "react-router-dom";
 
+import logoLight from "../../../images/CMS_logo_big.png";
+import logoDark from "../../../images/CMS_logo_big2.png";
 import logo from "../../../images/logo.svg";
-import logoLightPng from "../../../images/logo-light.png";
 import logoLightSvg from "../../../images/logo-light.svg";
-import logoDark from "../../../images/logo-dark.png";
 
 const Sidebar = props => {
 
@@ -22,19 +22,18 @@ const Sidebar = props => {
         <div className="navbar-brand-box">
           <Link to="/" className="logo logo-dark">
             <span className="logo-sm">
-              <img src={logo} alt="" height="22" />
+              <img src={logoLight} alt="" width="80%" />
             </span>
             <span className="logo-lg">
-              <img src={logoDark} alt="" height="17" />
+              <img src={logoDark} alt="" width="80%" />
             </span>
           </Link>
-
           <Link to="/" className="logo logo-light">
             <span className="logo-sm">
-              <img src={logoLightSvg} alt="" height="22" />
+              <img src={logoLightSvg} alt="" width="100%" />
             </span>
             <span className="logo-lg">
-              <img src={logoLightPng} alt="" height="19" />
+              <img src={logoLight} alt="" width="80%" />
             </span>
           </Link>
         </div>
