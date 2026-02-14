@@ -13,9 +13,9 @@ const WelcomeComp = () => {
         <div className="bg-primary-subtle">
           <Row>
             <Col xs="7">
-              <div className="text-primary p-3">
-                <h5 className="text-primary">Welcome Back !</h5>
-                <p>Skote Dashboard</p>
+              <div className="text-white p-3">
+                <h5 className="text-white">Welcome Back !</h5>
+                <p>Lekit Dashboard</p>
               </div>
             </Col>
             <Col xs="5" className="align-self-end">
@@ -33,8 +33,7 @@ const WelcomeComp = () => {
                   className="img-thumbnail rounded-circle"
                 />
               </div>
-              <h5 className="font-size-15 text-truncate">Henry Price</h5>
-              <p className="text-muted mb-0 text-truncate">UI/UX Designer</p>
+              <h5 className="font-size-15 text-truncate">Toomas Lekit</h5>
             </Col>
 
             <Col sm="8">
@@ -45,7 +44,7 @@ const WelcomeComp = () => {
                     <p className="text-muted mb-0">Projects</p>
                   </Col>
                   <Col xs="6">
-                    <h5 className="font-size-15">$1245</h5>
+                    <h5 className="font-size-15">£ 1245</h5>
                     <p className="text-muted mb-0">Revenue</p>
                   </Col>
                 </Row>
