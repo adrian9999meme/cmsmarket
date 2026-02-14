@@ -17,13 +17,17 @@ import { loginUser, setToken } from "../../store/actions";
 import withRouter from "../../components/Common/withRouter";
 // import images
 import profile from "../../../images/profile-img.png";
-import logo from "../../../images/logo.svg";
+import logo from "../../../images/CMS_icon.png";
+
+import { demoUser } from '../../constants/demouser'
 
 const Login = props => {
   //meta title
   document.title = "Login";
   const dispatch = useDispatch()
   const [userLogin, setUserLogin] = useState({ email: '', password: '' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const registerSelector = createSelector(
     state => state.Account,
     account => ({
@@ -34,7 +38,6 @@ const Login = props => {
     user
   } = useSelector(registerSelector);
 
-  const { email, password } = userLogin
 
   useEffect(() => {
     if (user) {
@@ -43,7 +46,7 @@ const Login = props => {
         password: user.password || password
       });
     }
-  }, [user, email, password]);  
+  }, [user, email, password]);
 
   // auto login
   useEffect(() => {
@@ -52,6 +55,11 @@ const Login = props => {
       dispatch(setToken(token))
     }
   }, [])
+
+  const handleClick = () => {
+    setEmail(demoUser.email);
+    setPassword(demoUser.password);
+  };
 
   const validation = useFormik({
     // enableReinitialize : use this  flag when initial values needs to be changed
@@ -80,9 +88,9 @@ const Login = props => {
                 <div className="bg-primary-subtle">
                   <Row>
                     <Col xs={7}>
-                      <div className="text-primary p-4">
-                        <h5 className="text-primary">Welcome Back !</h5>
-                        <p>Sign in to continue to Skote.</p>
+                      <div className="text-white p-4">
+                        <h5 className="text-white">Welcome to Lekit System Management !</h5>
+                        <p>Sign in to continue to Lekit.</p>
                       </div>
                     </Col>
                     <Col className="col-5 align-self-end">
@@ -99,7 +107,7 @@ const Login = props => {
                             src={logo}
                             alt=""
                             className="rounded-circle"
-                            height="34"
+                            height="75%"
                           />
                         </span>
                       </div>
@@ -175,6 +183,18 @@ const Login = props => {
                           Log In
                         </button>
                       </div>
+
+                      <Alert color="info" className="mt-4">
+                        <div className="d-flex align-items-center">
+                          <div className="flex-grow-1">
+                            <p className="mb-0 email">Email - {demoUser.email}</p>
+                            <p className="mb-1 pass">Password - {demoUser.password}</p>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <Link to="#" onClick={handleClick} className="btn btn-primary">Click Me</Link>
+                          </div>
+                        </div>
+                      </Alert>
 
                       <div className="mt-4 text-center">
                         <h5 className="font-size-14 mb-3">Sign in with</h5>
