@@ -170,6 +170,12 @@ const SidebarContent = props => {
                 <span>Stores Breakdown</span>
               </Link>
             </li>
+            <li className="position-absolute bottom-0">
+              <Link to="/logout">
+                <i class="bx bx-power-off"></i>
+                <span>{props.t("Logout")}</span>
+              </Link>
+            </li>
           </ul>
         </div>
       </SimpleBar>

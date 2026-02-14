@@ -22,8 +22,8 @@ import logo from "../../../images/logo.svg";
 const Login = props => {
   //meta title
   document.title = "Login";
-
-  const [userLogin, setUserLogin] = useState({ email: email, password: '' });
+  const dispatch = useDispatch()
+  const [userLogin, setUserLogin] = useState({ email: '', password: '' });
   const registerSelector = createSelector(
     state => state.Account,
     account => ({
@@ -34,6 +34,8 @@ const Login = props => {
     user
   } = useSelector(registerSelector);
 
+  const { email, password } = userLogin
+
   useEffect(() => {
     if (user) {
       setUserLogin({
@@ -41,7 +43,7 @@ const Login = props => {
         password: user.password || password
       });
     }
-  }, [user, email, password]);
+  }, [user, email, password]);  
 
   // auto login
   useEffect(() => {

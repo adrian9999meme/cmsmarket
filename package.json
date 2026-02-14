@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build",
+        "build": "vite build && move public\\build\\.vite\\manifest.json public\\build\\manifest.json",
         "build-rtl": "rtlcss public/build/css/theme.min.css"
     },
     "devDependencies": {
@@ -88,7 +88,7 @@
         "simplebar-react": "^3.2.6",
         "swiper": "^11.1.15",
         "toastr": "^2.1.4",
-        "vite-plugin-static-copy": "^2.1.0",
+        "vite-plugin-static-copy": "^3.2.0",
         "yet-another-react-lightbox": "^3.21.7",
         "yup": "^1.4.0"
     }

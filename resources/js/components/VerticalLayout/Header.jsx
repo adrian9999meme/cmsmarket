@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { useState } from "react";
 
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import { Row, Col } from "reactstrap";
 import { Link } from "react-router-dom";
 
@@ -33,9 +33,12 @@ import {
   showRightSidebarAction,
   toggleLeftmenu,
   changeSidebarType,
+  changeTopbarTheme,
 } from "../../store/actions";
+import { leftSidebarTypes, topBarThemeTypes } from '../../constants/layout';
 
 const Header = props => {
+  const dispatch = useDispatch()
   const [search, setsearch] = useState(false);
   const [megaMenu, setmegaMenu] = useState(false);
   const [socialDrp, setsocialDrp] = useState(false);
@@ -75,7 +78,14 @@ const Header = props => {
       body.classList.toggle("vertical-collpsed");
       body.classList.toggle("sidebar-enable");
     }
-
+    
+    if (props.leftSideBarType !== leftSidebarTypes.ICON) {
+      dispatch(changeSidebarType(leftSidebarTypes.ICON))
+      dispatch(changeTopbarTheme(topBarThemeTypes.DARK))
+    } else {
+      dispatch(changeSidebarType(leftSidebarTypes.DEFAULT))
+      dispatch(changeTopbarTheme(topBarThemeTypes.LIGHT))
+    }
   }
 
   return (
@@ -120,7 +130,7 @@ const Header = props => {
               </div>
             </form>
 
-            <Dropdown
+            {/* <Dropdown
               className="dropdown-mega d-none d-lg-block ms-2"
               isOpen={megaMenu}
               toggle={() => {
@@ -268,7 +278,7 @@ const Header = props => {
                   </Col>
                 </Row>
               </DropdownMenu>
-            </Dropdown>
+            </Dropdown> */}
           </div>
           <div className="d-flex">
             <div className="dropdown d-inline-block d-lg-none ms-2">
@@ -389,7 +399,7 @@ const Header = props => {
             <ProfileMenu />
 
             <div
-               onClick={() => {
+              onClick={() => {
                 props.showRightSidebarAction(!props.showRightSidebar);
               }}
               className="dropdown d-inline-block"
@@ -432,4 +442,5 @@ export default connect(mapStatetoProps, {
   showRightSidebarAction,
   toggleLeftmenu,
   changeSidebarType,
+  changeTopbarTheme,
 })(withTranslation()(Header));

@@ -57,7 +57,7 @@ function* loginUser({ payload: { user, history } }) {
 function* logoutUser({ payload: { history } }) {
   try {
     localStorage.removeItem("token");
-    yield logoutUserSuccess('/login');
+    yield logoutUserSuccess();
     axios.defaults.headers.common['Authorization'] = '';
     history('/login');
   } catch (error) {
