@@ -4,7 +4,8 @@ import {
   LOGOUT_USER,
   LOGOUT_USER_SUCCESS,
   API_ERROR,
-  SET_TOKEN
+  SET_TOKEN,
+  SET_USER
 } from "./actionTypes"
 
 export const loginUser = (user, history) => {
@@ -46,5 +47,12 @@ export const setToken = (token) => {
   return {
     type: SET_TOKEN,
     payload: token
+  }
+}
+
+export const setUser = (user) => {
+  return {
+    type: SET_USER,
+    payload: user
   }
 }

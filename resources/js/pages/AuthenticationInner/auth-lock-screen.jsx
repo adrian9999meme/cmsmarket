@@ -1,39 +1,59 @@
-import React from "react";
-
+import PropTypes from "prop-types";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { createSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
+import { Container, Row, Col, CardBody, Card, Button, Form, Label, Input, FormFeedback } from "reactstrap";
 // Formik Validation
 import * as Yup from "yup";
 import { useFormik } from "formik";
 
-import { Container, Row, Col, CardBody, Card, Button, Form, Label, Input, FormFeedback } from "reactstrap";
-
+import { loginUser, logoutUserSuccess } from "../../store/actions";
+import withRouter from "../../components/Common/withRouter";
 // import images
 import profileImg from "../../../images/profile-img.png";
-import logoImg from "../../../images/logo.svg";
-import lightlogo from "../../../images/logo-light.svg";
+import logoLight from "../../../images/CMS_icon.png";
+import logoDark from "../../../images/CMS_icon2.png";
 import avatar from "../../../images/users/avatar-1.jpg";
-import { Link } from "react-router-dom";
 
-const LockScreen = () => {
-
+const LockScreen = (props) => {
   //meta title
-  document.title="Lock Screen | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Lock Screen";
+
+  const dispatch = useDispatch()
+
+  const userSelector = createSelector(
+    state => state.Login,
+    login => login
+  );
+  const user = useSelector(userSelector);
+
+  const [email, setEmail] = useState(sessionStorage.getItem('email') ? JSON.parse(sessionStorage.getItem("email")) : null);
+  const [firstname, setFirstname] = useState(sessionStorage.getItem('firstname') ? JSON.parse(sessionStorage.getItem("firstname")) : null);
+  const [password, setPassword] = useState('12345678');
+  const [currentUser, setCurrentUser] = useState({email: '', firstname: ''});
+  
+  useEffect(() => {
+    dispatch(logoutUserSuccess())
+  }, [])
 
   const validation = useFormik({
     // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
 
     initialValues: {
-      password: '',
+      email: email,
+      password: password,
     },
     validationSchema: Yup.object({
       password: Yup.string().required("Please Enter Your Password"),
     }),
     onSubmit: (values) => {
-      console.log(values);
+      dispatch(loginUser(values, props.router.navigate));
     }
   });
   return (
-    <React.Fragment>     
+    <React.Fragment>
       <div className="account-pages my-5 pt-sm-5">
         <Container>
           <Row className="justify-content-center">
@@ -42,8 +62,8 @@ const LockScreen = () => {
                 <div className="bg-primary-subtle">
                   <Row>
                     <Col xs="7">
-                      <div className="text-primary p-4">
-                        <h5 className="text-primary">Lock screen</h5>
+                      <div className="text-white p-4">
+                        <h5 className="text-white">Lock screen</h5>
                         <p>Enter your password to unlock the screen!</p>
                       </div>
                     </Col>
@@ -58,10 +78,10 @@ const LockScreen = () => {
                       <div className="avatar-md profile-user-wid mb-4">
                         <span className="avatar-title rounded-circle bg-light">
                           <img
-                            src={lightlogo}
+                            src={logoLight}
                             alt=""
                             className="rounded-circle"
-                            height="34"
+                            height="80%"
                           />
                         </span>
                       </div>
@@ -70,10 +90,10 @@ const LockScreen = () => {
                       <div className="avatar-md profile-user-wid mb-4">
                         <span className="avatar-title rounded-circle bg-light">
                           <img
-                            src={logoImg}
+                            src={logoDark}
                             alt=""
                             className="rounded-circle"
-                            height="34"
+                            height="80%"
                           />
                         </span>
                       </div>
@@ -93,7 +113,7 @@ const LockScreen = () => {
                           className="rounded-circle img-thumbnail avatar-md"
                           alt="thumbnail"
                         />
-                        <h5 className="font-size-15 mt-3">Maria Laird</h5>
+                        <h5 className="font-size-15 mt-3">{firstname}</h5>
                       </div>
 
                       <div className="mb-3">
@@ -142,8 +162,7 @@ const LockScreen = () => {
                   </Link>{" "}
                 </p>
                 <p>
-                  © {(new Date().getFullYear())} Skote. Crafted with{" "}
-                  <i className="mdi mdi-heart text-danger" /> by Themesbrand
+                  © {(new Date().getFullYear())} LEKIT Ltd | Revolution in hardware products delivery.
                 </p>
               </div>
             </Col>
@@ -153,4 +172,9 @@ const LockScreen = () => {
     </React.Fragment>
   );
 };
-export default LockScreen;
+
+export default withRouter(LockScreen);
+
+LockScreen.propTypes = {
+  history: PropTypes.object,
+};

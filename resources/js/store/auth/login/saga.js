@@ -2,7 +2,7 @@ import { put, takeEvery } from "redux-saga/effects";
 
 // Login Redux States
 import { LOGIN_USER, LOGOUT_USER } from "./actionTypes";
-import { apiError, logoutUserSuccess, setToken } from "./actions";
+import { apiError, logoutUserSuccess, setToken, setUser } from "./actions";
 
 //Toast
 import { toast } from "react-toastify";
@@ -32,17 +32,21 @@ function* loginUser({ payload: { user, history } }) {
     const response = yield axios.post('api/auth/login', user);
 
     if (!response.data.success) {
-      throw new Error(response.data.message)
+      throw new Error(response.data?.message)
     }
 
     yield toast.success("User Login Successfully", {
       position: "top-right",
       autoClose: 1500,
     });
+
     // set token value in state
-    yield put(setToken(response.data.token))
+    yield put(setToken(response.data?.token))
+    yield put(setUser(response.data?.user))
 
     localStorage.setItem("token", JSON.stringify(response.data?.token));
+    sessionStorage.setItem('email', JSON.stringify(response.data?.user?.email));
+    sessionStorage.setItem('firstname', JSON.stringify(response.data?.user?.first_name));
     // navigate to dashboard
     history('/dashboard');
   } catch (error) {
@@ -56,9 +60,7 @@ function* loginUser({ payload: { user, history } }) {
 
 function* logoutUser({ payload: { history } }) {
   try {
-    localStorage.removeItem("token");
     yield logoutUserSuccess();
-    axios.defaults.headers.common['Authorization'] = '';
     history('/login');
   } catch (error) {
     yield put(apiError(error));

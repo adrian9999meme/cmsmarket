@@ -59,14 +59,16 @@ class APIController extends Controller
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized User'], 401);
         }
-
+        // get user to return
+        $user = User::where('email', $request->email)->first();
         return response()->json([
             'success' => true,
             'message' => 'Login successfully',
             'token' => $token,
+            'user' => $user,
             'token_type' => 'Bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60
-        ]);
+        ], 200);
     }
 
     // custom register

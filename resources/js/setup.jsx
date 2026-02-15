@@ -1,8 +1,9 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Routes, Route } from "react-router-dom";
-import { layoutTypes } from "./constants/layout";
+import { createSelector } from "reselect";
 
+import { layoutTypes } from "./constants/layout";
 import {publicRoutes, authProtectedRoutes} from "./routes/allRoutes";
 
 import VerticalLayout from "./components/VerticalLayout/";
@@ -11,10 +12,10 @@ import NonAuthLayout from "./components/NonAuthLayout";
 
 import fakeBackend from "./helpers/AuthType/fakeBackend";
 import AuthProtected from './routes/AuthProtected';
-import { createSelector } from "reselect";
+import Pages404 from "./pages/Utility/pages-404";
 
 // Activating fake backend
-fakeBackend();
+// fakeBackend();
 
 const getLayout = (layoutType) => {
     let Layout = VerticalLayout;
@@ -70,6 +71,7 @@ const Index = () => {
                     />
                 ))}
             </Route>
+            <Route path="*" element={<Pages404 />} />
         </Routes>
     </React.Fragment>
     );
