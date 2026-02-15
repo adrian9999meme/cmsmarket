@@ -21,7 +21,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const PagesFaqs = () => {
 
   //meta title
-  document.title = "FAQs | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "FAQs | LEKIT Ltd";
   
   const [activeTab, setactiveTab] = useState("1");
 

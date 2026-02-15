@@ -34,7 +34,7 @@ const ResetPassword = (props) => {
   const token = props.router.params.token;
 
   //meta title
-  document.title="Recover Password | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Recover Password | LEKIT Ltd";
 
   const validation = useFormik({
     // enableReinitialize : use this flag when initial values needs to be changed

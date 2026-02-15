@@ -8,7 +8,7 @@ import { jobsGridData } from '../../../common/data';
 import JobFilter from './JobFilter';
 
 const JobGrid = () => {
-    document.title = "Jobs Grid | Skote React + Laravel Admin And Dashboard Template";
+    document.title = "Jobs Grid | LEKIT Ltd";
 
     const [jobGrid, setJobGrid] = useState();
 

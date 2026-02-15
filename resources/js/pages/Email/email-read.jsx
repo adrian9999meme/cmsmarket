@@ -17,7 +17,7 @@ import { getMailsListsId as onGetMailsListsId } from "../../store/actions";
 const EmailRead = (props) => {
 
   //meta title
-  document.title = "Read Email | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Read Email | LEKIT Ltd";
 
   const id = props.router.params.id;
 

@@ -25,7 +25,7 @@ import logo from "../../../images/logo.svg";
 const ForgetPasswordPage = props => {
 
   //meta title
-  document.title = "Forget Password | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Forget Password | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

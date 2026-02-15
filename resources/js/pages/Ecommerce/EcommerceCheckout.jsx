@@ -64,7 +64,7 @@ const orderSummary = [
 const EcommerceCheckout = () => {
 
   //meta title
-  document.title = "Checkout | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Checkout | LEKIT Ltd";
 
   const [activeTab, setactiveTab] = useState("1");
   const [selectedGroup, setselectedGroup] = useState(null);

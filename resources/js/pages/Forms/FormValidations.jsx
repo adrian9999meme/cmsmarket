@@ -25,7 +25,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const FormValidations = () => {
 
   //meta title
-  document.title = "Form Validation | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Form Validation | LEKIT Ltd";
 
   // Form validation 
   const validation = useFormik({

@@ -15,7 +15,7 @@ import {
 const SparklineChart = () => {
 
    //meta title
-   document.title = "Sparkline Charts | Skote React + Laravel Admin And Dashboard Template"
+   document.title = "Sparkline Charts | LEKIT Ltd"
 
   return (
     <React.Fragment>

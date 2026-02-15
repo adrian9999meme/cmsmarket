@@ -45,7 +45,7 @@ const imageZoom = [img3, img7];
 const UiLightbox = (props) => {
     //meta title
     document.title =
-        "Lightbox | Skote React + Laravel Admin And Dashboard Template";
+        "Lightbox | LEKIT Ltd";
 
     const [photoIndex, setphotoIndex] = useState(0);
     const [isFits, setisFits] = useState(false);

@@ -35,7 +35,7 @@ import moment from "moment";
 const EcommerceCustomers = () => {
 
   //meta title
-  document.title = "Customers | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Customers | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

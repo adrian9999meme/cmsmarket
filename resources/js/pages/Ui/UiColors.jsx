@@ -6,7 +6,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 
 const UiColors = () => {
   //meta title
-  document.title = "Colors | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Colors | LEKIT Ltd";
   return (
     <React.Fragment>
       <div className="page-content">

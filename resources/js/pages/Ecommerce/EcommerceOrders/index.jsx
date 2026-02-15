@@ -51,7 +51,7 @@ import { ToastContainer } from "react-toastify";
 const EcommerceOrder = () => {
 
   //meta title
-  document.title = "Orders | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Orders | LEKIT Ltd";
 
   const [modal, setModal] = useState(false);
   const [modal1, setModal1] = useState(false);

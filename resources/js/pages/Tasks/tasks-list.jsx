@@ -25,7 +25,7 @@ import { createSelector } from "reselect";
 
 const TasksList = () => {
   //meta title
-  document.title = "Task List | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Task List | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

@@ -15,7 +15,7 @@ const Login2 = () => {
   const [passwordShow, setPasswordShow] = useState(false);
 
   //meta title
-  document.title = "Login 2 | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Login 2 | LEKIT Ltd";
 
   // Form validation 
   const validation = useFormik({

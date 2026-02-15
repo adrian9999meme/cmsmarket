@@ -18,7 +18,7 @@ import { createSelector } from "reselect"
 const EcommerceShops = () => {
 
   //meta title
-  document.title="Shops | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Shops | LEKIT Ltd";
 
   const dispatch = useDispatch()
 

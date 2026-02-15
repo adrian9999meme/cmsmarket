@@ -11,7 +11,7 @@ import CardPricing from "./card-pricing"
 const PagesPricing = () => {
 
   //meta title
-  document.title = "Pricing | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Pricing | LEKIT Ltd";
 
   const pricings = [
     {

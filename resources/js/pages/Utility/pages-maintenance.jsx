@@ -13,7 +13,7 @@ import logolight from "../../../images/logo-light.png";
 const PagesMaintenance = () => {
 
   //meta title
-  document.title = "Maintenance | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Maintenance | LEKIT Ltd";
 
   return (
     <React.Fragment>

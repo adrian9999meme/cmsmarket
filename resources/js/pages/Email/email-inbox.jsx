@@ -43,7 +43,7 @@ import { labelsData, mailChatData } from "../../common/data";
 const EmailInbox = () => {
     //meta title
     document.title =
-        "Inbox | Skote React + Laravel Admin And Dashboard Template";
+        "Inbox | LEKIT Ltd";
 
     const dispatch = useDispatch();
     const [mailsList, setMailsList] = useState();

@@ -16,7 +16,7 @@ import lightlogo from "../../../images/logo-light.svg";
 const Register = () => {
 
   //meta title
-  document.title="Register | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Register | LEKIT Ltd";
 
   //form validation
   const validation = useFormik({

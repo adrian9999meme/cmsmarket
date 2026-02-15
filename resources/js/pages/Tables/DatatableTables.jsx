@@ -268,7 +268,7 @@ function DatatableTables() {
         },
     ];
     //meta title
-    document.title = "Data Tables | Skote React + Laravel Admin And Dashboard Template";
+    document.title = "Data Tables | LEKIT Ltd";
 
     return (
         <div className="page-content">

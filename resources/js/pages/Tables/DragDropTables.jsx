@@ -75,7 +75,7 @@ const DragDropTables = () => {
     };
 
     //meta title
-    document.title = "Drag & Drop Tables | Skote React + Laravel Admin And Dashboard Template";
+    document.title = "Drag & Drop Tables | LEKIT Ltd";
 
     return (
         <React.Fragment>

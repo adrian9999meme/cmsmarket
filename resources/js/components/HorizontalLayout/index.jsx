@@ -55,7 +55,7 @@ const Layout = (props) => {
     let currentage = title.charAt(1).toUpperCase() + title.slice(2);
 
     document.title =
-      currentage + " | Skote React + Laravel Admin And Dashboard Template";
+      currentage + " | LEKIT Ltd";
   }, [pathName.pathname]);
 
   useEffect(() => {

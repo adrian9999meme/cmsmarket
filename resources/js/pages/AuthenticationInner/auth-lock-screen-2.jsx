@@ -17,7 +17,7 @@ import CarouselPage from "./CarouselPage";
 const LockScreen2 = (props) => {
 
   //meta title
-  document.title = "Lock Screen 2 | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Lock Screen 2 | LEKIT Ltd";
 
   const validation = useFormik({
     // enableReinitialize : use this flag when initial values needs to be changed

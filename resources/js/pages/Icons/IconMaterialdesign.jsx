@@ -23469,7 +23469,7 @@ const IconMaterialdesign = () => {
   })
 
    //meta title
-   document.title = "Material Design | Skote React + Laravel Admin And Dashboard Template";
+   document.title = "Material Design | LEKIT Ltd";
 
   return (
     <React.Fragment>

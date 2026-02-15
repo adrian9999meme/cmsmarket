@@ -9,7 +9,7 @@ import { Link } from "react-router-dom"
 
 const EmailVerification2 = () => {
   //meta title
-  document.title = "Email Verification 2 | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Email Verification 2 | LEKIT Ltd";
   return (
     <React.Fragment>
       <div>

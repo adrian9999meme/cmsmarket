@@ -49,7 +49,7 @@ import { createSelector } from "reselect";
 const Calender = props => {
 
   //meta title
-  document.title = "Calendar | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Calendar | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

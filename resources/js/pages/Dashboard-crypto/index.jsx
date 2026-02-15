@@ -17,7 +17,7 @@ import BuySell from "./buy-sell";
 const Dashboard = () => {
  
   //meta title
-  document.title = "Crypto Dashboard | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Crypto Dashboard | LEKIT Ltd";
 
   return (
     <React.Fragment>

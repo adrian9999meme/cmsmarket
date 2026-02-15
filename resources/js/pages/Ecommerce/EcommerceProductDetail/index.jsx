@@ -29,7 +29,7 @@ import { createSelector } from "reselect";
 const EcommerceProductDetail = (props) => {
 
   //meta title
-  document.title = "Product Details | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Product Details | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

@@ -95,7 +95,7 @@ const initialFormState = {
 };
 
 const SellersBreakdown = () => {
-  document.title = "Sellers Breakdown | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Sellers Breakdown | LEKIT Ltd";
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sellers, setSellers] = useState(MOCK_SELLERS);

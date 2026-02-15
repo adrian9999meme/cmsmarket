@@ -13,7 +13,7 @@ import Storage from "./Storage";
 const Index = () => {
 
   //meta title
-  document.title = "File Manager | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "File Manager | LEKIT Ltd";
 
   const series = [76]
   const options = {

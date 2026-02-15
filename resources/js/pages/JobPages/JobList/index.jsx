@@ -28,7 +28,7 @@ import { ToastContainer } from "react-toastify";
 function JobList() {
 
     //meta title
-    document.title = "Jobs List | Skote React + Laravel Admin And Dashboard Template";
+    document.title = "Jobs List | LEKIT Ltd";
 
     const [modal, setModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);

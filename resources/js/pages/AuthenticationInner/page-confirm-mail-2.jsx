@@ -10,7 +10,7 @@ import { Link } from "react-router-dom"
 const ConfirmMail2 = () => {
 
   //meta title
-  document.title="Confirm Mail 2 | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Confirm Mail 2 | LEKIT Ltd";
 
   return (
     <React.Fragment>

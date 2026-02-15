@@ -31,7 +31,7 @@ const second = {
 const MapsGoogle = (props) => {
     //meta title
     document.title =
-        "Google Maps | Skote React + Laravel Admin And Dashboard Template";
+        "Google Maps | LEKIT Ltd";
 
     const selectedPlace = {};
 

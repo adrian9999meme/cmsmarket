@@ -16,7 +16,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb"
 const UiGrid = () => {
 
   //meta title
-  document.title = "Grid | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Grid | LEKIT Ltd";
 
   return (
     <React.Fragment>

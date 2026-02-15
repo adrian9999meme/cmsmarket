@@ -7,7 +7,7 @@ import error from "../../../images/error-img.png"
 
 const Pages404 = () => {
     //meta title
-    document.title = "404 Error Page | Skote React + Laravel Admin And Dashboard Template";
+    document.title = "404 Error Page | LEKIT Ltd";
 
   return (
     <React.Fragment>

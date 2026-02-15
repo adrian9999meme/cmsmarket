@@ -18,7 +18,7 @@ import { createSelector } from "reselect";
 
 const InvoicesList = props => {
   //meta title
-  document.title = "Invoice List | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Invoice List | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

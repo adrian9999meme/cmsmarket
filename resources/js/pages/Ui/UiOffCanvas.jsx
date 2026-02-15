@@ -20,7 +20,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const UiDrawer = () => {
 
     //meta title
-    document.title = "Drawer | Skote React + Laravel Admin And Dashboard Template";
+    document.title = "Drawer | LEKIT Ltd";
 
     const [open, setOpen] = useState(false);
     const [isTop, setIsTop] = useState(false);

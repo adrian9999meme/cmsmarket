@@ -7,7 +7,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb"
 const UiProgressbar = () => {
 
   //meta title
-  document.title = "Progress Bars | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Progress Bars | LEKIT Ltd";
 
   return (
     <React.Fragment>

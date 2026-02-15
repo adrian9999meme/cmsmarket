@@ -10,7 +10,7 @@ import logoLight from "../../../images/logo-light.png"
 const TwostepVerification2 = () => {
 
   //meta title
-  document.title = "Two Step Verification 2 | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Two Step Verification 2 | LEKIT Ltd";
 
   return (
     <React.Fragment>
