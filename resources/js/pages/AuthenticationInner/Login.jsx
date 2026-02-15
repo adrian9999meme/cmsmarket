@@ -18,7 +18,7 @@ const Login = () => {
   const [show, setShow] = useState(false);
 
   //meta title
-  document.title = "Login | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Login | LEKIT Ltd";
 
   // Form validation 
   const validation = useFormik({

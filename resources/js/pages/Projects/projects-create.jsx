@@ -19,7 +19,7 @@ import { projectAssignedTo } from "../../common/data/projects";
 const ProjectsCreate = () => {
 
   //meta title
-  document.title = "Create New Project | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Create New Project | LEKIT Ltd";
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);

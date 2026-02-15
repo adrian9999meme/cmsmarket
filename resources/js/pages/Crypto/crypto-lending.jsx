@@ -19,7 +19,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const CryptoLending = props => {
 
   //meta title
-  document.title="Lending | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Lending | LEKIT Ltd";
 
   const [assets] = useState([
     {

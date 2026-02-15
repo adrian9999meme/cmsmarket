@@ -33,7 +33,7 @@ import { getUserProfile } from "../../../store/actions";
 const ContactsProfile = props => {
 
   //meta title
-  document.title = "Profile | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Profile | LEKIT Ltd";
 
   const { userProfile, onGetUserProfile } = props;
   // eslint-disable-next-line no-unused-vars

@@ -67,7 +67,7 @@ class UiSessionTimeout extends Component {
   }
   render() {
     //meta title
-    document.title = "Session Timeout | Skote React + Laravel Admin And Dashboard Template";
+    document.title = "Session Timeout | LEKIT Ltd";
 
     return (
       <React.Fragment>

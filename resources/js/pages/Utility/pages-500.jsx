@@ -7,7 +7,7 @@ import error from "../../../images/error-img.png"
 
 const Pages500 = () => {
    //meta title
-   document.title = "500 Error Page | Skote React + Laravel Admin And Dashboard Template";
+   document.title = "500 Error Page | LEKIT Ltd";
 
   return (
     <React.Fragment>

@@ -32,7 +32,7 @@ import { handleSearchData } from "../../components/Common/searchFile";
 const EcommerceProducts = () => {
 
   //meta title
-  document.title = "Products | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Products | LEKIT Ltd";
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

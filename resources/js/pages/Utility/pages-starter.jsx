@@ -7,7 +7,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const PagesStarter = () => {
 
     //meta title
-    document.title="Stater Page | Skote React + Laravel Admin And Dashboard Template";
+    document.title="Stater Page | LEKIT Ltd";
 
   return (
     <React.Fragment>

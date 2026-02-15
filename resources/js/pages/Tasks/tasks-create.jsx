@@ -26,7 +26,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb"
 const TasksCreate = () => {
 
   //meta title
-  document.title="Create Task | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Create Task | LEKIT Ltd";
 
   const editorRef = useRef();
   const [editor, setEditor] = useState(false);

@@ -20,3 +20,6 @@ export const CHANGE_PRELOADER = "CHANGE_PRELOADER";
 
 // Layout mode
 export const CHANGE_LAYOUT_MODE = "CHANGE_LAYOUT_MODE";
+
+export const GET_SERVER_TIME = "GET_SERVER_TIME";
+

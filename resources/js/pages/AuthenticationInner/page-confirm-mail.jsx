@@ -9,7 +9,7 @@ import logolight from "../../../images/logo-light.png"
 const ConfirmMail = () => {
 
   //meta title
-  document.title="Confirm Mail | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Confirm Mail | LEKIT Ltd";
 
   return (
     <React.Fragment>

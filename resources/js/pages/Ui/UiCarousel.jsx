@@ -24,7 +24,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const UiCarousel = () => {
 
   //meta title
-  document.title = "Carousel | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Carousel | LEKIT Ltd";
 
   return (
     <React.Fragment>

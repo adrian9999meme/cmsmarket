@@ -10,7 +10,8 @@ import {
   CHANGE_PRELOADER,
   TOGGLE_LEFTMENU,
   SHOW_SIDEBAR,
-  CHANGE_LAYOUT_MODE
+  CHANGE_LAYOUT_MODE,
+  GET_SERVER_TIME
 } from "./actionTypes";
 
 //constants
@@ -37,6 +38,7 @@ const INIT_STATE = {
   isMobile: false,
   showSidebar: true,
   leftMenu: false,
+  timediffer: 0,
 }
 const Layout = (state = INIT_STATE, action) => {
   switch (action.type) {
@@ -51,11 +53,11 @@ const Layout = (state = INIT_STATE, action) => {
         isPreloader: action.payload,
       }
 
-      case CHANGE_LAYOUT_MODE:
-        return {
-          ...state,
-          layoutModeType: action.payload,
-        }                                                               
+    case CHANGE_LAYOUT_MODE:
+      return {
+        ...state,
+        layoutModeType: action.payload,
+      }
 
     case CHANGE_LAYOUT_WIDTH:
       return {
@@ -96,6 +98,12 @@ const Layout = (state = INIT_STATE, action) => {
       return {
         ...state,
         leftMenu: action.payload,
+      }
+
+    case GET_SERVER_TIME:
+      return {
+        ...state,
+        timediffer: action.payload
       }
 
     default:

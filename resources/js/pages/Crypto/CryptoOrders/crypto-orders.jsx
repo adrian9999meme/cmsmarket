@@ -39,7 +39,7 @@ import { handleSearchData } from "../../../components/Common/searchFile";
 const CryptoOrders = props => {
 
   //meta title
-  document.title = "Orders | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Orders | LEKIT Ltd";
 
   const { orders, onGetOrders, loading } = props;
   const [cryptoOrder, setCryptoOrder] = useState();

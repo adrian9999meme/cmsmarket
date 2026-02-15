@@ -28,7 +28,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const CryptoBuySell = props => {
 
   //meta title
-  document.title="Buy/Sell | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Buy/Sell | LEKIT Ltd";
 
   const [activeTab, setActiveTab] = useState("1");
   const [isMenu, setIsMenu] = useState(false);

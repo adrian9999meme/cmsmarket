@@ -70,7 +70,7 @@ const ProjectStatus = ({ status }) => {
 const ProjectsList = () => {
 
   //meta title
-  document.title = "Project List | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Project List | LEKIT Ltd";
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

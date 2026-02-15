@@ -30,7 +30,7 @@ import classnames from "classnames";
 const UiTabsAccordions = () => {
 
   //meta title
-  document.title = "Tabs & Accordions | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Tabs & Accordions | LEKIT Ltd";
 
   const [activeTab, setActiveTab] = useState("1");
   const [activeTab1, setActiveTab1] = useState("5");

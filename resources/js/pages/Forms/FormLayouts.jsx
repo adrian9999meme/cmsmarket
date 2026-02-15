@@ -11,7 +11,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const FormLayouts = () => {
 
   //meta title
-  document.title = "Form Layouts | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Form Layouts | LEKIT Ltd";
 
 
   const formik = useFormik({

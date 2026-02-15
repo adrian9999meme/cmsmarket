@@ -12,7 +12,7 @@ import CarouselPage from "./CarouselPage";
 const Recoverpw2 = () => {
 
   //meta title
-  document.title = "Recover Password 2 | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Recover Password 2 | LEKIT Ltd";
 
   const validation = useFormik({
     // enableReinitialize : use this flag when initial values needs to be changed

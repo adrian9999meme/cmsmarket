@@ -16,7 +16,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb"
 const MapsVector = () => {
 
   //meta title
-  document.title = "Vector Maps | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Vector Maps | LEKIT Ltd";
 
   return (
     <React.Fragment>

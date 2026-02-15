@@ -18,7 +18,7 @@ import InputMask from "react-input-mask"
 
 const FormMask = () => {
   //meta title
-  document.title = "Form Mask | Skote React + Laravel Admin And Dashboard Template"
+  document.title = "Form Mask | LEKIT Ltd"
 
   const Repeat = props => (
     <InputMask

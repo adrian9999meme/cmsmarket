@@ -18,7 +18,7 @@ import { Link } from "react-router-dom";
 const FormUpload = () => {
 
   //meta title
-  document.title = "Form File Upload | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Form File Upload | LEKIT Ltd";
 
   const [selectedFiles, setselectedFiles] = useState([]);
 

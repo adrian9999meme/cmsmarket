@@ -17,7 +17,7 @@ import ChatBox from "./chat-box"
 const DashboardSaas = () => {
 
   //meta title
-  document.title = "Saas Dashboard | Skote React + Laravel Admin And Dashboard Template"
+  document.title = "Saas Dashboard | LEKIT Ltd"
 
   return (
     <React.Fragment>

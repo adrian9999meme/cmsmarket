@@ -49,7 +49,31 @@ import {
   ON_ADD_REPLY_FAIL,
   ON_ADD_COMMENT,
   ON_ADD_COMMENT_SUCCESS,
-  ON_ADD_COMMENT_FAIL
+  ON_ADD_COMMENT_FAIL,
+  ADD_SELLER_REQUEST,
+  ADD_SELLER_SUCCESS,
+  ADD_SELLER_FAIL,
+  GET_SELLER_REQUEST,
+  GET_SELLER_SUCCESS,
+  GET_SELLER_FAIL,
+  EDIT_SELLER_REQUEST,
+  EDIT_SELLER_SUCCESS,
+  EDIT_SELLER_FAIL,
+  DELETE_SELLER_REQUEST,
+  DELETE_SELLER_SUCCESS,
+  DELETE_SELLER_FAIL,
+  ADD_STORE_REQUEST,
+  ADD_STORE_SUCCESS,
+  ADD_STORE_FAIL,
+  GET_STORE_REQUEST,
+  GET_STORE_SUCCESS,
+  GET_STORE_FAIL,
+  EDIT_STORE_REQUEST,
+  EDIT_STORE_SUCCESS,
+  EDIT_STORE_FAIL,
+  DELETE_STORE_REQUEST,
+  DELETE_STORE_SUCCESS,
+  DELETE_STORE_FAIL,
 } from "./actionTypes";
 
 export const getProducts = () => ({
@@ -298,5 +322,117 @@ export const onAddCommentSuccess = comments => ({
 
 export const onAddCommentFail = error => ({
   type: ON_ADD_COMMENT_FAIL,
+  payload: error,
+});
+
+// ADD NEW SELLER
+export const addNewSellerRequest = () => ({
+  type: ADD_SELLER_REQUEST,
+  payload: {},
+});
+export const addNewSellerSuccess = seller => ({
+  type: ADD_SELLER_SUCCESS,
+  payload: seller,
+});
+export const addNewSellerFail = error => ({
+  type: ADD_SELLER_FAIL,
+  payload: error,
+});
+
+// GET SELLERS
+export const getSellersRequest = () => ({
+  type: GET_SELLER_REQUEST,
+  payload: {},
+});
+export const getSellersSuccess = (sellers) => ({
+  type: GET_SELLER_SUCCESS,
+  payload: sellers,
+});
+export const getSellersFail = (error) => ({
+  type: GET_SELLER_FAIL,
+  payload: {error},
+});
+
+// EDIT SELLER
+export const editSellerRequest = () => ({
+  type: EDIT_SELLER_REQUEST,
+  payload: {},
+});
+export const editSellerSuccess = seller => ({
+  type: EDIT_SELLER_SUCCESS,
+  payload: seller,
+});
+export const editSellerFail = error => ({
+  type: EDIT_SELLER_FAIL,
+  payload: error,
+});
+
+// DELETE SELLER
+export const deleteSellerRequest = () => ({
+  type: DELETE_SELLER_REQUEST,
+  payload: {},
+});
+export const deleteSellerSuccess = (seller) => ({
+  type: DELETE_SELLER_SUCCESS,
+  payload: seller,
+});
+export const deleteSellerFail = error => ({
+  type: DELETE_SELLER_FAIL,
+  payload: error,
+});
+
+// ADD NEW STORE
+export const addNewStoreRequest = () => ({
+  type: ADD_STORE_REQUEST,
+  payload: {},
+});
+export const addNewStoreSuccess = store => ({
+  type: ADD_STORE_SUCCESS,
+  payload: store,
+});
+export const addNewStoreFail = error => ({
+  type: ADD_STORE_FAIL,
+  payload: error,
+});
+
+// GET STORES
+export const getStoresRequest = () => ({
+  type: GET_STORE_REQUEST,
+  payload: {},
+});
+export const getStoresSuccess = (stores) => ({
+  type: GET_STORE_SUCCESS,
+  payload: stores,
+});
+export const getStoresFail = (error) => ({
+  type: GET_STORE_FAIL,
+  payload: { error },
+});
+
+// EDIT STORE
+export const editStoreRequest = () => ({
+  type: EDIT_STORE_REQUEST,
+  payload: {},
+});
+export const editStoreSuccess = store => ({
+  type: EDIT_STORE_SUCCESS,
+  payload: store,
+});
+export const editStoreFail = error => ({
+  type: EDIT_STORE_FAIL,
+  payload: error,
+});
+
+// DELETE STORE
+export const deleteStoreRequest = () => ({
+  type: DELETE_STORE_REQUEST,
+  payload: {},
+});
+export const deleteStoreSuccess = store => ({
+  type: DELETE_STORE_SUCCESS,
+  payload: store,
+});
+export const deleteStoreFail = error => ({
+  type: DELETE_STORE_FAIL,
   payload: error,
 });

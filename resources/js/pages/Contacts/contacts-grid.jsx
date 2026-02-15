@@ -18,7 +18,7 @@ import { createSelector } from "reselect";
 const ContactsGrid = () => {
 
   //meta title
-  document.title = "User Grid | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "User Grid | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

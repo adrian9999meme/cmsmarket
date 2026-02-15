@@ -14,7 +14,7 @@ import logoLight from "../../../images/logo-light.png";
 const Register2 = () => {
 
   //meta title
-  document.title = "Register 2 | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Register 2 | LEKIT Ltd";
 
   //form validation
   const validation = useFormik({

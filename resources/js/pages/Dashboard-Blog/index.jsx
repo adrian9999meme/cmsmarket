@@ -15,7 +15,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb"
 
 const index = () => {
   //meta title
-  document.title = "Blog Dashboard | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Blog Dashboard | LEKIT Ltd";
 
   return (
     <React.Fragment>

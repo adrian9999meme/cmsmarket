@@ -41,7 +41,7 @@ const PagesTimeline = () => {
   ];
 
   //meta title
-  document.title = "Timeline | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Timeline | LEKIT Ltd";
 
   return (
     <React.Fragment>

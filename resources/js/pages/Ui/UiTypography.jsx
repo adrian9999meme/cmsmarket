@@ -14,7 +14,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const UiTypography = () => {
 
   //meta title
-  document.title = "Typography | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Typography | LEKIT Ltd";
 
   return (
     <React.Fragment>

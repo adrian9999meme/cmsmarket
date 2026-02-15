@@ -23,7 +23,7 @@ import lightlogo from "../../../images/logo-light.svg";
 const Recoverpw = () => {
 
   //meta title
-  document.title="Recover Password | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Recover Password | LEKIT Ltd";
 
   const validation = useFormik({
     // enableReinitialize : use this flag when initial values needs to be changed

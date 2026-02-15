@@ -23,7 +23,7 @@ import image1 from "../../../images/small/img-1.jpg";
 
 function UiUtilitie() {
     //meta title
-    document.title = "Breadcrumb | Skote React + Laravel Admin And Dashboard Template";
+    document.title = "Breadcrumb | LEKIT Ltd";
     return (
         <React.Fragment>
             <div className="page-content">

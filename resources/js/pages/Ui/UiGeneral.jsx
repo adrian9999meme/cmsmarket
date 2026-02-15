@@ -26,7 +26,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const UiGeneral = () => {
 
   //meta title
-  document.title = "General | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "General | LEKIT Ltd";
 
   const [popovertop, setpopovertop] = useState(false);
   const [popoverleft, setpopoverleft] = useState(false);

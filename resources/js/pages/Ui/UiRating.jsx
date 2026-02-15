@@ -10,7 +10,7 @@ import Rating from "react-rating";
 const UiRating = () => {
 
   //meta title
-  document.title = "Rating | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Rating | LEKIT Ltd";
 
   const [def, setdef] = useState("");
   const [rate, setRate] = useState("");

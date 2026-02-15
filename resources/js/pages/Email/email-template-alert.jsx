@@ -7,7 +7,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb"
 
 const EmailAlertTemplte = props => {
   //meta title
-  document.title="Alert Email | Skote React + Laravel Admin And Dashboard Template";
+  document.title="Alert Email | LEKIT Ltd";
   return (
     <React.Fragment>
       <div className="page-content">

@@ -11,7 +11,7 @@ import { productListvar } from "../../common/data";
 const EcommerceCart = () => {
 
   //meta title
-  document.title = "Cart | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Cart | LEKIT Ltd";
 
   const [productList, setproductList] = useState(productListvar);
   const [dic, setDic] = useState(0);

@@ -29,7 +29,7 @@ import { ToastContainer } from "react-toastify";
 
 const ApplyJobs = () => {
   //meta title
-  document.title = "Job Apply | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Job Apply | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

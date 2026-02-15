@@ -99,7 +99,7 @@ const MOCK_TRADE_CUSTOMERS = [
 ];
 
 const CustomersBreakdown = () => {
-  document.title = "Customers Breakdown | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Customers Breakdown | LEKIT Ltd";
 
   const [activeTab, setActiveTab] = useState("customers");
   const [searchTerm, setSearchTerm] = useState("");

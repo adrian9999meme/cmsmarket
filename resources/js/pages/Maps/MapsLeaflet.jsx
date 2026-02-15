@@ -16,7 +16,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const MapsLeaflet = () => {
 
   //meta title
-  document.title = "Leaflet Maps | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Leaflet Maps | LEKIT Ltd";
 
   return (
     <React.Fragment>

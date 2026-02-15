@@ -26,7 +26,7 @@ import Paginations from "../../components/Common/Pagination";
 const ProjectsGrid = props => {
 
   //meta title
-  document.title = "Projects Grid | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Projects Grid | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

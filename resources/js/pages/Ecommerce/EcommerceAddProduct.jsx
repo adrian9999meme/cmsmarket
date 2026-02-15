@@ -11,7 +11,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const EcommerceAddProduct = () => {
 
   //meta title
-  document.title = "Add Product | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Add Product | LEKIT Ltd";
 
   const [selectedFiles, setselectedFiles] = useState([]);
 

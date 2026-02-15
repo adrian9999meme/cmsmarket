@@ -34,7 +34,7 @@ import avatar from "../../../images/users/avatar-1.jpg"
 const CryptoExchange = props => {
 
   //meta title
-  document.title = "Exchange | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Exchange | LEKIT Ltd";
 
   const series = [
     {

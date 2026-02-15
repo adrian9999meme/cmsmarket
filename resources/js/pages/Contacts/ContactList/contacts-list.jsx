@@ -39,7 +39,7 @@ import { ToastContainer } from "react-toastify";
 const ContactsList = () => {
 
   //meta title
-  document.title = "User List | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "User List | LEKIT Ltd";
 
   const dispatch = useDispatch();
   const [contact, setContact] = useState();

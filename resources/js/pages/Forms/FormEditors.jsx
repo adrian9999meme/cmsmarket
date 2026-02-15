@@ -17,7 +17,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 const FormEditors = () => {
 
    //meta title
-   document.title = "Form Editors | Skote React + Laravel Admin And Dashboard Template"
+   document.title = "Form Editors | LEKIT Ltd"
 
   return (
     <React.Fragment>

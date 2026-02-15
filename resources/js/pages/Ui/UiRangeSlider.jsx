@@ -9,7 +9,7 @@ import 'rc-slider/assets/index.css';
 const UiRangeSlider = () => {
 
    //meta title
-   document.title = "Range Slider | Skote React + Laravel Admin And Dashboard Template";
+   document.title = "Range Slider | LEKIT Ltd";
 
    const [value, setValue] = useState(50);
 

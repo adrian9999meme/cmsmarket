@@ -22,7 +22,7 @@ import { createSelector } from "reselect";
 const ProjectsOverview = props => {
 
   //meta title
-  document.title = "Project Overview | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Project Overview | LEKIT Ltd";
 
   const dispatch = useDispatch();
 

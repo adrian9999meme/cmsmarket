@@ -10,7 +10,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const CandidateList = () => {
-    document.title = "Candidate List | Skote React + Laravel Admin And Dashboard Template";
+    document.title = "Candidate List | LEKIT Ltd";
 
     const [isOpen, setIsOpen] = useState(false);
     const toggle = () => setIsOpen(!isOpen);

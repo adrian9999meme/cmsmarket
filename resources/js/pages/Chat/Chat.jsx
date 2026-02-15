@@ -16,7 +16,7 @@ import { createSelector } from "reselect";
 const Chat = () => {
 
   //meta title
-  document.title = "Chat | Skote React + Laravel Admin And Dashboard Template";
+  document.title = "Chat | LEKIT Ltd";
 
   const dispatch = useDispatch();
   const chatSelector = createSelector(

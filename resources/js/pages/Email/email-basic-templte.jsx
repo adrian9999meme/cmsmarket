@@ -7,7 +7,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb"
 
 const EmailBasicTemplte = () => {
    //meta title
-   document.title="Basic Action | Skote React + Laravel Admin And Dashboard Template";
+   document.title="Basic Action | LEKIT Ltd";
   return (
     <React.Fragment>
       <div className="page-content">
