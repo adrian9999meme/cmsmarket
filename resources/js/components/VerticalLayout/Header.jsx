@@ -16,11 +16,11 @@ import megamenuImg from "../../../images/megamenu-img.png";
 
 // import images
 import github from "../../../images/brands/github.png";
-import bitbucket from "../../../images/brands/bitbucket.png";
-import dribbble from "../../../images/brands/dribbble.png";
 import dropbox from "../../../images/brands/dropbox.png";
-import mail_chimp from "../../../images/brands/mail_chimp.png";
-import slack from "../../../images/brands/slack.png";
+import gmail from "../../../images/brands/Gmail.png";
+import analytics from "../../../images/brands/Analytics.png";
+import stripe from "../../../images/brands/Stripe.png";
+import paypal from "../../../images/brands/Paypal.png";
 
 import logo from "../../../images/logo.svg";
 import logoLightSvg from "../../../images/logo-light.svg";
@@ -78,7 +78,7 @@ const Header = props => {
       body.classList.toggle("vertical-collpsed");
       body.classList.toggle("sidebar-enable");
     }
-    
+
     if (props.leftSideBarType !== leftSidebarTypes.ICON) {
       dispatch(changeSidebarType(leftSidebarTypes.ICON))
       dispatch(changeTopbarTheme(topBarThemeTypes.DARK))
@@ -339,42 +339,43 @@ const Header = props => {
                 <div className="px-lg-2">
                   <Row className="no-gutters">
                     <Col>
-                      <Link className="dropdown-icon-item" to="#">
+                      <Link className="dropdown-icon-item" to="https://github.com/trending" target="_blank" rel="noopener noreferrer">
                         <img src={github} alt="Github" />
                         <span>GitHub</span>
                       </Link>
                     </Col>
                     <Col>
-                      <Link className="dropdown-icon-item" to="#">
-                        <img src={bitbucket} alt="bitbucket" />
-                        <span>Bitbucket</span>
-                      </Link>
-                    </Col>
-                    <Col>
-                      <Link className="dropdown-icon-item" to="#">
-                        <img src={dribbble} alt="dribbble" />
-                        <span>Dribbble</span>
-                      </Link>
-                    </Col>
-                  </Row>
-
-                  <Row className="no-gutters">
-                    <Col>
-                      <Link className="dropdown-icon-item" to="#">
-                        <img src={dropbox} alt="dropbox" />
+                      <Link className="dropdown-icon-item" to="https://www.dropbox.com/features/content-collaboration/trending" target="_blank" rel="noopener noreferrer">
+                        <img src={dropbox} alt="Dropbox" />
                         <span>Dropbox</span>
                       </Link>
                     </Col>
+                  </Row>
+                  <Row className="no-gutters">
                     <Col>
-                      <Link className="dropdown-icon-item" to="#">
-                        <img src={mail_chimp} alt="mail_chimp" />
-                        <span>Mail Chimp</span>
+                      <Link className="dropdown-icon-item" to="https://mail.google.com/mail/u/0/#search/trend" target="_blank" rel="noopener noreferrer">
+                        <img src={gmail} alt="Gmail" />
+                        <span>Gmail</span>
                       </Link>
                     </Col>
                     <Col>
-                      <Link className="dropdown-icon-item" to="#">
-                        <img src={slack} alt="slack" />
-                        <span>Slack</span>
+                      <Link className="dropdown-icon-item" to="https://trends.google.com/trends/trendingsearches/daily" target="_blank" rel="noopener noreferrer">
+                        <img src={analytics} alt="Analytics" />
+                        <span>Analytics</span>
+                      </Link>
+                    </Col>
+                  </Row>
+                  <Row className="no-gutters">
+                    <Col>
+                      <Link className="dropdown-icon-item" to="https://stripe.com/en-us/blog/tags/trends" target="_blank" rel="noopener noreferrer">
+                        <img src={stripe} alt="Stripe" />
+                        <span>Stripe</span>
+                      </Link>
+                    </Col>
+                    <Col>
+                      <Link className="dropdown-icon-item" to="https://www.paypal.com/stories/us/tag/trends" target="_blank" rel="noopener noreferrer">
+                        <img src={paypal} alt="Paypal" />
+                        <span>Paypal</span>
                       </Link>
                     </Col>
                   </Row>

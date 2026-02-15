@@ -6,7 +6,7 @@ const TopCities = () => {
     <React.Fragment>
       <Card>
         <CardBody>
-          <CardTitle className="mb-4">Top Cities Selling Product</CardTitle>
+          <CardTitle className="mb-4">Top Celling Stores</CardTitle>
           <div className="text-center">
             <div className="mb-4">
               <i className="bx bx-map-pin text-primary display-4" />

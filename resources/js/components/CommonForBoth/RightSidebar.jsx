@@ -266,6 +266,7 @@ const RightSidebar = props => {
                     onChange={e => {
                       if (e.target.checked) {
                         props.changeSidebarType(e.target.value);
+                        props.changeTopbarTheme(topBarThemeTypes.DARK);
                       }
                     }}
                   />

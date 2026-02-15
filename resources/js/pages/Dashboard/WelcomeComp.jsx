@@ -7,6 +7,7 @@ import avatar1 from "../../../images/users/avatar-1.jpg"
 import profileImg from "../../../images/profile-img.png"
 
 const WelcomeComp = () => {
+  const firstname = sessionStorage.getItem('firstname') ? JSON.parse(sessionStorage.getItem("firstname")) : 'Authorized User'
   return (
     <React.Fragment>
       <Card className="overflow-hidden">
@@ -33,7 +34,7 @@ const WelcomeComp = () => {
                   className="img-thumbnail rounded-circle"
                 />
               </div>
-              <h5 className="font-size-15 text-truncate">Toomas Lekit</h5>
+              <h5 className="font-size-15 text-truncate">{firstname}</h5>
             </Col>
 
             <Col sm="8">
@@ -44,8 +45,8 @@ const WelcomeComp = () => {
                     <p className="text-muted mb-0">Projects</p>
                   </Col>
                   <Col xs="6">
-                    <h5 className="font-size-15">£ 1245</h5>
-                    <p className="text-muted mb-0">Revenue</p>
+                    <h5 className="font-size-15">£1245</h5>
+                    <p className="text-muted mb-0">Lekit Revenue</p>
                   </Col>
                 </Row>
                 <div className="mt-4">
