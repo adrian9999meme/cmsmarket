@@ -130,7 +130,7 @@ const Dashboard = props => {
               <Card>
                 <CardBody>
                   <div className="d-sm-flex flex-wrap">
-                    <h4 className="card-title mb-4">Email Sent</h4>
+                    <h4 className="card-title mb-4">Orders Delivered</h4>
                     <div className="ms-auto">
                       <ul className="nav nav-pills">
                         <li className="nav-item">

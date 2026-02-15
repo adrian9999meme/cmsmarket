@@ -35,7 +35,7 @@ function* loginUser({ payload: { user, history } }) {
       throw new Error(response.data?.message)
     }
 
-    yield toast.success("User Login Successfully", {
+    toast.success("User Login Successfully", {
       position: "top-right",
       autoClose: 1500,
     });
