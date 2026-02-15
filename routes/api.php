@@ -20,4 +20,5 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::post('/register', [APIController::class, 'register']);
     Route::post('/forget-password', [APIController::class, 'forget_pass']);
     Route::post('/reset-password', [APIController::class, 'reset_pass']);
+    Route::get('/getservertime', [APIController::class, 'getservertime']);
 });

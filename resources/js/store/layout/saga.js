@@ -9,12 +9,14 @@ import {
   CHANGE_SIDEBAR_TYPE,
   CHANGE_TOPBAR_THEME,
   SHOW_RIGHT_SIDEBAR,
-  CHANGE_LAYOUT_MODE
+  CHANGE_LAYOUT_MODE,
+  GET_SERVER_TIME
 } from "./actionTypes"
 
 import {
   changeSidebarType as changeSidebarTypeAction,
   changeTopbarTheme as changeTopbarThemeAction,
+  getServerTime,
 } from "./actions"
 
 /**
@@ -178,6 +180,26 @@ function* showRightSidebar() {
     yield call(manageBodyClass, "right-bar-enabled", "add")
   } catch (error) {}
 }
+// get server time to async
+function* AsyncServerTime() {
+  try {
+      const record_time_start = new Date();
+      var response = yield axios.get("/api/auth/getservertime")
+      if (response.data?.data) {
+          // Get server time as JS Date object from response
+          const { year, month, day, hour, minute, second } = response.data?.data;
+          // month in JS Date constructor is 0-indexed, so subtract 1
+          const serverDate = new Date(year, month, day, hour, minute, second);
+          // Time difference in seconds (positive if client ahead)
+          const timeDiffer = Math.floor((record_time_start.getTime() - serverDate.getTime()) / 1000);
+
+          yield put(getServerTime(GET_SERVER_TIME, Math.abs(timeDiffer) < 60 ? 0 : timeDiffer));
+      }
+  }
+  catch (error) {
+      toast.error("Async Server Time failed.");
+  }
+}
 
 /**
  * Watchers
@@ -214,6 +236,10 @@ export function* watchSChangeLayoutMode() {
   yield takeEvery(CHANGE_LAYOUT_MODE, changeLayoutMode)
 }
 
+export function* fetchServerTime() {
+  yield takeEvery(GET_SERVER_TIME, AsyncServerTime)
+}
+
 function* LayoutSaga() {
   yield all([
     fork(watchSChangeLayoutMode),
@@ -224,6 +250,7 @@ function* LayoutSaga() {
     fork(watchChangeLeftSidebarType),
     fork(watchShowRightSidebar),
     fork(watchChangeTopbarTheme),
+    fork(fetchServerTime)
   ])
 }
 

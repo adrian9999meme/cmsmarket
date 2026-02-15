@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { connect, useDispatch } from "react-redux";
+import { connect, useSelector, useDispatch } from "react-redux";
+import { createSelector } from "reselect";
 import { Row, Col } from "reactstrap";
 import { Link } from "react-router-dom";
 
@@ -34,6 +35,7 @@ import {
   toggleLeftmenu,
   changeSidebarType,
   changeTopbarTheme,
+  getServerTime,
 } from "../../store/actions";
 import { leftSidebarTypes, topBarThemeTypes } from '../../constants/layout';
 
@@ -42,6 +44,36 @@ const Header = props => {
   const [search, setsearch] = useState(false);
   const [megaMenu, setmegaMenu] = useState(false);
   const [socialDrp, setsocialDrp] = useState(false);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+  const [timeDiffer, setTimeDiffer] = useState(0)
+
+  const layoutSelector = createSelector(
+    state => state.Layout,
+    layout => ({
+      timediffer: layout.timediffer,
+    })
+  );
+  const {
+    timediffer,
+  } = useSelector(layoutSelector);
+
+  useEffect(() => {
+    dispatch(getServerTime())
+  }, [])
+
+  // Update current time every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date(Date.now() + 100000000));
+    }, 1000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setTimeDiffer(timediffer)
+  }, [timediffer])
 
   function toggleFullscreen() {
     if (
@@ -279,6 +311,25 @@ const Header = props => {
                 </Row>
               </DropdownMenu>
             </Dropdown> */}
+          </div>
+          <div className='d-flex p-0 h-100 align-items-center px-5 text-white justify-content-between' style={{minWidth: '350px', backgroundColor: 'rgb(34 39 54)'}}>
+            {currentTime && (
+              <>
+                <span className="fs-2 fw-bold me-2 w-40">
+                  {currentTime.toLocaleTimeString('en-GB', { hour12: false })}
+                </span>
+                <span className="fs-5 w-60">
+                  {currentTime
+                    .toLocaleDateString('en-GB', {
+                      weekday: 'long',
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    }).replace(',', '')
+                    .replace(/(\d{2})\/(\d{2})\/(\d{4})/, (_, d, m, y) => `${d}-${m}-${y}`)}
+                </span>
+              </>
+            )}
           </div>
           <div className="d-flex">
             <div className="dropdown d-inline-block d-lg-none ms-2">

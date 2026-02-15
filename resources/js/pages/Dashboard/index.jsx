@@ -50,6 +50,7 @@ const reports = [
 ];
 
 const Dashboard = props => {
+  
   const [modal, setmodal] = useState(false);
   const [subscribemodal, setSubscribemodal] = useState(false);
   const [periodData, setPeriodData] = useState([]);
@@ -61,18 +62,19 @@ const Dashboard = props => {
     state => state.Dashboard,
     dashboard => ({
       chartsData: dashboard.chartsData,
+      timediffer: dashboard.timediffer,
+      date: dashboard.date,
     })
   );
-
-  const { chartsData } = useSelector(dashboardSelector);
-
+  
+  const { chartsData, timediffer, date } = useSelector(dashboardSelector);
+  
   useEffect(() => {
     setTimeout(() => {
       setSubscribemodal(true);
     }, 2000);
   }, []);
-
-
+  
   useEffect(() => {
     setPeriodData(chartsData);
   }, [chartsData]);
@@ -80,7 +82,7 @@ const Dashboard = props => {
   useEffect(() => {
     dispatch(onGetChartsData("Year"));
   }, [dispatch]);
-  
+
   const onChangeChartPeriod = pType => {
     setPeriodType(pType);
     dispatch(onGetChartsData(pType));

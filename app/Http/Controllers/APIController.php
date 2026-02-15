@@ -172,4 +172,24 @@ class APIController extends Controller
             return $this->sendResponse(400, "Something went wrong, please contact support.");
         }
     }
+    public function getservertime()
+    {
+        $now = now();
+
+        $response = [
+            'datetime' => $now->toDateTimeString(),
+            'second' => $now->second,
+            'minute' => $now->minute,
+            'hour' => $now->hour,
+            'day' => $now->day,
+            'month' => $now->month,
+            'year' => $now->year,
+            'day_name' => $now->format('l'), // e.g., "Thursday"
+        ];
+
+        return response()->json([
+            'data'=>$response,
+            'success'=>true
+        ]);
+    }
 }

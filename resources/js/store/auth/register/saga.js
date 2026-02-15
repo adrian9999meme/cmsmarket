@@ -13,7 +13,6 @@ function* registerUser({ payload: { user, history } }) {
   try {
     // request signup
     const response = yield axios.post('api/auth/register', user);
-    console.log("response:", response)
     const data = response?.data;
     const status = response?.status;
     // if registration is succeed

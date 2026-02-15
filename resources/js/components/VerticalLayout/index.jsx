@@ -1,5 +1,8 @@
 import PropTypes from "prop-types";
 import React, { useEffect } from "react";
+//redux
+import { useSelector, useDispatch } from "react-redux";
+import { createSelector } from "reselect";
 import withRouter from "../Common/withRouter";
 import {
   changeLayout,
@@ -17,10 +20,6 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import RightSidebar from "../CommonForBoth/RightSidebar";
-
-//redux
-import { useSelector, useDispatch } from "react-redux";
-import { createSelector } from "reselect";
 
 const Layout = props => {
   const dispatch = useDispatch();
