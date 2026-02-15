@@ -19,7 +19,32 @@ import {
   ON_LIKE_REPLY,
   ON_ADD_REPLY,
   ON_ADD_COMMENT,
+  ADD_SELLER_REQUEST,
+  ADD_SELLER_SUCCESS,
+  ADD_SELLER_FAIL,
+  GET_SELLER_REQUEST,
+  GET_SELLER_SUCCESS,
+  GET_SELLER_FAIL,
+  EDIT_SELLER_REQUEST,
+  EDIT_SELLER_SUCCESS,
+  EDIT_SELLER_FAIL,
+  DELETE_SELLER_REQUEST,
+  DELETE_SELLER_SUCCESS,
+  DELETE_SELLER_FAIL,
+  ADD_STORE_REQUEST,
+  ADD_STORE_SUCCESS,
+  ADD_STORE_FAIL,
+  GET_STORE_REQUEST,
+  GET_STORE_SUCCESS,
+  GET_STORE_FAIL,
+  EDIT_STORE_REQUEST,
+  EDIT_STORE_SUCCESS,
+  EDIT_STORE_FAIL,
+  DELETE_STORE_REQUEST,
+  DELETE_STORE_SUCCESS,
+  DELETE_STORE_FAIL,
 } from "./actionTypes";
+
 import {
   getCartDataFail,
   getCartDataSuccess,
@@ -55,6 +80,30 @@ import {
   onAddReplyFail,
   onAddCommentSuccess,
   onAddCommentFail,
+  addNewSellerRequest,
+  addNewSellerSuccess,
+  addNewSellerFail,
+  getSellersRequest,
+  getSellersSuccess,
+  getSellersFail,
+  editSellerRequest,
+  editSellerSuccess,
+  editSellerFail,
+  deleteSellerRequest,
+  deleteSellerSuccess,
+  deleteSellerFail,
+  addNewStoreRequest,
+  addNewStoreSuccess,
+  addNewStoreFail,
+  getStoresRequest,
+  getStoresSuccess,
+  getStoresFail,
+  editStoreRequest,
+  editStoreSuccess,
+  editStoreFail,
+  deleteStoreRequest,
+  deleteStoreSuccess,
+  deleteStoreFail,
 } from "./actions";
 
 //Include Both Helper File with needed methods
@@ -248,6 +297,110 @@ function* onAddComment({ payload: { productId, commentText } }) {
   }
 }
 
+function* onAddNewSeller(seller) {
+  try {
+    const response = yield axios.post('/api/seller/create', seller);
+    if (response.data?.success) {
+      yield put(addNewSellerSuccess(response.data?.data));
+      toast.success("New Seller Added Successfully", { autoClose: 1000 })
+    }
+  } catch (error) {
+    yield put(addNewSellerFail(error));
+    toast.error("New Seller Added Failed", { autoClose: 1000 });
+  }
+}
+
+function* fetchSellers() {
+  try {
+    const response = yield axios.get('/api/seller/fetch');
+    if (response.data?.success) {
+      yield put(getSellersSuccess(response.data?.data));
+      toast.success("Sellers Fetched Successfully", { autoClose: 1000 })
+    }
+  } catch (error) {
+    yield put(getSellersFail(error));
+    toast.error("Seller Fetch Failed", { autoClose: 1000 });
+  }
+}
+
+function* onEditSeller(seller) {
+  try {
+    const response = yield axios.put(`/api/seller/edit/${seller.id}`, seller);
+    if (response.data?.success) {
+      yield put(editSellerSuccess(response.data?.data));
+      toast.success("Seller Updated Successfully", { autoClose: 1000 })
+    }
+  } catch (error) {
+    yield put(editSellerFail(error));
+    toast.error("Seller Update Failed", { autoClose: 1000 });
+  }
+}
+
+function* onDeleteSeller(seller) {
+  try {
+    const response = yield axios.delete(`/api/seller/delete/${seller.id}`);
+    if (response.data?.success) {
+      yield put(deleteSellerSuccess(response.data?.data));
+      toast.success("Seller Deleted Successfully", { autoClose: 1000 })
+    }
+  } catch (error) {
+    yield put(deleteSellerFail(error));
+    toast.error("Seller Delete Failed", { autoClose: 1000 });
+  }
+}
+
+function* onAddNewStore(store) {
+  try {
+    const response = yield axios.post('/api/store/create', store);
+    if (response.data?.success) {
+      yield put(addNewStoreSuccess(response.data?.data));
+      toast.success("New Store Added Successfully", { autoClose: 1000 })
+    }
+  } catch (error) {
+    yield put(addNewStoreFail(error));
+    toast.error("New Store Added Failed", { autoClose: 1000 });
+  }
+}
+
+function* fetchStores() {
+  try {
+    const response = yield axios.get('/api/store/fetch');
+    if (response.data?.success) {
+      yield put(getStoresSuccess(response.data?.data));
+      toast.success("Stores Fetched Successfully", { autoClose: 1000 })
+    }
+  } catch (error) {
+    yield put(getStoresFail(error));
+    toast.error("Store Fetch Failed", { autoClose: 1000 });
+  }
+}
+
+function* onEditStore(store) {
+  try {
+    const response = yield axios.put(`/api/store/edit/${store.id}`, store);
+    if (response.data?.success) {
+      yield put(editStoreSuccess(response.data?.data));
+      toast.success("Store Updated Successfully", { autoClose: 1000 })
+    }
+  } catch (error) {
+    yield put(editStoreFail(error));
+    toast.error("Store Update Failed", { autoClose: 1000 });
+  }
+}
+
+function* onDeleteStore(store) {
+  try {
+    const response = yield axios.delete(`/api/store/delete/${store.id}`);
+    if (response.data?.success) {
+      yield put(deleteStoreSuccess(response.data?.data));
+      toast.success("Store Deleted Successfully", { autoClose: 1000 })
+    }
+  } catch (error) {
+    yield put(deleteStoreFail(error));
+    toast.error("Store Delete Failed", { autoClose: 1000 });
+  }
+}
+
 function* ecommerceSaga() {
   yield takeEvery(GET_PRODUCTS, fetchProducts);
   yield takeEvery(GET_PRODUCT_DETAIL, fetchProductDetail);
@@ -266,6 +419,14 @@ function* ecommerceSaga() {
   yield takeEvery(ON_LIKE_REPLY, onLikeReply);
   yield takeEvery(ON_ADD_REPLY, onAddReply);
   yield takeEvery(ON_ADD_COMMENT, onAddComment);
+  yield takeEvery(ADD_SELLER_SUCCESS, onAddNewSeller);
+  yield takeEvery(GET_SELLER_SUCCESS, fetchSellers);
+  yield takeEvery(EDIT_SELLER_SUCCESS, onEditSeller);
+  yield takeEvery(DELETE_SELLER_SUCCESS, onDeleteSeller);
+  yield takeEvery(ADD_STORE_SUCCESS, onAddNewStore);
+  yield takeEvery(GET_STORE_SUCCESS, fetchStores);
+  yield takeEvery(EDIT_STORE_SUCCESS, onEditStore);
+  yield takeEvery(DELETE_STORE_SUCCESS, onDeleteStore);
 }
 
 export default ecommerceSaga;
