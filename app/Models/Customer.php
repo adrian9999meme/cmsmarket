@@ -15,11 +15,11 @@ class Customer extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'type',         // 'regular' or 'trade'
         'name',
         'email',
         'phone',
         'address',
+        'last_login',
         'status',
     ];
 
@@ -39,13 +39,13 @@ class Customer extends Model
      */
     protected $visible = [
         'id',
-        'type',
         'name',
         'email',
         'phone',
         'address',
+        'last_login',
         'status',
-        'created_at',
-        'updated_at',
+        'orders',
+        'tickets'
     ];
 }

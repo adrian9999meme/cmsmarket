@@ -2,13 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
@@ -39,9 +35,9 @@ class CustomerController extends Controller
     public function createCustomer(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'customer_name' => 'required|max:250',
+            'name' => 'required|max:250',
             'email' => 'required|email|max:255|unique:customers,email',
-            'phone_no' => 'nullable|max:50',
+            'phone' => 'nullable|max:50',
             'address' => 'nullable|max:255',
             // Add other customer fields and validation rules as needed
         ]);
@@ -65,9 +61,9 @@ class CustomerController extends Controller
 
         // Create a new Customer entry with details from the request
         $newCustomer = Customer::create([
-            'customer_name' => $request->customer_name,
+            'name' => $request->name,
             'email' => $request->email,
-            'phone_no' => $request->phone_no ?? null,
+            'phone' => $request->phone ?? null,
             'address' => $request->address ?? null,
             // Add additional fields as required by your Customer model
         ]);
@@ -85,8 +81,8 @@ class CustomerController extends Controller
         // Optional: Add filters by customer_name/email/etc through query params
         $query = Customer::query();
 
-        if ($request->has('customer_name')) {
-            $query->where('customer_name', 'like', '%' . $request->customer_name . '%');
+        if ($request->has('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
         if ($request->has('email')) {
             $query->where('email', 'like', '%' . $request->email . '%');
@@ -109,9 +105,9 @@ class CustomerController extends Controller
     {
         // Validate input
         $validator = Validator::make($request->all(), [
-            'customer_name' => 'sometimes|required|max:250',
+            'name' => 'sometimes|required|max:250',
             'email' => 'sometimes|required|email|max:255|unique:customers,email,' . $id,
-            'phone_no' => 'nullable|max:50',
+            'phone' => 'nullable|max:50',
             'address' => 'nullable|max:255',
             // Add additional validation rules as required
         ]);
@@ -135,40 +131,56 @@ class CustomerController extends Controller
 
         // Update customer fields if provided in request
         $input = $request->only([
-            'customer_name',
+            'name',
             'email',
-            'phone_no',
+            'phone',
             'address',
+            'status',
             // Add additional fields as required
         ]);
 
         $customer->fill($input);
         $customer->save();
 
+        // Fetch the fresh/updated value from DB
+        $updatedCustomer = Customer::find($customer->id);
+
         return response()->json([
             'success' => true,
             'message' => 'Customer updated successfully',
-            'data' => $customer,
+            'data' => $updatedCustomer,
         ], 200);
     }
     
     // delete customer
     public function deleteCustomer($id)
     {
-        $customer = Customer::find($id);
+        try {
+            $customer = Customer::find($id);
 
-        if (!$customer) {
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer not found',
+                ], 404);
+            }
+
+            // Store customer data before delete, in case Eloquent sets object as trashed
+            $customerData = $customer->toArray();
+
+            $customer->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Customer deleted successfully',
+                'data' => $customerData,
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Customer not found',
-            ], 404);
+                'message' => 'An error occurred while deleting the customer.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $customer->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Customer deleted successfully',
-        ], 200);
     }
 }

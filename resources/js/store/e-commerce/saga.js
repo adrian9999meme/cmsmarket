@@ -1,3 +1,5 @@
+import axios from "axios";
+import { toast } from "react-toastify";
 import { call, put, takeEvery } from "redux-saga/effects";
 
 // Ecommerce Redux States
@@ -107,26 +109,26 @@ import {
 } from "./actions";
 
 //Include Both Helper File with needed methods
-import {
-  getCartData,
-  getCustomers,
-  getOrders,
-  getProducts,
-  getShops,
-  getProductDetail,
-  addNewOrder,
-  updateOrder,
-  deleteOrder,
-  addNewCustomer,
-  updateCustomer,
-  deleteCustomer,
-  getProductComents as getProductComentsApi,
-  onLikeComment as onLikeCommentApi,
-  onLikeReply as onLikeReplyApi,
-  onAddReply as onAddReplyApi,
-  onAddComment as onAddCommentApi,
-} from "../../helpers/fakebackend_helper";
-import { toast } from "react-toastify";
+// import {
+//   getCartData,
+//   getCustomers,
+//   getOrders,
+//   getProducts,
+//   getShops,
+//   getProductDetail,
+//   addNewOrder,
+//   updateOrder,
+//   deleteOrder,
+//   addNewCustomer,
+//   updateCustomer,
+//   deleteCustomer,
+//   getProductComents as getProductComentsApi,
+//   onLikeComment as onLikeCommentApi,
+//   onLikeReply as onLikeReplyApi,
+//   onAddReply as onAddReplyApi,
+//   onAddComment as onAddCommentApi,
+// } from "../../helpers/fakebackend_helper";
+
 
 function* fetchProducts() {
   try {
@@ -166,44 +168,54 @@ function* fetchCartData() {
 
 function* fetchCustomers() {
   try {
-    const response = yield call(getCustomers);
-    yield put(getCustomersSuccess(response));
+    const response = yield axios.get('/api/customer/fetch');
+    if (response.data?.success) {
+      yield put(getCustomersSuccess(response.data?.data?.data));
+      toast.success("Customers Fetch Successfully", { autoClose: 2000 });
+    }
   } catch (error) {
     yield put(getCustomersFail(error));
+    toast.error("Customers Eetch Failed", { autoClose: 2000 });
   }
 }
 
-function* onUpdateCustomer({ payload: customer }) {
+function* onUpdateCustomer({payload: customer}) {
   try {
-    const response = yield call(updateCustomer, customer);
-    yield put(updateCustomerSuccess(response));
-    toast.success("Customer Update Successfully", { autoClose: 2000 });
+    const response = yield axios.put(`/api/customer/edit/${customer.id}`, customer);
+    if (response.data?.success) {
+      yield put(updateCustomerSuccess(response.data?.data));
+      toast.success("Customer Update Successfully", { autoClose: 2000 });
+    }
   } catch (error) {
     yield put(updateCustomerFail(error));
     toast.error("Customer Update Failed", { autoClose: 2000 });
   }
 }
 
-function* onDeleteCustomer({ payload: customer }) {
+function* onDeleteCustomer({ payload: id }) {
   try {
-    const response = yield call(deleteCustomer, customer);
-    yield put(deleteCustomerSuccess(response));
-    toast.success("Customer Delete Successfully", { autoClose: 2000 });
+    const response = yield axios.delete(`/api/customer/delete/${id}`);
+    if (response.data?.success){
+      yield put(deleteCustomerSuccess(response.data?.data));
+      toast.success("Customer Deleted Successfully", { autoClose: 2000 });
+    }
   } catch (error) {
     yield put(deleteCustomerFail(error));
     toast.error("Customer Delete Failed", { autoClose: 2000 });
   }
 }
 
-function* onAddNewCustomer({ payload: customer }) {
+function* onAddNewCustomer(customer) {
   try {
-    const response = yield call(addNewCustomer, customer);
-
-    yield put(addCustomerSuccess(response));
-    toast.success("Customer Added Successfully", { autoClose: 2000 });
+    console.log("customer:", customer)
+    const response = yield axios.post('/api/customer/create', customer.payload);
+    if (response.data?.data) {
+      yield put(addCustomerSuccess(response.data?.data));
+      toast.success("Customer Added Successfully", { autoClose: 1000 });
+    }
   } catch (error) {
     yield put(addCustomerFail(error));
-    toast.error("Customer Added Failed", { autoClose: 2000 });
+    toast.error("Customer Added Failed", { autoClose: 1000 });
   }
 }
 

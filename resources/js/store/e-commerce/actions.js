@@ -222,9 +222,9 @@ export const updateCustomerFail = error => ({
   payload: error,
 });
 
-export const deleteCustomer = customer => ({
+export const deleteCustomer = id => ({
   type: DELETE_CUSTOMER,
-  payload: customer,
+  payload: id,
 });
 
 export const deleteCustomerSuccess = customer => ({
