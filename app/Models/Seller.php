@@ -15,14 +15,15 @@ class Seller extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'shop_name',
-        'phone_no',
-        'address',
-        'city',
+        // 'user_id',
         'company_name',
         'company_email',
-        'company_website',
+        'phone_no',
         'company_type',
+        // 'company_website',
+        // 'address',   
+        // 'shop_name',
+        // 'city',
     ];
 
     // /**
@@ -42,15 +43,15 @@ class Seller extends Model
     protected $visible = [
         'id',
         'user_id',
-        'shop_name',
-        'phone_no',
-        'address',
-        'city',
-        'status',
         'company_name',
         'company_email',
-        'company_website',
+        // 'company_website',
+        'phone_no',
         'company_type',
+        'pulished',
+        // 'address',
+        // 'shop_name',
+        // 'city',
         'created_at',
         'updated_at',
     ];

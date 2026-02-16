@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { createSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Container,
   Row,
@@ -21,6 +23,7 @@ import {
   NavLink,
 } from "reactstrap";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
+import { addNewCustomer, deleteCustomer, getCustomers, updateCustomer } from "../../store/actions";
 
 // Mock data - no database (MVP)
 const MOCK_CUSTOMERS = [
@@ -101,14 +104,33 @@ const MOCK_TRADE_CUSTOMERS = [
 const CustomersBreakdown = () => {
   document.title = "Customers Breakdown | LEKIT Ltd";
 
+  const dispatch = useDispatch();
+
   const [activeTab, setActiveTab] = useState("customers");
   const [searchTerm, setSearchTerm] = useState("");
-  const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
+  const [customers, setCustomers] = useState([]);
   const [tradeCustomers, setTradeCustomers] = useState(MOCK_TRADE_CUSTOMERS);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // add | edit | view
   const [modalType, setModalType] = useState("customers"); // customers | trade
   const [currentRecord, setCurrentRecord] = useState(null);
+
+  const ecommerceSelector = createSelector(
+    state => state.ecommerce,
+    ecommerce => ({
+      allcustomers: ecommerce.customers,
+    })
+  );
+  const { allcustomers } = useSelector(ecommerceSelector);
+
+  useEffect(() => {
+    // Protect against undefined/null or non-array allcustomers
+    setCustomers(Array.isArray(allcustomers) ? allcustomers : []);
+  }, [allcustomers]);
+
+  useEffect(() => {
+    dispatch(getCustomers());
+  }, [dispatch]);
 
   const initialFormState = {
     id: "",
@@ -127,11 +149,19 @@ const CustomersBreakdown = () => {
 
   const toggleStatus = (type, id) => {
     if (type === "customers") {
-      setCustomers((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c))
-      );
+      // setCustomers((prev = []) =>
+      //   prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c))
+      // );
+      const customerToUpdate = customers.find(customer => customer.id === id);
+      if (!customerToUpdate) return;
+      const updatedCustomer = {
+        ...customerToUpdate,
+        status: customerToUpdate.status === 'Active' ? 'Blocked' : 'Active'
+      };
+      console.log("update:", updatedCustomer)
+      dispatch(updateCustomer(updatedCustomer));
     } else {
-      setTradeCustomers((prev) =>
+      setTradeCustomers((prev = []) =>
         prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c))
       );
     }
@@ -144,7 +174,9 @@ const CustomersBreakdown = () => {
     setCurrentRecord(null);
     setFormValues({
       ...initialFormState,
-      id: isTrade ? `TC${String(tradeCustomers.length + 1).padStart(3, "0")}` : `C${String(customers.length + 1).padStart(3, "0")}`,
+      id: isTrade
+        ? `TC${String((tradeCustomers?.length || 0) + 1).padStart(3, "0")}`
+        : `C${String((customers?.length || 0) + 1).padStart(3, "0")}`,
     });
     setModalOpen(true);
   };
@@ -155,7 +187,7 @@ const CustomersBreakdown = () => {
     setCurrentRecord(record);
     setFormValues({
       ...initialFormState,
-      ...record,
+      ...(record || {}),
     });
     setModalOpen(true);
   };
@@ -178,62 +210,80 @@ const CustomersBreakdown = () => {
     if (modalType === "customers") {
       if (modalMode === "add") {
         const newCustomer = {
-          id: formValues.id || `C${String(customers.length + 1).padStart(3, "0")}`,
+          id: formValues.id || `C${String((customers?.length || 0) + 1).padStart(3, "0")}`,
           name: formValues.name,
           email: formValues.email,
           tel: formValues.tel,
           address: formValues.address,
-          lastLogin: formValues.lastLogin || new Date().toISOString().slice(0, 16).replace("T", " "),
+          lastLogin:
+            formValues.lastLogin ||
+            new Date().toISOString().slice(0, 16).replace("T", " "),
           orders: 0,
           tickets: 0,
           active: true,
         };
-        setCustomers((prev) => [...prev, newCustomer]);
+        // setCustomers((prev = []) => [...prev, newCustomer]);
+        // send backend
+        dispatch(addNewCustomer(newCustomer));
       } else if (modalMode === "edit" && currentRecord) {
-        setCustomers((prev) =>
-          prev.map((c) =>
-            c.id === currentRecord.id
-              ? {
-                  ...c,
-                  name: formValues.name,
-                  email: formValues.email,
-                  tel: formValues.tel,
-                  address: formValues.address,
-                  lastLogin: formValues.lastLogin || c.lastLogin,
-                }
-              : c
-          )
+        const filteredCustomer = customers.filter(
+          customer => customer.id.toString() === currentRecord.id.toString()
         );
+        const editCustomer = {
+          ...filteredCustomer[0],
+          name: formValues.name,
+          email: formValues.email,
+          phone: formValues.tel,
+          address: formValues.address,
+          last_login: formValues.lastLogin
+        }
+        // setCustomers((prev = []) =>
+        //   prev.map((c) =>
+        //     c.id === currentRecord.id
+        //       ? {
+        //         ...c,
+        //         name: formValues.name,
+        //         email: formValues.email,
+        //         tel: formValues.tel,
+        //         address: formValues.address,
+        //         lastLogin: formValues.lastLogin || c.lastLogin,
+        //       }
+        //       : c
+        //   )
+        // );
+        dispatch(updateCustomer(editCustomer))
       }
     } else {
       // trade customers
       if (modalMode === "add") {
         const newTrade = {
-          id: formValues.id || `TC${String(tradeCustomers.length + 1).padStart(3, "0")}`,
+          id: formValues.id || `TC${String((tradeCustomers?.length || 0) + 1).padStart(3, "0")}`,
           name: formValues.name,
           companyName: formValues.companyName,
           industry: formValues.industry,
           companyAddress: formValues.companyAddress,
-          lastLogin: formValues.lastLogin || new Date().toISOString().slice(0, 16).replace("T", " "),
+          last_login:
+            formValues.lastLogin ||
+            new Date().toISOString().slice(0, 16).replace("T", " "),
           orders: 0,
           tickets: 0,
           tradeDiscounts: formValues.tradeDiscounts || "0%",
           active: true,
         };
-        setTradeCustomers((prev) => [...prev, newTrade]);
+        setTradeCustomers((prev = []) => [...prev, newTrade]);
       } else if (modalMode === "edit" && currentRecord) {
-        setTradeCustomers((prev) =>
+        setTradeCustomers((prev = []) =>
           prev.map((c) =>
             c.id === currentRecord.id
               ? {
-                  ...c,
-                  name: formValues.name,
-                  companyName: formValues.companyName,
-                  industry: formValues.industry,
-                  companyAddress: formValues.companyAddress,
-                  lastLogin: formValues.lastLogin || c.lastLogin,
-                  tradeDiscounts: formValues.tradeDiscounts || c.tradeDiscounts,
-                }
+                ...c,
+                name: formValues.name,
+                companyName: formValues.companyName,
+                industry: formValues.industry,
+                companyAddress: formValues.companyAddress,
+                last_login: formValues.lastLogin || c.lastLogin,
+                tradeDiscounts: formValues.tradeDiscounts || c.tradeDiscounts,
+              }
               : c
           )
         );
@@ -244,31 +294,37 @@ const CustomersBreakdown = () => {
   };
 
   const filteredCustomers = useMemo(() => {
+    if (!Array.isArray(customers) || customers.length === 0) return [];
     if (!searchTerm.trim()) return customers;
     const term = searchTerm.toLowerCase();
     return customers.filter(
       (c) =>
-        c.id.toLowerCase().includes(term) ||
-        c.name.toLowerCase().includes(term) ||
-        c.email.toLowerCase().includes(term)
+        c.id?.toLowerCase?.().includes(term) ||
+        c.name?.toLowerCase?.().includes(term) ||
+        c.email?.toLowerCase?.().includes(term)
     );
   }, [customers, searchTerm]);
 
   const filteredTradeCustomers = useMemo(() => {
+    if (!Array.isArray(tradeCustomers) || tradeCustomers.length === 0) return [];
     if (!searchTerm.trim()) return tradeCustomers;
     const term = searchTerm.toLowerCase();
     return tradeCustomers.filter(
       (c) =>
-        c.id.toLowerCase().includes(term) ||
-        c.name.toLowerCase().includes(term) ||
+        c.id?.toLowerCase?.().includes(term) ||
+        c.name?.toLowerCase?.().includes(term) ||
         (c.companyName && c.companyName.toLowerCase().includes(term))
     );
   }, [tradeCustomers, searchTerm]);
 
   const handleRemoveCustomer = (type, id) => {
     if (!window.confirm("Remove this customer?")) return;
-    if (type === "customers") setCustomers((prev) => prev.filter((c) => c.id !== id));
-    else setTradeCustomers((prev) => prev.filter((c) => c.id !== id));
+    if (type === "customers") {
+      dispatch(deleteCustomer(id))
+      // setCustomers((prev = []) => Array.isArray(prev) ? prev.filter((c) => c.id !== id) : []);
+    }
+    else
+      setTradeCustomers((prev = []) => Array.isArray(prev) ? prev.filter((c) => c.id !== id) : []);
   };
 
   // Action icon with title (tooltip on hover) – one-click actions
@@ -325,7 +381,7 @@ const CustomersBreakdown = () => {
                     >
                       <span>Customers</span>
                       <span className={"badge ms-2 " + (activeTab === "customers" ? "bg-light text-primary" : "bg-secondary")}>
-                        {filteredCustomers.length}
+                        {filteredCustomers?.length}
                       </span>
                     </NavLink>
                   </NavItem>
@@ -352,7 +408,7 @@ const CustomersBreakdown = () => {
                 </Nav>
                 <p className="text-muted small mb-0">
                   {activeTab === "customers"
-                    ? `Total: ${filteredCustomers.length} customer${filteredCustomers.length !== 1 ? "s" : ""}`
+                    ? `Total: ${filteredCustomers?.length} customer${filteredCustomers?.length !== 1 ? "s" : ""}`
                     : `Total: ${filteredTradeCustomers.length} trade customer${filteredTradeCustomers.length !== 1 ? "s" : ""}`}
                 </p>
               </div>
@@ -380,17 +436,17 @@ const CustomersBreakdown = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredCustomers.map((row) => (
+                          {filteredCustomers && filteredCustomers.map((row) => (
                             <tr key={row.id}>
                               <td>{row.id}</td>
                               <td>{row.name}</td>
                               <td>{row.email}</td>
-                              <td>{row.tel}</td>
+                              <td>{row.phone}</td>
                               <td>{row.address}</td>
-                              <td>{row.lastLogin}</td>
+                              <td>{row.last_login}</td>
                               <td>
                                 <small>
-                                  Orders: {row.orders}, Tickets: {row.tickets}
+                                  Orders: {row?.orders || 0}, Tickets: {row?.tickets || 0}
                                 </small>
                               </td>
                               <td>
@@ -399,11 +455,11 @@ const CustomersBreakdown = () => {
                                     className="form-check-input"
                                     type="checkbox"
                                     id={`cust-${row.id}`}
-                                    checked={row.active}
+                                    checked={row.status === 'Active'}
                                     onChange={() => toggleStatus("customers", row.id)}
                                   />
                                   <label className="form-check-label" htmlFor={`cust-${row.id}`}>
-                                    {row.active ? "Active" : "Blocked"}
+                                    {row.status === 'Active' ? "Active" : "Blocked"}
                                   </label>
                                 </div>
                               </td>
@@ -411,9 +467,9 @@ const CustomersBreakdown = () => {
                                 <div className="d-flex justify-content-start gap-1 flex-wrap">
                                   <ActionIcon title="View Profile" iconClass="bx-user" onClick={() => openViewOrEditModal("customers", "view", row)} />
                                   <ActionIcon title="Edit Profile" iconClass="bx-edit-alt" onClick={() => openViewOrEditModal("customers", "edit", row)} />
-                                  <ActionIcon title="Orders" iconClass="bx-cart" onClick={() => {}} />
-                                  <ActionIcon title="Tickets" iconClass="bx-support" onClick={() => {}} />
-                                  <ActionIcon title="Contact Customer" iconClass="bx-envelope" onClick={() => {}} />
+                                  <ActionIcon title="Orders" iconClass="bx-cart" onClick={() => { }} />
+                                  <ActionIcon title="Tickets" iconClass="bx-support" onClick={() => { }} />
+                                  <ActionIcon title="Contact Customer" iconClass="bx-envelope" onClick={() => { }} />
                                   <ActionIcon title="Remove" iconClass="bx-trash" colorClass="text-danger" onClick={() => handleRemoveCustomer("customers", row.id)} />
                                 </div>
                               </td>
@@ -438,7 +494,7 @@ const CustomersBreakdown = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredTradeCustomers.map((row) => (
+                          {filteredTradeCustomers && filteredTradeCustomers.map((row) => (
                             <tr key={row.id}>
                               <td>{row.id}</td>
                               <td>{row.name}</td>
@@ -474,12 +530,12 @@ const CustomersBreakdown = () => {
                                 <div className="d-flex justify-content-start gap-1 flex-wrap">
                                   <ActionIcon title="View Profile" iconClass="bx-user" onClick={() => openViewOrEditModal("trade", "view", row)} />
                                   <ActionIcon title="Edit Profile" iconClass="bx-edit-alt" onClick={() => openViewOrEditModal("trade", "edit", row)} />
-                                  <ActionIcon title="Orders" iconClass="bx-cart" onClick={() => {}} />
-                                  <ActionIcon title="Products" iconClass="bx-package" onClick={() => {}} />
-                                  <ActionIcon title="Statistics" iconClass="bx-bar-chart" onClick={() => {}} />
-                                  <ActionIcon title="Contact Store" iconClass="bx-envelope" onClick={() => {}} />
-                                  <ActionIcon title="Admin Profiles" iconClass="bx-user-circle" onClick={() => {}} />
-                                  <ActionIcon title="Block Store" iconClass="bx-block" onClick={() => {}} />
+                                  <ActionIcon title="Orders" iconClass="bx-cart" onClick={() => { }} />
+                                  <ActionIcon title="Products" iconClass="bx-package" onClick={() => { }} />
+                                  <ActionIcon title="Statistics" iconClass="bx-bar-chart" onClick={() => { }} />
+                                  <ActionIcon title="Contact Store" iconClass="bx-envelope" onClick={() => { }} />
+                                  <ActionIcon title="Admin Profiles" iconClass="bx-user-circle" onClick={() => { }} />
+                                  <ActionIcon title="Block Store" iconClass="bx-block" onClick={() => { }} />
                                   <ActionIcon title="Remove Store" iconClass="bx-trash" colorClass="text-danger" onClick={() => handleRemoveCustomer("trade", row.id)} />
                                 </div>
                               </td>
@@ -500,8 +556,8 @@ const CustomersBreakdown = () => {
               {modalMode === "view"
                 ? "View Profile"
                 : modalMode === "edit"
-                ? "Edit Profile"
-                : "Add New Customer"}
+                  ? "Edit Profile"
+                  : "Add New Customer"}
             </ModalHeader>
             <ModalBody>
               <Form>

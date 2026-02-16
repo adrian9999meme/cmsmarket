@@ -222,9 +222,9 @@ export const updateCustomerFail = error => ({
   payload: error,
 });
 
-export const deleteCustomer = customer => ({
+export const deleteCustomer = id => ({
   type: DELETE_CUSTOMER,
-  payload: customer,
+  payload: id,
 });
 
 export const deleteCustomerSuccess = customer => ({
@@ -326,9 +326,9 @@ export const onAddCommentFail = error => ({
 });
 
 // ADD NEW SELLER
-export const addNewSellerRequest = () => ({
+export const addNewSellerRequest = (seller) => ({
   type: ADD_SELLER_REQUEST,
-  payload: {},
+  payload: seller,
 });
 export const addNewSellerSuccess = seller => ({
   type: ADD_SELLER_SUCCESS,
@@ -354,9 +354,9 @@ export const getSellersFail = (error) => ({
 });
 
 // EDIT SELLER
-export const editSellerRequest = () => ({
+export const editSellerRequest = (seller) => ({
   type: EDIT_SELLER_REQUEST,
-  payload: {},
+  payload: seller,
 });
 export const editSellerSuccess = seller => ({
   type: EDIT_SELLER_SUCCESS,
@@ -368,9 +368,9 @@ export const editSellerFail = error => ({
 });
 
 // DELETE SELLER
-export const deleteSellerRequest = () => ({
+export const deleteSellerRequest = (id) => ({
   type: DELETE_SELLER_REQUEST,
-  payload: {},
+  payload: id,
 });
 export const deleteSellerSuccess = (seller) => ({
   type: DELETE_SELLER_SUCCESS,
@@ -382,9 +382,9 @@ export const deleteSellerFail = error => ({
 });
 
 // ADD NEW STORE
-export const addNewStoreRequest = () => ({
+export const addNewStoreRequest = (store) => ({
   type: ADD_STORE_REQUEST,
-  payload: {},
+  payload: store,
 });
 export const addNewStoreSuccess = store => ({
   type: ADD_STORE_SUCCESS,
@@ -410,9 +410,9 @@ export const getStoresFail = (error) => ({
 });
 
 // EDIT STORE
-export const editStoreRequest = () => ({
+export const editStoreRequest = (store) => ({
   type: EDIT_STORE_REQUEST,
-  payload: {},
+  payload: store,
 });
 export const editStoreSuccess = store => ({
   type: EDIT_STORE_SUCCESS,
@@ -424,9 +424,9 @@ export const editStoreFail = error => ({
 });
 
 // DELETE STORE
-export const deleteStoreRequest = () => ({
+export const deleteStoreRequest = (id) => ({
   type: DELETE_STORE_REQUEST,
-  payload: {},
+  payload: id,
 });
 export const deleteStoreSuccess = store => ({
   type: DELETE_STORE_SUCCESS,

@@ -12,7 +12,8 @@ import {
   changeSidebarType,
   changeTopbarTheme,
   changeLayoutWidth,
-  showRightSidebarAction
+  showRightSidebarAction,
+  getServerTime
 } from "../../store/actions";
 
 // Layout Related Components
@@ -49,6 +50,9 @@ const Layout = props => {
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
+  // useEffect(() => {
+  //   dispatch(getServerTime())
+  // }, [])
 
   const toggleMenuCallback = () => {
     if (leftSideBarType === "default") {

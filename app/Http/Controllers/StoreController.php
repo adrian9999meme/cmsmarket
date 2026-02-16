@@ -39,7 +39,22 @@ class StoreController extends Controller
     public function createStore(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'store_name' => 'required|max:250',
+            'seller_id' => 'required|string|max:255',
+            'user_id' => 'required|string|max:255',
+            'store_name' => 'required|string|max:250',
+            'slug' => 'required|string|max:255',
+            'store_phone' => 'required|string|max:255',
+            'store_email' => 'required|email|max:255',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'postcode' => 'required|string|max:255',
+            'status' => 'nullable|in:open,closed',
+            'opening_hours' => 'required|array',
+            'logo' => 'nullable|string|max:255',
+            'todaysOrders' => 'nullable|integer|min:0',
+            'totalOrders' => 'nullable|integer|min:0',
+            'totalCustomersOrders' => 'nullable|integer|min:0',
+            'productsCount' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -60,14 +75,18 @@ class StoreController extends Controller
         }
         // Create a new Store entry with details from the request
         $newStore = Store::create([
+            'seller_id' => $request->seller_id,
+            'user_id' => $request->user_id,
             'store_name' => $request->store_name,
-            'phone_no' => $request->phone_no ?? null,
-            'address' => $request->address ?? null,
-            'city' => $request->city ?? null,
-            'manager_name' => $request->manager_name ?? null,
-            'manager_email' => $request->manager_email ?? null,
-            'website' => $request->website ?? null,
-            'store_type' => $request->store_type ?? null,
+            'slug' => $request->slug,
+            'store_phone' => $request->store_phone,
+            'store_email' => $request->store_email,
+            'address' => $request->address,
+            'city' => $request->city,
+            'postcode' => $request->postcode,
+            'status' => $request->status,
+            'opening_hours' => $request->opening_hours,
+            'logo' => $request->logo,
             // Add additional fields as required by your Store model
         ]);
 
@@ -108,14 +127,18 @@ class StoreController extends Controller
     {
         // Validate input
         $validator = Validator::make($request->all(), [
-            'store_name' => 'sometimes|required|max:250',
-            'phone_no' => 'nullable|max:50',
-            'address' => 'nullable|max:255',
-            'city' => 'nullable|max:100',
-            'manager_name' => 'nullable|max:255',
-            'manager_email' => 'nullable|email|max:255',
-            'website' => 'nullable|max:255',
-            'store_type' => 'nullable|max:100',
+            'seller_id' => 'required|string|max:255',
+            'user_id' => 'required|string|max:255',
+            'store_name' => 'required|string|max:250',
+            'slug' => 'required|string|max:255',
+            'store_phone' => 'required|string|max:255',
+            'store_email' => 'required|email|max:255',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'postcode' => 'required|string|max:255',
+            'status' => 'nullable|in:open,closed',
+            'opening_hours' => 'required|array',
+            'logo' => 'nullable|string|max:255',
             // Add additional validation rules as required
         ]);
 
@@ -138,14 +161,18 @@ class StoreController extends Controller
 
         // Update store fields if provided in request
         $input = $request->only([
+            'seller_id',
+            'user_id',
             'store_name',
-            'phone_no',
+            'slug',
+            'store_phone',
+            'store_email',
             'address',
             'city',
-            'manager_name',
-            'manager_email',
-            'website',
-            'store_type',
+            'postcode',
+            'status',
+            'opening_hours',
+            'logo',
             // Add additional fields as required
         ]);
 
@@ -158,24 +185,36 @@ class StoreController extends Controller
             'data' => $store,
         ], 200);
     }
-    
+
     // delete store
     public function deleteStore($id)
     {
-        $store = Store::find($id);
+        try {
+            $store = Store::find($id);
 
-        if (!$store) {
+            if (!$store) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Store not found',
+                ], 404);
+            }
+
+            // Store store data before delete, in case Eloquent sets object as trashed
+            $storeData = $store->toArray();
+
+            $store->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Store deleted successfully',
+                'data' => $storeData,
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Store not found',
-            ], 404);
+                'message' => 'An error occurred while deleting the store.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $store->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Store deleted successfully',
-        ], 200);
     }
 }

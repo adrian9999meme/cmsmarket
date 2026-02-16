@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Seller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class SellerController extends Controller
 {
@@ -39,8 +36,10 @@ class SellerController extends Controller
     public function createSeller(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            // 'email' => 'required|email|max:250',
-            'shop_name' => 'required|max:250',
+            'company_name'   => 'required|max:255',
+            'company_email'  => 'required|email|max:255',
+            'phone_no'       => 'required|max:50',
+            'company_type'   => 'required|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -52,8 +51,8 @@ class SellerController extends Controller
         }
 
         // validate existed
-        $seller = Seller::where('email', $request->email)->first();
-        if (empty($seller)) {
+        $seller = Seller::where('company_email', $request->email)->first();
+        if (! empty($seller)) {
             return response()->json([
                 'success'=> false,
                 'message'=> 'This seller is already existed',
@@ -61,14 +60,10 @@ class SellerController extends Controller
         }
         // Create a new Seller entry with details from the request
         $newSeller = Seller::create([
-            'shop_name' => $request->shop_name,
-            'phone_no' => $request->phone_no ?? null,
-            'address' => $request->address ?? null,
-            'city' => $request->city ?? null,
-            'company_name' => $request->company_name ?? null,
-            'company_email' => $request->company_email ?? null,
-            'company_website' => $request->company_website ?? null,
-            'company_type' => $request->company_type ?? null,
+            'company_name' => $request->company_name,
+            'company_email' => $request->company_email,
+            'phone_no' => $request->phone_no,
+            'company_type' => $request->company_type,
             // Add additional fields as required by your Seller model
         ]);
 
@@ -85,8 +80,8 @@ class SellerController extends Controller
         // Optional: Add filters by shop_name/city/etc through query params
         $query = Seller::query();
 
-        if ($request->has('shop_name')) {
-            $query->where('shop_name', 'like', '%' . $request->shop_name . '%');
+        if ($request->has('company_name')) {
+            $query->where('company_name', 'like', '%' . $request->company_name . '%');
         }
         if ($request->has('city')) {
             $query->where('city', 'like', '%' . $request->city . '%');
@@ -163,20 +158,32 @@ class SellerController extends Controller
     // delete seller
     public function deleteSeller($id)
     {
-        $seller = Seller::find($id);
+        try {
+            $seller = Seller::find($id);
 
-        if (!$seller) {
+            if (!$seller) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Seller not found',
+                ], 404);
+            }
+
+            // Store seller data before delete, in case Eloquent sets object as trashed
+            $sellerData = $seller->toArray();
+
+            $seller->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Seller deleted successfully',
+                'data' => $sellerData,
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Seller not found',
-            ], 404);
+                'message' => 'An error occurred while deleting the seller.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $seller->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Seller deleted successfully',
-        ], 200);
     }
 }

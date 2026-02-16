@@ -204,7 +204,7 @@ const Ecommerce = (state = INIT_STATE, action) => {
       return {
         ...state,
         customers: state.customers.filter(
-          customer => customer.id.toString() !== action.payload.toString()
+          customer => customer.id.toString() !== action.payload.id.toString()
         ),
       };
 
@@ -278,7 +278,7 @@ const Ecommerce = (state = INIT_STATE, action) => {
       return {
         ...state,
         sellers: state.sellers.filter(
-          seller => seller.id !== action.payload
+          seller => seller.id !== action.payload.id
         ),
       };
 
@@ -317,7 +317,7 @@ const Ecommerce = (state = INIT_STATE, action) => {
       return {
         ...state,
         stores: state.stores.filter(
-          store => store.id !== action.payload
+          store => store.id !== action.payload.id
         ),
       };
 

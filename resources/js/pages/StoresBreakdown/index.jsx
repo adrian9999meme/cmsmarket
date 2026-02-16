@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createSelector } from "reselect";
 import {
   Container,
   Row,
@@ -17,84 +19,100 @@ import {
   FormGroup,
   Label,
 } from "reactstrap";
-import Breadcrumbs from "../../components/Common/Breadcrumb";
 
+import { addNewStoreRequest, deleteStoreRequest, editStoreRequest, getStoresRequest } from "../../store/actions";
+import Breadcrumbs from "../../components/Common/Breadcrumb";
 import defaultLogoImg from "../../../images/companies/img-2.png";
 
 const defaultLogo = defaultLogoImg;
 
-// Mock data - no database (MVP)
+// Updated Mock data - no database (MVP) to the new format
 const MOCK_STORES = [
   {
-    id: "ST001",
-    storeNumber: "STORE-001",
-    name: "HomePro Main Store",
-    logo: defaultLogoImg,
+    seller_id: "SELLER001",
+    user_id: "USER001",
+    store_name: "HomePro Main Store",
+    slug: "homepro-main-store",
+    store_phone: "+44 1234 567890",
+    store_email: "info@homepro.com",
     address: "12 High Street, London SW1A 1AA",
-    seller: "HomePro Supplies Ltd",
-    industry: "Domestic products",
+    city: "London",
+    postcode: "SW1A 1AA",
+    status: "open",
+    opening_hours: "08:00",
+    logo: defaultLogoImg,
     todaysOrders: 32,
     totalOrders: 1240,
     totalCustomersOrders: 980,
     productsCount: 245,
-    open: true,
-    openingTime: "08:00",
   },
   {
-    id: "ST002",
-    storeNumber: "STORE-002",
-    name: "ElectroWorld City",
-    logo: defaultLogoImg,
+    seller_id: "SELLER002",
+    user_id: "USER002",
+    store_name: "ElectroWorld City",
+    slug: "electroworld-city",
+    store_phone: "+44 5678 123456",
+    store_email: "contact@electroworld.com",
     address: "45 Park Lane, Manchester M1 2AB",
-    seller: "ElectroWorld Ltd",
-    industry: "Electrical products",
+    city: "Manchester",
+    postcode: "M1 2AB",
+    status: "closed",
+    opening_hours: "09:30",
+    logo: defaultLogoImg,
     todaysOrders: 18,
     totalOrders: 892,
     totalCustomersOrders: 650,
     productsCount: 310,
-    open: false,
-    openingTime: "09:30",
   },
   {
-    id: "ST003",
-    storeNumber: "STORE-003",
-    name: "BuildRight Superstore",
-    logo: defaultLogoImg,
+    seller_id: "SELLER003",
+    user_id: "USER003",
+    store_name: "BuildRight Superstore",
+    slug: "buildright-superstore",
+    store_phone: "+44 9876 543210",
+    store_email: "sales@buildright.com",
     address: "78 Queen St, Birmingham B1 1AA",
-    seller: "BuildRight Materials",
-    industry: "Construction & building materials",
+    city: "Birmingham",
+    postcode: "B1 1AA",
+    status: "open",
+    opening_hours: "07:30",
+    logo: defaultLogoImg,
     todaysOrders: 54,
     totalOrders: 2156,
     totalCustomersOrders: 1740,
     productsCount: 520,
-    open: true,
-    openingTime: "07:30",
   },
 ];
 
 const initialFormState = {
-  storeNumber: "",
-  name: "",
-  logo: "",
+  seller_id: "",
+  user_id: "",
+  store_name: "",
+  slug: "",
+  store_phone: "",
+  store_email: "",
   address: "",
-  seller: "",
-  industry: "",
+  city: "",
+  postcode: "",
+  status: "open",
+  opening_hours: [],
+  open_hour: "",
+  close_hour: "",
+  logo: "",
   todaysOrders: 0,
   totalOrders: 0,
   totalCustomersOrders: 0,
   productsCount: 0,
-  open: true,
-  openingTime: "",
 };
 
 const StoresBreakdown = () => {
   document.title = "Stores Breakdown | LEKIT Ltd";
-
+  const dispatch = useDispatch()
   const [searchTerm, setSearchTerm] = useState("");
-  const [stores, setStores] = useState(MOCK_STORES);
+  const [stores, setStores] = useState([]);
   const [openOnly, setOpenOnly] = useState(true);
   const [sellerFilter, setSellerFilter] = useState("all");
-  const [industryFilter, setIndustryFilter] = useState("all");
+  const [cityFilter, setCityFilter] = useState("all");
   const [ordersFilter, setOrdersFilter] = useState("all"); // all | 0-100 | 100-500 | 500+
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -102,12 +120,28 @@ const StoresBreakdown = () => {
   const [currentRecord, setCurrentRecord] = useState(null);
   const [formValues, setFormValues] = useState(initialFormState);
 
+  const ecommerceSelector = createSelector(
+    state => state.ecommerce,
+    ecommerce => ({
+      allstores: ecommerce.stores,
+    })
+  );
+  const { allstores } = useSelector(ecommerceSelector);
+
+  useEffect(() => {
+    setStores(allstores)
+  }, [allstores])
+
+  useEffect(() => {
+    dispatch(getStoresRequest())
+  }, [dispatch])
+
   const uniqueSellers = useMemo(
-    () => Array.from(new Set(stores.map((s) => s.seller))),
+    () => Array.from(new Set(stores.map((s) => s.seller_id))),
     [stores]
   );
-  const uniqueIndustries = useMemo(
-    () => Array.from(new Set(stores.map((s) => s.industry))),
+  const uniqueCities = useMemo(
+    () => Array.from(new Set(stores.map((s) => s.city))),
     [stores]
   );
 
@@ -118,22 +152,22 @@ const StoresBreakdown = () => {
       const term = searchTerm.toLowerCase();
       data = data.filter(
         (s) =>
-          s.storeNumber.toLowerCase().includes(term) ||
-          s.name.toLowerCase().includes(term) ||
-          s.address.toLowerCase().includes(term)
+          s.store_name.toLowerCase().includes(term) ||
+          (s.address && s.address.toLowerCase().includes(term)) ||
+          (s.store_email && s.store_email.toLowerCase().includes(term))
       );
     }
 
     if (openOnly) {
-      data = data.filter((s) => s.open);
+      data = data.filter((s) => s.status === "open");
     }
 
     if (sellerFilter !== "all") {
-      data = data.filter((s) => s.seller === sellerFilter);
+      data = data.filter((s) => s.seller_id === sellerFilter);
     }
 
-    if (industryFilter !== "all") {
-      data = data.filter((s) => s.industry === industryFilter);
+    if (cityFilter !== "all") {
+      data = data.filter((s) => s.city === cityFilter);
     }
 
     if (ordersFilter !== "all") {
@@ -147,15 +181,15 @@ const StoresBreakdown = () => {
     }
 
     return data;
-  }, [stores, searchTerm, openOnly, sellerFilter, industryFilter, ordersFilter]);
+  }, [stores, searchTerm, openOnly, sellerFilter, cityFilter, ordersFilter]);
 
   const openAddModal = () => {
     setModalMode("add");
     setCurrentRecord(null);
     setFormValues({
       ...initialFormState,
-      storeNumber: `STORE-${String(stores.length + 1).padStart(3, "0")}`,
-      openingTime: "09:00",
+      slug: `store-${stores.length + 1}`,
+      status: "open",
     });
     setModalOpen(true);
   };
@@ -164,18 +198,22 @@ const StoresBreakdown = () => {
     setModalMode(mode);
     setCurrentRecord(record);
     setFormValues({
-      storeNumber: record.storeNumber,
-      name: record.name,
-      logo: record.logo || "",
+      seller_id: record.seller_id,
+      user_id: record.user_id,
+      store_name: record.store_name,
+      slug: record.slug,
+      store_phone: record.store_phone,
+      store_email: record.store_email,
       address: record.address,
-      seller: record.seller,
-      industry: record.industry,
+      city: record.city,
+      postcode: record.postcode,
+      status: record.status,
+      opening_hours: record.opening_hours,
+      logo: record.logo || "",
       todaysOrders: record.todaysOrders,
       totalOrders: record.totalOrders,
       totalCustomersOrders: record.totalCustomersOrders,
       productsCount: record.productsCount,
-      open: record.open,
-      openingTime: record.openingTime,
     });
     setModalOpen(true);
   };
@@ -185,7 +223,7 @@ const StoresBreakdown = () => {
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
-      setFormValues((prev) => ({ ...prev, [name]: checked }));
+      setFormValues((prev) => ({ ...prev, [name]: checked ? "open" : "closed" }));
     } else if (
       name === "todaysOrders" ||
       name === "totalOrders" ||
@@ -205,56 +243,62 @@ const StoresBreakdown = () => {
     }
 
     if (modalMode === "add") {
+
       const newStore = {
-        id: `ST${String(stores.length + 1).padStart(3, "0")}`,
-        storeNumber: formValues.storeNumber,
-        name: formValues.name,
-        logo: formValues.logo || defaultLogo,
+        seller_id: formValues.seller_id,
+        user_id: formValues.user_id,
+        store_name: formValues.store_name,
+        slug: formValues.slug,
+        store_phone: formValues.store_phone,
+        store_email: formValues.store_email,
         address: formValues.address,
-        seller: formValues.seller,
-        industry: formValues.industry,
+        city: formValues.city,
+        postcode: formValues.postcode,
+        status: formValues.status || "open",
+        opening_hours: [{ open: formValues.open_hour, close: formValues.close_hour, is_closed: formValues.status === "open" }],
+        logo: formValues.logo || defaultLogo,
         todaysOrders: formValues.todaysOrders || 0,
         totalOrders: formValues.totalOrders || 0,
         totalCustomersOrders: formValues.totalCustomersOrders || 0,
         productsCount: formValues.productsCount || 0,
-        open: formValues.open,
-        openingTime: formValues.openingTime || "09:00",
       };
-      setStores((prev) => [...prev, newStore]);
+      // setStores((prev) => [...prev, newStore]);
+      dispatch(addNewStoreRequest(newStore))
     } else if (modalMode === "edit" && currentRecord) {
-      setStores((prev) =>
-        prev.map((s) =>
-          s.id === currentRecord.id
-            ? {
-                ...s,
-                storeNumber: formValues.storeNumber,
-                name: formValues.name,
-                logo: formValues.logo || s.logo,
-                address: formValues.address,
-                seller: formValues.seller,
-                industry: formValues.industry,
-                todaysOrders: formValues.todaysOrders,
-                totalOrders: formValues.totalOrders,
-                totalCustomersOrders: formValues.totalCustomersOrders,
-                productsCount: formValues.productsCount,
-                open: formValues.open,
-                openingTime: formValues.openingTime,
-              }
-            : s
-        )
-      );
+      const updateStore = {
+        id: currentRecord.id,
+        seller_id: formValues.seller_id,
+        user_id: formValues.user_id,
+        store_name: formValues.store_name,
+        slug: formValues.slug,
+        store_phone: formValues.store_phone,
+        store_email: formValues.store_email,
+        address: formValues.address,
+        city: formValues.city,
+        postcode: formValues.postcode,
+        status: formValues.status,
+        opening_hours: formValues.opening_hours,
+        todaysOrders: formValues.todaysOrders,
+        totalOrders: formValues.totalOrders,
+        totalCustomersOrders: formValues.totalCustomersOrders,
+        productsCount: formValues.productsCount,
+      }
+      dispatch(editStoreRequest(updateStore))
     }
-    setModalOpen(false);
+    setModalOpen(false);  
   };
 
   const handleRemove = (id) => {
     if (!window.confirm("Remove this store?")) return;
-    setStores((prev) => prev.filter((s) => s.id !== id));
+    dispatch(deleteStoreRequest(id))
+    // setStores((prev) => prev.filter((s) => s.id !== id));
   };
 
   const toggleOpenStatus = (id) => {
     setStores((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, open: !s.open } : s))
+      prev.map((s) =>
+        s.id === id ? { ...s, status: s.status === "open" ? "closed" : "open" } : s
+      )
     );
   };
 
@@ -330,16 +374,16 @@ const StoresBreakdown = () => {
             </Col>
             <Col md={3}>
               <FormGroup>
-                <Label>Show Stores by Industry</Label>
+                <Label>Show Stores by City</Label>
                 <Input
                   type="select"
-                  value={industryFilter}
-                  onChange={(e) => setIndustryFilter(e.target.value)}
+                  value={cityFilter}
+                  onChange={(e) => setCityFilter(e.target.value)}
                 >
-                  <option value="all">All industries</option>
-                  {uniqueIndustries.map((ind) => (
-                    <option key={ind} value={ind}>
-                      {ind}
+                  <option value="all">All cities</option>
+                  {uniqueCities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
                     </option>
                   ))}
                 </Input>
@@ -376,69 +420,70 @@ const StoresBreakdown = () => {
                     <Table className="table table-bordered table-nowrap align-middle mb-0">
                       <thead className="table-light">
                         <tr>
-                          <th>Store #</th>
                           <th>Store Name</th>
                           <th>Address</th>
+                          <th>City</th>
+                          <th>Status</th>
+                          <th>Opening Hours</th>
                           <th>Today's Orders</th>
                           <th>Info</th>
-                          <th>Status</th>
                           <th className="text-center">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredStores.map((row) => (
-                          <tr key={row.id}>
-                            <td>{row.storeNumber}</td>
+                          <tr key={row.slug}>
                             <td>
                               <div className="d-flex align-items-center">
                                 <img
-                                  src={row.logo}
+                                  src={row.logo || defaultLogo}
                                   alt=""
                                   className="rounded me-2"
                                   style={{ width: 32, height: 32, objectFit: "contain" }}
                                   onError={(e) => {
-                                    e.target.src = defaultLogoImg;
+                                    e.target.src = defaultLogo;
                                   }}
                                 />
-                                <span>{row.name}</span>
+                                <span>{row.store_name}</span>
                               </div>
                             </td>
                             <td>{row.address}</td>
-                            <td>{row.todaysOrders}</td>
-                            <td>
-                              <div className="small">
-                                <div>Orders: {row.totalOrders}</div>
-                                <div>Customers: {row.totalCustomersOrders}</div>
-                                <div>Products: {row.productsCount}</div>
-                              </div>
-                            </td>
+                            <td>{row.city}</td>
                             <td>
                               <div className="d-flex flex-column small">
                                 <span
                                   className={
-                                    row.open ? "text-success fw-semibold" : "text-muted fw-semibold"
+                                    row.status === "open"
+                                      ? "text-success fw-semibold"
+                                      : "text-muted fw-semibold"
                                   }
                                 >
-                                  {row.open ? "Opened" : "Closed"}
-                                </span>
-                                <span className="text-muted">
-                                  Opening time today: {row.openingTime}
+                                  {row.status === "open" ? "Opened" : "Closed"}
                                 </span>
                                 <div className="form-check form-switch mt-1">
                                   <Input
                                     className="form-check-input"
                                     type="checkbox"
-                                    id={`open-${row.id}`}
-                                    checked={row.open}
+                                    id={`open-${row.slug}`}
+                                    checked={row.status === "open"}
                                     onChange={() => toggleOpenStatus(row.id)}
                                   />
                                   <Label
                                     className="form-check-label"
                                     htmlFor={`open-${row.id}`}
                                   >
-                                    {row.open ? "On" : "Off"}
+                                    {row.status === "open" ? "On" : "Off"}
                                   </Label>
                                 </div>
+                              </div>
+                            </td>
+                            <td>{row.opening_hours ? `${row.opening_hours[0].open}-${row.opening_hours[0].close}` : ""}</td>
+                            <td>{row.todaysOrders}</td>
+                            <td>
+                              <div className="small">
+                                <div>Orders: {row.totalOrders}</div>
+                                <div>Customers: {row.totalCustomersOrders}</div>
+                                <div>Products: {row.productsCount}</div>
                               </div>
                             </td>
                             <td className="text-center">
@@ -452,36 +497,6 @@ const StoresBreakdown = () => {
                                   title="Edit Profile"
                                   iconClass="bx-edit-alt"
                                   onClick={() => openViewOrEditModal("edit", row)}
-                                />
-                                <ActionIcon
-                                  title="Orders"
-                                  iconClass="bx-cart"
-                                  onClick={() => {}}
-                                />
-                                <ActionIcon
-                                  title="Products"
-                                  iconClass="bx-package"
-                                  onClick={() => {}}
-                                />
-                                <ActionIcon
-                                  title="Statistics"
-                                  iconClass="bx-bar-chart"
-                                  onClick={() => {}}
-                                />
-                                <ActionIcon
-                                  title="Contact Store"
-                                  iconClass="bx-envelope"
-                                  onClick={() => {}}
-                                />
-                                <ActionIcon
-                                  title="Admin Profiles"
-                                  iconClass="bx-user-circle"
-                                  onClick={() => {}}
-                                />
-                                <ActionIcon
-                                  title="Block Store"
-                                  iconClass="bx-block"
-                                  onClick={() => {}}
                                 />
                                 <ActionIcon
                                   title="Remove Store"
@@ -509,33 +524,46 @@ const StoresBreakdown = () => {
           {modalMode === "view"
             ? "View Store"
             : modalMode === "edit"
-            ? "Edit Store"
-            : "Add New Store"}
+              ? "Edit Store"
+              : "Add New Store"}
         </ModalHeader>
         <ModalBody>
           <Form>
             <Row className="mb-3">
               <Col md={4}>
                 <FormGroup>
-                  <Label for="field-storeNumber">Store #</Label>
+                  <Label for="field-store_name">Store Name</Label>
                   <Input
-                    id="field-storeNumber"
-                    name="storeNumber"
+                    id="field-store_name"
+                    name="store_name"
                     type="text"
-                    value={formValues.storeNumber}
+                    value={formValues.store_name}
                     onChange={handleFormChange}
-                    readOnly={modalMode !== "add"}
+                    readOnly={modalMode === "view"}
                   />
                 </FormGroup>
               </Col>
-              <Col md={8}>
+              <Col md={4}>
                 <FormGroup>
-                  <Label for="field-name">Store Name</Label>
+                  <Label for="field-user_id">Manager</Label>
                   <Input
-                    id="field-name"
-                    name="name"
+                    id="field-user_id"
+                    name="user_id"
                     type="text"
-                    value={formValues.name}
+                    value={formValues.user_id}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+              <Col md={4}>
+                <FormGroup>
+                  <Label for="field-seller_id">Seller</Label>
+                  <Input
+                    id="field-seller_id"
+                    name="seller_id"
+                    type="text"
+                    value={formValues.seller_id}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
@@ -546,12 +574,12 @@ const StoresBreakdown = () => {
             <Row className="mb-3">
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-seller">Seller</Label>
+                  <Label for="field-store_phone">Phone</Label>
                   <Input
-                    id="field-seller"
-                    name="seller"
+                    id="field-store_phone"
+                    name="store_phone"
                     type="text"
-                    value={formValues.seller}
+                    value={formValues.store_phone}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
@@ -559,14 +587,89 @@ const StoresBreakdown = () => {
               </Col>
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-industry">Industry</Label>
+                  <Label for="field-store_email">Email</Label>
                   <Input
-                    id="field-industry"
-                    name="industry"
-                    type="text"
-                    value={formValues.industry}
+                    id="field-store_email"
+                    name="store_email"
+                    type="email"
+                    value={formValues.store_email}
                     onChange={handleFormChange}
-                    placeholder="e.g. domestic products, electrical products"
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
+              <Col md={12}>
+                <FormGroup>
+                  <Label for="field-slug">Slug</Label>
+                  <Input
+                    id="field-slug"
+                    name="slug"
+                    type="text"
+                    value={formValues.slug}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="field-city">City</Label>
+                  <Input
+                    id="field-city"
+                    name="city"
+                    type="text"
+                    value={formValues.city}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="field-postcode">Postcode</Label>
+                  <Input
+                    id="field-postcode"
+                    name="postcode"
+                    type="text"
+                    value={formValues.postcode}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="field-open_hour">Open Hour</Label>
+                  <Input
+                    id="field-open_hour"
+                    name="open_hour"
+                    placeholder="eg.09.00AM"
+                    type="time"
+                    value={formValues.open_hour}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="field-close_hour">Close Hour</Label>
+                  <Input
+                    id="field-close_hour"
+                    name="close_hour"
+                    placeholder="eg.04.00PM"
+                    type="time"
+                    value={formValues.close_hour}
+                    onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
                 </FormGroup>
@@ -648,37 +751,24 @@ const StoresBreakdown = () => {
               </Col>
             </Row>
 
-            <Row className="mb-0">
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="field-openingTime">Opening Time (today)</Label>
-                  <Input
-                    id="field-openingTime"
-                    name="openingTime"
-                    type="time"
-                    value={formValues.openingTime}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
-              {modalMode !== "view" && (
+            {modalMode !== "view" && (
+              <Row>
                 <Col md={6} className="d-flex align-items-end pb-3">
                   <FormGroup check className="form-switch">
                     <Input
                       type="checkbox"
-                      name="open"
-                      id="field-open"
-                      checked={formValues.open}
+                      name="status"
+                      id="field-status"
+                      checked={formValues.status === "open"}
                       onChange={handleFormChange}
                     />
-                    <Label check htmlFor="field-open">
+                    <Label check htmlFor="field-status">
                       Store Open Today
                     </Label>
                   </FormGroup>
                 </Col>
-              )}
-            </Row>
+              </Row>
+            )}
           </Form>
         </ModalBody>
         <ModalFooter>
@@ -697,4 +787,3 @@ const StoresBreakdown = () => {
 };
 
 export default StoresBreakdown;
-
