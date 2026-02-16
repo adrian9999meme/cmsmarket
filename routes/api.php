@@ -29,12 +29,18 @@ Route::group(['middleware' => 'api'], function ($router) {
     // Async time
     Route::get('/auth/getservertime', [APIController::class, 'getservertime']);
 
+    // Customer APIs
+    Route::post('/customer/create', [CustomerController::class, 'createCustomer']);
+    Route::get('/customer/fetch', [CustomerController::class, 'fetchCustomers']);
+    Route::put('/customer/edit/{id}', [CustomerController::class, 'updateCustomer']);
+    Route::delete('/customer/delete/{id}', [CustomerController::class, 'deleteCustomer']);
+
     // Seller
     Route::post('/seller/create', [SellerController::class, 'createSeller']);
     Route::get('/seller/fetch', [SellerController::class, 'fetchSellers']);
     Route::put('/seller/edit/{id}', [SellerController::class, 'updateSeller']);
     Route::delete('/seller/delete/{id}', [SellerController::class, 'deleteSeller']);
-    
+
     // Store
     Route::post('/store/create', [StoreController::class, 'createStore']);
     Route::get('/store/fetch', [StoreController::class, 'fetchStores']);
@@ -46,10 +52,4 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get('/product/fetch', [ProductController::class, 'fetchProducts']);
     Route::put('/product/edit/{id}', [ProductController::class, 'updateProduct']);
     Route::delete('/product/delete/{id}', [ProductController::class, 'deleteProduct']);
-
-    // Customer APIs
-    Route::post('/customer/create', [CustomerController::class, 'createCustomer']);
-    Route::get('/customer/fetch', [CustomerController::class, 'fetchCustomers']);
-    Route::put('/customer/edit/{id}', [CustomerController::class, 'updateCustomer']);
-    Route::delete('/customer/delete/{id}', [CustomerController::class, 'deleteCustomer']);
 });
