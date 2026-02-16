@@ -354,7 +354,6 @@ function* onDeleteSeller({payload: id}) {
     const response = yield axios.delete(`/api/seller/delete/${id}`);
     if (response.data?.success) {
       yield put(deleteSellerSuccess(response.data?.data));
-      console.log("response.data:", response.data.data)
       toast.success(response.data?.message, { autoClose: 1000 })
     }
   } catch (error) {
@@ -363,16 +362,16 @@ function* onDeleteSeller({payload: id}) {
   }
 }
 
-function* onAddNewStore(store) {
+function* onAddNewStore({payload: store}) {
   try {
     const response = yield axios.post('/api/store/create', store);
     if (response.data?.success) {
       yield put(addNewStoreSuccess(response.data?.data));
-      toast.success("New Store Added Successfully", { autoClose: 1000 })
+      toast.success(response.data?.message, { autoClose: 1000 })
     }
   } catch (error) {
     yield put(addNewStoreFail(error));
-    toast.error("New Store Added Failed", { autoClose: 1000 });
+    toast.error(error.data?.message, { autoClose: 1000 });
   }
 }
 
@@ -380,16 +379,16 @@ function* fetchStores() {
   try {
     const response = yield axios.get('/api/store/fetch');
     if (response.data?.success) {
-      yield put(getStoresSuccess(response.data?.data));
-      toast.success("Stores Fetched Successfully", { autoClose: 1000 })
+      yield put(getStoresSuccess(response.data?.data?.data));
+      toast.success(response.data?.message, { autoClose: 1000 })
     }
   } catch (error) {
     yield put(getStoresFail(error));
-    toast.error("Store Fetch Failed", { autoClose: 1000 });
+    toast.error(error.data?.message, { autoClose: 1000 });
   }
 }
 
-function* onEditStore(store) {
+function* onEditStore({payload: store}) {
   try {
     const response = yield axios.put(`/api/store/edit/${store.id}`, store);
     if (response.data?.success) {
@@ -402,9 +401,9 @@ function* onEditStore(store) {
   }
 }
 
-function* onDeleteStore(store) {
+function* onDeleteStore({payload: id}) {
   try {
-    const response = yield axios.delete(`/api/store/delete/${store.id}`);
+    const response = yield axios.delete(`/api/store/delete/${id}`);
     if (response.data?.success) {
       yield put(deleteStoreSuccess(response.data?.data));
       toast.success("Store Deleted Successfully", { autoClose: 1000 })

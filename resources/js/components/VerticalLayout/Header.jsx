@@ -44,17 +44,7 @@ const Header = props => {
   const [search, setsearch] = useState(false);
   const [megaMenu, setmegaMenu] = useState(false);
   const [socialDrp, setsocialDrp] = useState(false);
-
-  // const layoutSelector = createSelector(
-  //   state => state.Layout,
-  //   layout => ({
-  //     timediffer: layout.timediffer,
-  //   })
-  // );
-  // const {
-  //   timediffer,
-  // } = useSelector(layoutSelector);
-  console.log("header is triggered")
+  
   function toggleFullscreen() {
     if (
       !document.fullscreenElement &&

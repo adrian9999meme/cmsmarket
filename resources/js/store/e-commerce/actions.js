@@ -382,9 +382,9 @@ export const deleteSellerFail = error => ({
 });
 
 // ADD NEW STORE
-export const addNewStoreRequest = () => ({
+export const addNewStoreRequest = (store) => ({
   type: ADD_STORE_REQUEST,
-  payload: {},
+  payload: store,
 });
 export const addNewStoreSuccess = store => ({
   type: ADD_STORE_SUCCESS,
@@ -410,9 +410,9 @@ export const getStoresFail = (error) => ({
 });
 
 // EDIT STORE
-export const editStoreRequest = () => ({
+export const editStoreRequest = (store) => ({
   type: EDIT_STORE_REQUEST,
-  payload: {},
+  payload: store,
 });
 export const editStoreSuccess = store => ({
   type: EDIT_STORE_SUCCESS,
@@ -424,9 +424,9 @@ export const editStoreFail = error => ({
 });
 
 // DELETE STORE
-export const deleteStoreRequest = () => ({
+export const deleteStoreRequest = (id) => ({
   type: DELETE_STORE_REQUEST,
-  payload: {},
+  payload: id,
 });
 export const deleteStoreSuccess = store => ({
   type: DELETE_STORE_SUCCESS,
