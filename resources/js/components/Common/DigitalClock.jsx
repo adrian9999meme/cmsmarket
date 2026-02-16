@@ -30,7 +30,7 @@ const DigitalClock = (props) => {
     }, []);
 
     return (
-        <div className='d-flex p-0 h-100 align-items-center px-5 text-white justify-content-between' style={{ minWidth: '350px', backgroundColor: 'rgb(34 39 54)' }}>
+        <div className='d-flex p-0 h-100 align-items-center px-5 text-white justify-content-between' style={{ minWidth: '400px', backgroundColor: 'rgb(34 39 54)' }}>
             {currentTime && (
                 <>
                     <span className="fs-2 fw-bold me-2 w-40">

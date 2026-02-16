@@ -114,7 +114,28 @@ const Navbar = props => {
                   </Link>
                 </li>
 
-                <li className="nav-item dropdown">
+                <li className="nav-item">
+                  <Link className="nav-link" to="/customers-breakdown">
+                    <i className="bx bx-user-circle me-2"></i>
+                    {props.t("Customers Breakdown")}
+                  </Link>
+                </li>
+
+                <li className="nav-item">
+                  <Link className="nav-link" to="/sellers-breakdown">
+                    <i className="bx bx-store-alt me-2"></i>
+                    {props.t("Sellers Breakdown")}
+                  </Link>
+                </li>
+
+                <li className="nav-item">
+                  <Link className="nav-link" to="/stores-breakdown">
+                    <i className="bx bx-store me-2"></i>
+                    {props.t("Stores Breakdown")}
+                  </Link>
+                </li>
+
+                {/* <li className="nav-item dropdown">
                   <Link
                     to="/#"
                     onClick={e => {
@@ -184,9 +205,6 @@ const Navbar = props => {
                           <Link to="/ui-placeholders" className="dropdown-item">
                             {props.t("Placeholders")}
                           </Link>
-                          {/* <Link to="/ui-sweet-alert" className="dropdown-item">
-                              {props.t("Sweet-Alert")}
-                            </Link> */}
                           <Link
                             to="/ui-tabs-accordions"
                             className="dropdown-item"
@@ -911,7 +929,7 @@ const Navbar = props => {
                       </div>
                     </div>
                   </div>
-                </li>
+                </li> */}
               </ul>
             </Collapse>
           </nav>
