@@ -76,18 +76,18 @@ class CustomerController extends Controller
     }
 
     // fetch customers
-    public function fetchCustomers(Request $request)
+    public function fetchCustomers(Request $request, $keyword)
     {
-        // Optional: Add filters by customer_name/email/etc through query params
+        // Fetch all records where any of email, name, or address contains the keyword (case insensitive)
         $query = Customer::query();
 
-        if ($request->has('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+        if (!empty($keyword) && $keyword !== 'undefined') {
+            $query->where(function ($q) use ($keyword) {
+                $q->orWhere('name', 'like', '%' . $keyword . '%')
+                  ->orWhere('email', 'like', '%' . $keyword . '%')
+                  ->orWhere('address', 'like', '%' . $keyword . '%');
+            });
         }
-        if ($request->has('email')) {
-            $query->where('email', 'like', '%' . $request->email . '%');
-        }
-        // Add more filters if needed
 
         // Simple pagination, default 10 per page
         $perPage = $request->get('per_page', 10);

@@ -103,7 +103,7 @@ const SellersBreakdown = () => {
   const dispatch = useDispatch()
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [sellers, setSellers] = useState(MOCK_SELLERS);
+  const [sellers, setSellers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // add | edit | view
   const [currentRecord, setCurrentRecord] = useState(null);
@@ -145,9 +145,11 @@ const SellersBreakdown = () => {
   }, [dispatch]);
 
   const togglePublish = (id) => {
-    setSellers((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, published: !s.published } : s))
-    );
+    const seller = sellers.find(seller => seller.id === id);
+    if (seller) {
+      const updatedSeller = { ...seller, published: !seller.published };
+      dispatch(editSellerRequest(updatedSeller));
+    }
   };
 
   const filteredSellers = useMemo(() => {
@@ -397,9 +399,9 @@ const SellersBreakdown = () => {
                                   title="Edit Profile"
                                   onClick={() => openViewOrEditModal("edit", row)}
                                 />
-                                <ActionIcon iconClass="bx-folder" title="Company Files" onClick={() => { }} />
+                                {/* <ActionIcon iconClass="bx-folder" title="Company Files" onClick={() => { }} />
                                 <ActionIcon iconClass="bx-store" title="Stores" onClick={() => { }} />
-                                <ActionIcon iconClass="bx-envelope" title="Contact Director" onClick={() => { }} />
+                                <ActionIcon iconClass="bx-envelope" title="Contact Director" onClick={() => { }} /> */}
                                 <ActionIcon
                                   iconClass="bx-trash"
                                   title="Remove"

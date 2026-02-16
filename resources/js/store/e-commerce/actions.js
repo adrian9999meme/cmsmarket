@@ -178,8 +178,9 @@ export const getCartDataFail = error => ({
   payload: error,
 });
 
-export const getCustomers = () => ({
+export const getCustomers = (keyword) => ({
   type: GET_CUSTOMERS,
+  payload: keyword
 });
 
 export const getCustomersSuccess = customers => ({
