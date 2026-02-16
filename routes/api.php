@@ -31,7 +31,7 @@ Route::group(['middleware' => 'api'], function ($router) {
 
     // Customer APIs
     Route::post('/customer/create', [CustomerController::class, 'createCustomer']);
-    Route::get('/customer/fetch', [CustomerController::class, 'fetchCustomers']);
+    Route::get('/customer/fetch/{keyword}', [CustomerController::class, 'fetchCustomers']);
     Route::put('/customer/edit/{id}', [CustomerController::class, 'updateCustomer']);
     Route::delete('/customer/delete/{id}', [CustomerController::class, 'deleteCustomer']);
 

@@ -166,9 +166,9 @@ function* fetchCartData() {
   }
 }
 
-function* fetchCustomers() {
+function* fetchCustomers({payload: keyword}) {
   try {
-    const response = yield axios.get('/api/customer/fetch');
+    const response = yield axios.get(`/api/customer/fetch/${keyword}`);
     if (response.data?.success) {
       yield put(getCustomersSuccess(response.data?.data?.data));
       toast.success("Customers Fetch Successfully", { autoClose: 2000 });

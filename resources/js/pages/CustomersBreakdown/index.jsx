@@ -299,7 +299,7 @@ const CustomersBreakdown = () => {
     const term = searchTerm.toLowerCase();
     return customers.filter(
       (c) =>
-        c.id?.toLowerCase?.().includes(term) ||
+        c.address?.toLowerCase?.().includes(term) ||
         c.name?.toLowerCase?.().includes(term) ||
         c.email?.toLowerCase?.().includes(term)
     );
@@ -385,7 +385,7 @@ const CustomersBreakdown = () => {
                       </span>
                     </NavLink>
                   </NavItem>
-                  <NavItem>
+                  {/* <NavItem>
                     <NavLink
                       href="#"
                       onClick={(e) => {
@@ -404,7 +404,7 @@ const CustomersBreakdown = () => {
                         {filteredTradeCustomers.length}
                       </span>
                     </NavLink>
-                  </NavItem>
+                  </NavItem> */}
                 </Nav>
                 <p className="text-muted small mb-0">
                   {activeTab === "customers"
@@ -467,9 +467,9 @@ const CustomersBreakdown = () => {
                                 <div className="d-flex justify-content-start gap-1 flex-wrap">
                                   <ActionIcon title="View Profile" iconClass="bx-user" onClick={() => openViewOrEditModal("customers", "view", row)} />
                                   <ActionIcon title="Edit Profile" iconClass="bx-edit-alt" onClick={() => openViewOrEditModal("customers", "edit", row)} />
-                                  <ActionIcon title="Orders" iconClass="bx-cart" onClick={() => { }} />
+                                  {/* <ActionIcon title="Orders" iconClass="bx-cart" onClick={() => { }} />
                                   <ActionIcon title="Tickets" iconClass="bx-support" onClick={() => { }} />
-                                  <ActionIcon title="Contact Customer" iconClass="bx-envelope" onClick={() => { }} />
+                                  <ActionIcon title="Contact Customer" iconClass="bx-envelope" onClick={() => { }} /> */}
                                   <ActionIcon title="Remove" iconClass="bx-trash" colorClass="text-danger" onClick={() => handleRemoveCustomer("customers", row.id)} />
                                 </div>
                               </td>

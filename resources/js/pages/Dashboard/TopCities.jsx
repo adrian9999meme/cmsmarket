@@ -12,7 +12,7 @@ const TopCities = () => {
               <i className="bx bx-map-pin text-primary display-4" />
             </div>
             <h3>1,456</h3>
-            <p>San Francisco</p>
+            <p>Edmundson</p>
           </div>
 
           <div className="table-responsive mt-4">
@@ -20,7 +20,7 @@ const TopCities = () => {
               <tbody>
                 <tr>
                   <td style={{ width: "30%" }}>
-                    <p className="mb-0">San Francisco</p>
+                    <p className="mb-0">Edmundson</p>
                   </td>
                   <td style={{ width: "25%" }}>
                     <h5 className="mb-0">1,456</h5>
@@ -36,7 +36,7 @@ const TopCities = () => {
                 </tr>
                 <tr>
                   <td>
-                    <p className="mb-0">Los Angeles</p>
+                    <p className="mb-0">Screwfix</p>
                   </td>
                   <td>
                     <h5 className="mb-0">1,123</h5>
@@ -52,7 +52,7 @@ const TopCities = () => {
                 </tr>
                 <tr>
                   <td>
-                    <p className="mb-0">San Diego</p>
+                    <p className="mb-0">LDN Projects</p>
                   </td>
                   <td>
                     <h5 className="mb-0">1,026</h5>
