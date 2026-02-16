@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { createSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Container,
   Row,
@@ -17,8 +19,9 @@ import {
   FormGroup,
   Label,
 } from "reactstrap";
-import Breadcrumbs from "../../components/Common/Breadcrumb";
 
+import { addNewSellerRequest, deleteSellerRequest, editSellerRequest, getSellersRequest } from "../../store/actions";
+import Breadcrumbs from "../../components/Common/Breadcrumb";
 import defaultLogoImg from "../../../images/companies/img-1.png";
 
 // Placeholder logo - in real app would be seller logo URL
@@ -97,12 +100,49 @@ const initialFormState = {
 const SellersBreakdown = () => {
   document.title = "Sellers Breakdown | LEKIT Ltd";
 
+  const dispatch = useDispatch()
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sellers, setSellers] = useState(MOCK_SELLERS);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // add | edit | view
   const [currentRecord, setCurrentRecord] = useState(null);
   const [formValues, setFormValues] = useState(initialFormState);
+
+  const ecommerceSelector = createSelector(
+    state => state.ecommerce,
+    ecommerce => ({
+      allsellers: ecommerce.sellers,
+    })
+  );
+  const { allsellers } = useSelector(ecommerceSelector);
+
+  useEffect(() => {
+    const alteredSellers = Array.isArray(allsellers)
+      ? allsellers.map(s => ({
+        id: s.id,
+        sellerNumber: `SEL-${s.id}`,
+        companyName: s.company_name,
+        companyLogo: defaultLogoImg,
+        director: {
+          name: "David Clarke",
+          position: "Operations Manager",
+          email: s.company_email,
+          tel: s.phone_no,
+        },
+        industry: s.company_type,
+        storesCount: 8,
+        lastLogin: "2024-01-14 11:05",
+        orders: 2156,
+        published: s.published || false,
+      }))
+      : [];
+    setSellers(Array.isArray(alteredSellers) ? alteredSellers : []);
+  }, [allsellers]);
+
+  useEffect(() => {
+    dispatch(getSellersRequest());
+  }, [dispatch]);
 
   const togglePublish = (id) => {
     setSellers((prev) =>
@@ -167,55 +207,78 @@ const SellersBreakdown = () => {
     }
 
     if (modalMode === "add") {
+      // const newSeller = {
+      //   id: `S${String(sellers.length + 1).padStart(3, "0")}`,
+      //   sellerNumber: formValues.sellerNumber,
+      //   companyName: formValues.companyName,
+      //   companyLogo: formValues.companyLogo || defaultLogoImg,
+      //   director: {
+      //     name: formValues.directorName,
+      //     position: formValues.directorPosition,
+      //     email: formValues.directorEmail,
+      //     tel: formValues.directorTel,
+      //   },
+      //   industry: formValues.industry,
+      //   storesCount: formValues.storesCount || 0,
+      //   lastLogin: formValues.lastLogin || new Date().toISOString().slice(0, 16).replace("T", " "),
+      //   orders: formValues.orders || 0,
+      //   published: formValues.published,
+      // };
       const newSeller = {
-        id: `S${String(sellers.length + 1).padStart(3, "0")}`,
-        sellerNumber: formValues.sellerNumber,
-        companyName: formValues.companyName,
-        companyLogo: formValues.companyLogo || defaultLogoImg,
-        director: {
-          name: formValues.directorName,
-          position: formValues.directorPosition,
-          email: formValues.directorEmail,
-          tel: formValues.directorTel,
-        },
-        industry: formValues.industry,
-        storesCount: formValues.storesCount || 0,
-        lastLogin: formValues.lastLogin || new Date().toISOString().slice(0, 16).replace("T", " "),
-        orders: formValues.orders || 0,
+        company_name: formValues.companyName,
+        company_email: formValues.directorEmail,
+        phone_no: formValues.directorTel,
+        company_type: formValues.industry,
         published: formValues.published,
       };
-      setSellers((prev) => [...prev, newSeller]);
+      // setSellers((prev) => [...prev, newSeller]);
+      dispatch(addNewSellerRequest(newSeller))
     } else if (modalMode === "edit" && currentRecord) {
-      setSellers((prev) =>
-        prev.map((s) =>
-          s.id === currentRecord.id
-            ? {
-                ...s,
-                sellerNumber: formValues.sellerNumber,
-                companyName: formValues.companyName,
-                companyLogo: formValues.companyLogo || defaultLogoImg || s.companyLogo,
-                director: {
-                  name: formValues.directorName,
-                  position: formValues.directorPosition,
-                  email: formValues.directorEmail,
-                  tel: formValues.directorTel,
-                },
-                industry: formValues.industry,
-                storesCount: formValues.storesCount,
-                lastLogin: formValues.lastLogin,
-                orders: formValues.orders,
-                published: formValues.published,
-              }
-            : s
-        )
-      );
+      // setSellers((prev) =>
+      //   prev.map((s) =>
+      //     s.id === currentRecord.id
+      //       ? {
+      //         ...s,
+      //         sellerNumber: formValues.sellerNumber,
+      //         companyName: formValues.companyName,
+      //         companyLogo: formValues.companyLogo || defaultLogoImg || s.companyLogo,
+      //         director: {
+      //           name: formValues.directorName,
+      //           position: formValues.directorPosition,
+      //           email: formValues.directorEmail,
+      //           tel: formValues.directorTel,
+      //         },
+      //         industry: formValues.industry,
+      //         storesCount: formValues.storesCount,
+      //         lastLogin: formValues.lastLogin,
+      //         orders: formValues.orders,
+      //         published: formValues.published,
+      //       }
+      //       : s
+      //   )
+      // );
+
+      const updatedSeller = sellers.map((s) =>
+        s.id === currentRecord.id
+          ? {
+            id: currentRecord.id,
+            company_name: formValues.companyName,
+            company_email: formValues.directorEmail,
+            phone_no: formValues.directorTel,
+            company_type: formValues.industry,
+            published: formValues.published,
+          }
+          : {}
+      ).find(item => item.id === currentRecord.id)
+
+      dispatch(editSellerRequest(updatedSeller))
     }
     setModalOpen(false);
   };
 
   const handleRemove = (id) => {
     if (window.confirm("Remove this seller?")) {
-      setSellers((prev) => prev.filter((s) => s.id !== id));
+      dispatch(deleteSellerRequest(id))
     }
   };
 
@@ -334,9 +397,9 @@ const SellersBreakdown = () => {
                                   title="Edit Profile"
                                   onClick={() => openViewOrEditModal("edit", row)}
                                 />
-                                <ActionIcon iconClass="bx-folder" title="Company Files" onClick={() => {}} />
-                                <ActionIcon iconClass="bx-store" title="Stores" onClick={() => {}} />
-                                <ActionIcon iconClass="bx-envelope" title="Contact Director" onClick={() => {}} />
+                                <ActionIcon iconClass="bx-folder" title="Company Files" onClick={() => { }} />
+                                <ActionIcon iconClass="bx-store" title="Stores" onClick={() => { }} />
+                                <ActionIcon iconClass="bx-envelope" title="Contact Director" onClick={() => { }} />
                                 <ActionIcon
                                   iconClass="bx-trash"
                                   title="Remove"

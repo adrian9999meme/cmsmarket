@@ -278,7 +278,7 @@ const Ecommerce = (state = INIT_STATE, action) => {
       return {
         ...state,
         sellers: state.sellers.filter(
-          seller => seller.id !== action.payload
+          seller => seller.id !== action.payload.id
         ),
       };
 

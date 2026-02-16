@@ -326,9 +326,9 @@ export const onAddCommentFail = error => ({
 });
 
 // ADD NEW SELLER
-export const addNewSellerRequest = () => ({
+export const addNewSellerRequest = (seller) => ({
   type: ADD_SELLER_REQUEST,
-  payload: {},
+  payload: seller,
 });
 export const addNewSellerSuccess = seller => ({
   type: ADD_SELLER_SUCCESS,
@@ -354,9 +354,9 @@ export const getSellersFail = (error) => ({
 });
 
 // EDIT SELLER
-export const editSellerRequest = () => ({
+export const editSellerRequest = (seller) => ({
   type: EDIT_SELLER_REQUEST,
-  payload: {},
+  payload: seller,
 });
 export const editSellerSuccess = seller => ({
   type: EDIT_SELLER_SUCCESS,
@@ -368,9 +368,9 @@ export const editSellerFail = error => ({
 });
 
 // DELETE SELLER
-export const deleteSellerRequest = () => ({
+export const deleteSellerRequest = (id) => ({
   type: DELETE_SELLER_REQUEST,
-  payload: {},
+  payload: id,
 });
 export const deleteSellerSuccess = (seller) => ({
   type: DELETE_SELLER_SUCCESS,
