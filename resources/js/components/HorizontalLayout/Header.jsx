@@ -31,6 +31,7 @@ import paypal from "../../../images/brands/Paypal.png";
 
 //i18n
 import { withTranslation } from "react-i18next";
+import DigitalClock from "../Common/DigitalClock";
 
 const Header = props => {
   const [menu, setMenu] = useState(false);
@@ -111,7 +112,7 @@ const Header = props => {
               </div>
             </form>
 
-            <Dropdown
+            {/* <Dropdown
               className="dropdown-mega d-none d-lg-block ms-2"
               isOpen={menu}
               toggle={() => setMenu(!menu)}
@@ -256,8 +257,10 @@ const Header = props => {
                   </Col>
                 </Row>
               </DropdownMenu>
-            </Dropdown>
+            </Dropdown> */}
           </div>
+
+          <DigitalClock />
 
           <div className="d-flex">
             <div className="dropdown d-inline-block d-lg-none ms-2">
