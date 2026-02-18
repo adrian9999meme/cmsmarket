@@ -28,8 +28,8 @@ const LockScreen = (props) => {
   );
   const user = useSelector(userSelector);
 
-  const [email, setEmail] = useState(sessionStorage.getItem('email') ? JSON.parse(sessionStorage.getItem("email")) : null);
-  const [firstname, setFirstname] = useState(sessionStorage.getItem('firstname') ? JSON.parse(sessionStorage.getItem("firstname")) : null);
+  const [email, setEmail] = useState(sessionStorage.getItem('email') !== undefined && sessionStorage.getItem('email') !== null ? JSON.parse(sessionStorage.getItem("email")) : null);
+  const [firstname, setFirstname] = useState(sessionStorage.getItem('firstname') !== undefined && sessionStorage.getItem('firstname') !== null ? JSON.parse(sessionStorage.getItem("firstname")) : null);
   const [password, setPassword] = useState('12345678');
   const [currentUser, setCurrentUser] = useState({email: '', firstname: ''});
   

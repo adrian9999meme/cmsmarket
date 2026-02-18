@@ -1,13 +1,13 @@
 import { put, takeEvery } from "redux-saga/effects";
-
-// Login Redux States
-import { LOGIN_USER, LOGOUT_USER } from "./actionTypes";
-import { apiError, logoutUserSuccess, setToken, setUser } from "./actions";
-
 //Toast
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import api from "../../apiWithToken";
+
+import api from "../../api";
+// Login Redux States
+import { LOGIN_USER, LOGOUT_USER } from "./actionTypes";
+import { apiError, logoutUserSuccess, setToken, setUser } from "./actions";
+import { LOGIN_API } from "../../endpoints";
 
 // NOTE:
 // For MVP we do NOT call any backend or database.
@@ -29,7 +29,7 @@ function* loginUser({ payload: { user, history } }) {
       throw new Error("Password is required.");
     }
 
-    const response = yield axios.post('api/auth/login', user);
+    const response = yield api.post(LOGIN_API, user);
 
     if (!response.data.success) {
       throw new Error(response.data?.message)
@@ -41,12 +41,13 @@ function* loginUser({ payload: { user, history } }) {
     });
 
     // set token value in state
-    yield put(setToken(response.data?.token))
-    yield put(setUser(response.data?.user))
+    yield put(setToken(response.data?.data?.token))
+    // yield put(setUser(response.data?.user))
 
-    localStorage.setItem("token", JSON.stringify(response.data?.token));
-    sessionStorage.setItem('email', JSON.stringify(response.data?.user?.email));
-    sessionStorage.setItem('firstname', JSON.stringify(response.data?.user?.first_name));
+    localStorage.setItem("token", JSON.stringify(response.data?.data?.token));
+    sessionStorage.setItem('email', JSON.stringify(response.data?.data?.email));
+    sessionStorage.setItem('firstname', JSON.stringify(response.data?.data?.first_name));
+    sessionStorage.setItem('lastname', JSON.stringify(response.data?.data?.last_name));
     // navigate to dashboard
     history('/dashboard');
   } catch (error) {
@@ -61,6 +62,8 @@ function* loginUser({ payload: { user, history } }) {
 function* logoutUser({ payload: { history } }) {
   try {
     yield logoutUserSuccess();
+    localStorage.removeItem('token')
+    axios.defaults.headers.common['Authorization'] = '';
     history('/login');
   } catch (error) {
     yield put(apiError(error));

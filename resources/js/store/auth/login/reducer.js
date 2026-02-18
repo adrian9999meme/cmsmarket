@@ -12,7 +12,7 @@ import {
 const initialState = {
   error: "",
   loading: false,
-  token: localStorage.getItem("token") ? JSON.parse(localStorage.getItem("token")) : null,
+  token: localStorage.getItem("token") || null,
   user: null
 }
 
@@ -36,8 +36,6 @@ const login = (state = initialState, action) => {
       break
     case LOGOUT_USER_SUCCESS:
       state = { ...state, isUserLogout: true, token: null }
-      localStorage.removeItem('token')
-      axios.defaults.headers.common['Authorization'] = '';
       break
     case API_ERROR:
       state = { ...state, error: action.payload, loading: false, isUserLogout: false, }
