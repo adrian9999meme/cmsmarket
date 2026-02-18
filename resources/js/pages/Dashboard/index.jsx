@@ -38,6 +38,7 @@ import TopCities from "./TopCities";
 import LatestTranaction from "./LatestTranaction";
 //Import Breadcrumb
 import Breadcrumbs from "../../components/Common/Breadcrumb";
+import DashboardInsightCard from "../../components/Common/DashboardInsigthCard";
 
 const reports = [
   { title: "Orders", iconClass: "bx-copy-alt", description: "1,235" },
@@ -97,6 +98,59 @@ const Dashboard = props => {
             title={props.t("Dashboards")}
             breadcrumbItem={props.t("Dashboard")}
           />
+
+          <Row className="mb-4">
+            <Col md={4} className="mb-3 mb-md-0">
+              <DashboardInsightCard
+                title="Orders Pending"
+                value="154"
+                icon={<i className="bi">£</i>}
+                variant="warning"
+              />
+            </Col>
+            <Col md={4} className="mb-3 mb-md-0">
+              <DashboardInsightCard
+                title="Orders Processing"
+                value="92"
+                icon={<i className="bi bi-truck"></i>}
+                variant="primary"
+              />
+            </Col>
+            <Col md={4}>
+              <DashboardInsightCard
+                title="Orders Completed"
+                value="203"
+                icon={<i className="bi bi-check-circle"></i>}
+                variant="cyan"
+              />
+            </Col>
+          </Row>
+          <Row className="mb-4">
+            <Col md={4} className="mb-3 mb-md-0">
+              <DashboardInsightCard
+                title="Total Products"
+                value="1,307"
+                icon={<i className="bi bi-cart"></i>}
+                variant="purple"
+              />
+            </Col>
+            <Col md={4} className="mb-3 mb-md-0">
+              <DashboardInsightCard
+                title="Total Customers"
+                value="473"
+                icon={<i className="bi bi-people"></i>}
+                variant="danger"
+              />
+            </Col>
+            <Col md={4}>
+              <DashboardInsightCard
+                title="Total Posts"
+                value="289"
+                icon={<i className="bi bi-newspaper"></i>}
+                variant="success"
+              />
+            </Col>
+          </Row>
 
           <Row>
             <Col xl="4">

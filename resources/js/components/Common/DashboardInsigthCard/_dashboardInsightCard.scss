@@ -1,0 +1,72 @@
+.dashboard-card {
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 1.5rem;
+    color: #fff;
+    position: relative;
+  
+    &__title {
+      font-weight: 600;
+      font-size: 1.2rem;
+      opacity: 0.95;
+    }
+  
+    &__value {
+      font-size: 3rem;
+      font-weight: 700;
+    }
+  
+    &__icon {
+      font-size: 4rem;
+      color: white;
+    }
+  
+    // Variants
+    &--warning {
+      background: linear-gradient(
+        120deg,
+        #f68a29 60%,
+        #f85208 60%,
+      );
+    }
+  
+    &--primary {
+      background: linear-gradient(
+        120deg,
+        #089fee 60%,
+        #047fdf 60%,
+      );
+    }
+  
+    &--success {
+      background: linear-gradient(
+        120deg,
+        #18b220 60%,
+        #129022 60%,
+      );
+    }
+  
+    &--danger {
+      background: linear-gradient(
+        120deg,
+        #e83a5d 60%,
+        #cf0634 60%,
+      );
+    }
+
+    &--purple {
+      background: linear-gradient(
+        120deg,
+        #6c5dee 60%,
+        #352c7b 60%,
+      );
+    }
+
+    &--cyan {
+      background: linear-gradient(
+        120deg,
+        #09bfb3 60%,
+        #0ea49b 60%,
+      );
+    }
+  }
