@@ -19,7 +19,7 @@ class ChatUserApiResource extends ResourceCollection
                     'user_name'         => $data->user->full_name,
                     'user_email'        => $data->user->email,
                     'chat_room_id'      => $data->id ? $data->id : '',
-                    'logo'              => isset($data->user->images['image_20x20']) ?static_asset($data->user->images['image_20x20']) :static_asset('images/default/user40x40.jpg'),
+                    'logo'              => isset($data->user->images['image_20x20']) ?static_asset($data->user->images['image_20x20']) :static_asset('storage/images/default/user40x40.jpg'),
                     'has_message'       => (bool)$data->lastMessage,
                     'message'           => $data->lastMessage ? [
                         'message'       => $data->lastMessage->message,

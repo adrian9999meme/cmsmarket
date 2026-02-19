@@ -13,7 +13,15 @@ const initialState = {
   error: "",
   loading: false,
   token: localStorage.getItem("token") || null,
-  user: null
+  user: {
+    email: '',
+    first_name: '',
+    last_name: '',
+    image: '',
+    phone: '',
+    role: '',
+    socials: [],
+  }
 }
 
 const login = (state = initialState, action) => {

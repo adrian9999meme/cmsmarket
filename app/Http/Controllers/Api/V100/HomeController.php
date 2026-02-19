@@ -92,7 +92,7 @@ class HomeController extends Controller
                                 }
 
                                 $banners[] = [
-                                    'thumbnail' => @is_file_exists($image->image_variants['image_300x170'], $image->image_variants['storage']) ? @get_media($image->image_variants['image_300x170'], $image->image_variants['storage']) : static_asset('images/default/default-image-300x170.png'),
+                                    'thumbnail' => @is_file_exists($image->image_variants['image_300x170'], $image->image_variants['storage']) ? @get_media($image->image_variants['image_300x170'], $image->image_variants['storage']) : static_asset('storage/images/default/default-image-300x170.png'),
                                     'action_type' => $action_types[$banner_key],
                                     'action_to' => $action_title,
                                     'action_id' => $action_id,

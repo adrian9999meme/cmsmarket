@@ -39,7 +39,7 @@ class Cart extends Model
             $image = get_media(@$product->thumbnail['image_40x40'], @$product->thumbnail['storage']);
         }
         else{
-            $image = static_asset('images/default/default-image-40x40.png');
+            $image = static_asset('storage/images/default/default-image-40x40.png');
         }
 
         return $image;
@@ -58,7 +58,7 @@ class Cart extends Model
             $image = get_media(@$product->thumbnail['image_72x72'], @$product->thumbnail['storage']);
         }
         else{
-            $image = static_asset('images/default/default-image-72x72.png');
+            $image = static_asset('storage/images/default/default-image-72x72.png');
         }
 
         return $image;

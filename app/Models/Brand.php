@@ -76,10 +76,10 @@ class Brand extends Model
 
     public function getImage130x93Attribute()
     {
-        return is_file_exists(@$this->logo['image_130x93'], @$this->logo['storage']) ? get_media(@$this->logo['image_130x93'], @$this->logo['storage']) : static_asset('images/default/130x93_no_bg.png');
+        return is_file_exists(@$this->logo['image_130x93'], @$this->logo['storage']) ? get_media(@$this->logo['image_130x93'], @$this->logo['storage']) : static_asset('storage/images/default/130x93_no_bg.png');
     }
     public function getImage835x200Attribute()
     {
-        return is_file_exists(@$this->banner['image_835x200'], @$this->banner['storage']) ? get_media(@$this->banner['image_835x200'], @$this->banner['storage']) : static_asset('images/default/default-image-835x200.png');
+        return is_file_exists(@$this->banner['image_835x200'], @$this->banner['storage']) ? get_media(@$this->banner['image_835x200'], @$this->banner['storage']) : static_asset('storage/images/default/default-image-835x200.png');
     }
 }

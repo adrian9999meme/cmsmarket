@@ -90,17 +90,17 @@ class Blog extends Model
 
     public function getThumbnailAttribute()
     {
-        return @is_file_exists($this->image['image_260x175'] , $this->image['storage']) ? @get_media($this->image['image_260x175'],$this->image['storage']) : static_asset('images/default/260x175.png');
+        return @is_file_exists($this->image['image_260x175'] , $this->image['storage']) ? @get_media($this->image['image_260x175'],$this->image['storage']) : static_asset('storage/images/default/260x175.png');
     }
 
     public function getRecentPostImageAttribute()
     {
-        return @is_file_exists($this->image['image_72x72'] , $this->image['storage']) ? @get_media($this->image['image_72x72'],$this->image['storage']) : static_asset('images/default/default-image-72x72.png');
+        return @is_file_exists($this->image['image_72x72'] , $this->image['storage']) ? @get_media($this->image['image_72x72'],$this->image['storage']) : static_asset('storage/images/default/default-image-72x72.png');
     }
 
     public function getBannerImgAttribute()
     {
-        return @is_file_exists($this->banner['image_900x300'] , $this->banner['storage']) ? @get_media($this->banner['image_900x300'],$this->banner['storage']) : static_asset('images/default/default-image-835x200.png');
+        return @is_file_exists($this->banner['image_900x300'] , $this->banner['storage']) ? @get_media($this->banner['image_900x300'],$this->banner['storage']) : static_asset('storage/images/default/default-image-835x200.png');
     }
 
     public function getPublishedDateAttribute()

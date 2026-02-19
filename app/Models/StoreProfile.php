@@ -48,12 +48,12 @@ class StoreProfile extends Model
 
     public function getImage105x75Attribute()
     {
-        return @is_file_exists(@$this->logo['image_105x75'], @$this->logo['storage']) ? get_media(@$this->logo['image_105x75'], @$this->logo['storage']) : static_asset('images/default/105x75_no_bg.png');
+        return @is_file_exists(@$this->logo['image_105x75'], @$this->logo['storage']) ? get_media(@$this->logo['image_105x75'], @$this->logo['storage']) : static_asset('storage/images/default/105x75_no_bg.png');
     }
 
     public function getImage899x480Attribute()
     {
-        return @is_file_exists(@$this->shop_banner['image_899x480'], @$this->shop_banner['storage']) ? get_media(@$this->shop_banner['image_899x480'], @$this->shop_banner['storage']) : static_asset('images/default/default-image-899x480.png');
+        return @is_file_exists(@$this->shop_banner['image_899x480'], @$this->shop_banner['storage']) ? get_media(@$this->shop_banner['image_899x480'], @$this->shop_banner['storage']) : static_asset('storage/images/default/default-image-899x480.png');
     }
 
     public function getImage90x60Attribute()

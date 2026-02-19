@@ -338,7 +338,7 @@ class CartRepository implements CartInterface
         } elseif ($product && is_array($product->thumbnail) && array_key_exists('image_40x40', $product->thumbnail) && is_file_exists($product->thumbnail['image_40x40'], $product->thumbnail['storage'])) {
             $image_40 = get_media(@$product->thumbnail['image_40x40'], @$product->thumbnail['storage']);
         } else {
-            $image_40 = static_asset('images/default/default-image-40x40.png');
+            $image_40 = static_asset('storage/images/default/default-image-40x40.png');
         }
 
         if ($product_stock && is_array($product_stock->image) && array_key_exists('image_72x72', $product_stock->image) && is_file_exists($product_stock->image['image_72x72'], $product_stock->image['storage'])) {
@@ -346,7 +346,7 @@ class CartRepository implements CartInterface
         } elseif ($product && is_array($product->thumbnail) && array_key_exists('image_40x40', $product->thumbnail) && is_file_exists($product->thumbnail['image_40x40'], $product->thumbnail['storage'])) {
             $image_72 = get_media(@$product->thumbnail['image_72x72'], @$product->thumbnail['storage']);
         } else {
-            $image_72 = static_asset('images/default/default-image-72x72.png');
+            $image_72 = static_asset('storage/images/default/default-image-72x72.png');
         }
 
         return [

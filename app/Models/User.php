@@ -133,12 +133,12 @@ class User extends EloquentUser implements JWTSubject, ContractAuthenticatable
 
     public function getProfileImageAttribute()
     {
-        return @is_file_exists($this->images['image_128x128'] , $this->images['storage']) ? @get_media($this->images['image_128x128'],$this->images['storage']) : static_asset('images/default/user.jpg');
+        return @is_file_exists($this->images['image_128x128'] , $this->images['storage']) ? @get_media($this->images['image_128x128'],$this->images['storage']) : static_asset('storage/images/default/user.jpg');
     }
 
     public function getUserProfileImageAttribute()
     {
-        return @is_file_exists($this->images['image_20x20'] , $this->images['storage']) ? @get_media($this->images['image_20x20'],$this->images['storage']) : static_asset('images/default/user32x32.jpg');
+        return @is_file_exists($this->images['image_20x20'] , $this->images['storage']) ? @get_media($this->images['image_20x20'],$this->images['storage']) : static_asset('storage/images/default/user32x32.jpg');
     }
 
     public function getShippingAddressAttribute()

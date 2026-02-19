@@ -88,7 +88,7 @@ class Category extends Model
 
     public function getPopularImageAttribute()
     {
-        return @is_file_exists($this->logo['image_130x95'], @$this->logo['storage']) ? get_media(@$this->logo['image_130x95'], @$this->logo['storage']) : static_asset('images/default/130x95_no_bg.png');
+        return @is_file_exists($this->logo['image_130x95'], @$this->logo['storage']) ? get_media(@$this->logo['image_130x95'], @$this->logo['storage']) : static_asset('storage/images/default/130x95_no_bg.png');
     }
 
     public function getAllPopularImageAttribute()
@@ -98,11 +98,11 @@ class Category extends Model
 
     public function getTopImageAttribute()
     {
-        return @is_file_exists($this->logo['image_80x60'], @$this->logo['storage']) ? get_media(@$this->logo['image_80x60'], @$this->logo['storage']) : static_asset('images/default/80x60_no_bg.png');
+        return @is_file_exists($this->logo['image_80x60'], @$this->logo['storage']) ? get_media(@$this->logo['image_80x60'], @$this->logo['storage']) : static_asset('storage/images/default/80x60_no_bg.png');
     }
     public function getPopularBannerAttribute()
     {
-        return @is_file_exists($this->banner['image_835x200'], @$this->banner['storage']) ? get_media(@$this->banner['image_835x200'], @$this->banner['storage']) : static_asset('images/default/130x95_no_bg.png');
+        return @is_file_exists($this->banner['image_835x200'], @$this->banner['storage']) ? get_media(@$this->banner['image_835x200'], @$this->banner['storage']) : static_asset('storage/images/default/130x95_no_bg.png');
     }
 
     public function scopeLanguage($query,$lang)

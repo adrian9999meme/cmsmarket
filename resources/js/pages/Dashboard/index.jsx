@@ -51,7 +51,7 @@ const reports = [
 ];
 
 const Dashboard = props => {
-  
+  document.title = "Dashboard";
   const [modal, setmodal] = useState(false);
   const [subscribemodal, setSubscribemodal] = useState(false);
   const [periodData, setPeriodData] = useState([]);

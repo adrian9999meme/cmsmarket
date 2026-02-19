@@ -76,6 +76,6 @@ class VideoShopping extends Model
     }
     public function getImage130x93Attribute()
     {
-        return is_file_exists(@$this->thumbnail['image_130x93'], @$this->thumbnail['storage']) ? get_media(@$this->thumbnail['image_130x93'], @$this->thumbnail['storage']) : static_asset('images/default/130x93_no_bg.png');
+        return is_file_exists(@$this->thumbnail['image_130x93'], @$this->thumbnail['storage']) ? get_media(@$this->thumbnail['image_130x93'], @$this->thumbnail['storage']) : static_asset('storage/images/default/130x93_no_bg.png');
     }
 }

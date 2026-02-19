@@ -143,7 +143,7 @@ class PackageController extends Controller
                 'paystack_activated' => $is_paystack_activated,
                 'fw_activated' => settingHelper('is_flutterwave_activated') == 1,
                 'default_assets' => [
-                    'preloader' => static_asset('images/default/preloader.gif'),
+                    'preloader' => static_asset('storage/images/default/preloader.gif'),
                     'review_image' => static_asset('images/others/env.svg'),
                 ]
             ];

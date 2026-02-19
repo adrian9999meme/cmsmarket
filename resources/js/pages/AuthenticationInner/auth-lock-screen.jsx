@@ -24,15 +24,18 @@ const LockScreen = (props) => {
 
   const userSelector = createSelector(
     state => state.Login,
-    login => login
+    login => ({
+      user: login.user
+    })
   );
-  const user = useSelector(userSelector);
+  const { user } = useSelector(userSelector);
+  const { email, first_name, last_name, image } = user
 
-  const [email, setEmail] = useState(sessionStorage.getItem('email') !== undefined && sessionStorage.getItem('email') !== null ? JSON.parse(sessionStorage.getItem("email")) : null);
-  const [firstname, setFirstname] = useState(sessionStorage.getItem('firstname') !== undefined && sessionStorage.getItem('firstname') !== null ? JSON.parse(sessionStorage.getItem("firstname")) : null);
+  const [useremail, setEmail] = useState(email ? email : 'unauthorizeduser@email.com');
+  const [name, setName] = useState(first_name && last_name ? first_name + ' ' + last_name : 'unknown user');
   const [password, setPassword] = useState('12345678');
-  const [currentUser, setCurrentUser] = useState({email: '', firstname: ''});
-  
+  const [currentUser, setCurrentUser] = useState({ email: '', name: '' });
+
   useEffect(() => {
     dispatch(logoutUserSuccess())
   }, [])
@@ -42,7 +45,7 @@ const LockScreen = (props) => {
     enableReinitialize: true,
 
     initialValues: {
-      email: email,
+      email: useremail,
       password: password,
     },
     validationSchema: Yup.object({
@@ -109,11 +112,11 @@ const LockScreen = (props) => {
                     >
                       <div className="user-thumb text-center mb-4">
                         <img
-                          src={avatar}
+                          src={image ? image : avatar}
                           className="rounded-circle img-thumbnail avatar-md"
                           alt="thumbnail"
                         />
-                        <h5 className="font-size-15 mt-3">{firstname}</h5>
+                        <h5 className="font-size-15 mt-3">{name}</h5>
                       </div>
 
                       <div className="mb-3">

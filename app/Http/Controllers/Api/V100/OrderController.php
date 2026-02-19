@@ -338,10 +338,10 @@ class OrderController extends Controller
                     'ngn_exchange_rate' => $ngn_exchange_rate,
                     'paystack_activated'=> $is_paystack_activated,
                     'fw_activated'      => $is_flutterwave_activated,
-                    'dark_logo'         => settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['original_image']) ?  get_media(@settingHelper('dark_logo')['original_image'], @settingHelper('dark_logo')['storage']) : static_asset('images/default/dark-logo.png'),
+                    'dark_logo'         => settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['original_image']) ?  get_media(@settingHelper('dark_logo')['original_image'], @settingHelper('dark_logo')['storage']) : static_asset('storage/images/default/dark-logo.png'),
                     'favicon'           => @is_file_exists(@settingHelper('favicon')['image_57x57_url']) ? get_media(settingHelper('favicon')['image_57x57_url']) : static_asset('images/ico/apple-touch-icon-57-precomposed.png'),
                     'default_assets'    => [
-                        'preloader'     => static_asset('images/default/preloader.gif'),
+                        'preloader'     => static_asset('storage/images/default/preloader.gif'),
                         'review_image'  => static_asset('images/others/env.svg'),
                     ]
                 ];

@@ -39,10 +39,10 @@ export default defineConfig({
                     src: 'resources/fonts',
                     dest: ''
                 },
-                {
-                    src: 'resources/images',
-                    dest: ''
-                },
+                // {
+                //     src: 'images',
+                //     dest: ''
+                // },
             ],
         }),
         react(),

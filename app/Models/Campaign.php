@@ -71,11 +71,11 @@ class Campaign extends Model
 
     public function getImage374x374Attribute()
     {
-        return @is_file_exists($this->thumbnail['image_374x374'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_374x374'],$this->thumbnail['storage']) : static_asset('images/default/374x374.png');
+        return @is_file_exists($this->thumbnail['image_374x374'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_374x374'],$this->thumbnail['storage']) : static_asset('storage/images/default/374x374.png');
     }
     public function getImage406x235Attribute()
     {
-        return @is_file_exists($this->thumbnail['image_406x235'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_406x235'],$this->thumbnail['storage']) : static_asset('images/default/default-image-400x235.png');
+        return @is_file_exists($this->thumbnail['image_406x235'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_406x235'],$this->thumbnail['storage']) : static_asset('storage/images/default/default-image-400x235.png');
     }
     public function getImage1920x412Attribute()
     {

@@ -494,7 +494,7 @@ class WalletController extends Controller
         $request['payment_type']            = 'skrill';
         $active_currency                    = $paymentController->activeCurrencyCheck($data);
         $success_url                        = $paymentController->successUrl($request);
-        $logo                               = settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['original_image']) ?  get_media(@settingHelper('dark_logo')['original_image'], @settingHelper('dark_logo')['storage']) : static_asset('images/default/dark-logo.png');
+        $logo                               = settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['original_image']) ?  get_media(@settingHelper('dark_logo')['original_image'], @settingHelper('dark_logo')['storage']) : static_asset('storage/images/default/dark-logo.png');
 
         $skrilRequest                       = new SkrillRequest();
         $skrilRequest->pay_to_email         = settingHelper('skrill_merchant_email'); // your merchant email

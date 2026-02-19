@@ -1,5 +1,6 @@
-import React from "react"
-
+import React, { useEffect, useState } from "react"
+import { createSelector } from "reselect"
+import { useSelector } from "react-redux"
 import { Row, Col, Card, CardBody } from "reactstrap"
 import { Link } from "react-router-dom"
 
@@ -7,7 +8,18 @@ import avatar1 from "../../../images/users/avatar-1.jpg"
 import profileImg from "../../../images/profile-img.png"
 
 const WelcomeComp = () => {
-  const firstname = sessionStorage.getItem('firstname') ? JSON.parse(sessionStorage.getItem("firstname")) : 'Authorized User'
+  const loginSelector = createSelector(
+    state => state.Login,
+    login => ({
+      user: login.user
+    })
+  )
+  const { user } = useSelector(loginSelector)
+  const [currentUser, setCurrentUser] = useState({})
+  useEffect(() => (
+    setCurrentUser(user)
+  ), [user])
+
   return (
     <React.Fragment>
       <Card className="overflow-hidden">
@@ -29,12 +41,12 @@ const WelcomeComp = () => {
             <Col sm="4">
               <div className="avatar-md profile-user-wid mb-4">
                 <img
-                  src={avatar1}
+                  src={currentUser.image ? currentUser.image : avatar1}
                   alt=""
                   className="img-thumbnail rounded-circle"
                 />
               </div>
-              <h5 className="font-size-15 text-truncate">{firstname}</h5>
+              <h5 className="font-size-15 text-truncate">{`${currentUser.first_name} ${currentUser.last_name}`}</h5>
             </Col>
 
             <Col sm="8">
