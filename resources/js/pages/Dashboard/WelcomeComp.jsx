@@ -6,6 +6,7 @@ import { Link } from "react-router-dom"
 
 import avatar1 from "../../../images/users/avatar-1.jpg"
 import profileImg from "../../../images/profile-img.png"
+import "./dashboard.scss"
 
 const WelcomeComp = () => {
   const loginSelector = createSelector(
@@ -26,7 +27,7 @@ const WelcomeComp = () => {
         <div className="bg-primary-subtle">
           <Row>
             <Col xs="7">
-              <div className="text-white p-3">
+              <div className="text-white p-5">
                 <h5 className="text-white">Welcome Back !</h5>
                 <p>Lekit Dashboard</p>
               </div>
@@ -61,7 +62,7 @@ const WelcomeComp = () => {
                     <p className="text-muted mb-0">Lekit Revenue</p>
                   </Col>
                 </Row>
-                <div className="mt-4">
+                <div className="mt-3">
                   <Link
                     to=""
                     className="btn btn-primary  btn-sm"
