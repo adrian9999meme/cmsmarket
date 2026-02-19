@@ -22,7 +22,7 @@ const ProfileMenu = props => {
   // Declare a new state variable, which we'll call "menu"
   const [menu, setMenu] = useState(false);
 
-  const [name, setUsername] = useState("Admin");
+  const [name, setUsername] = useState("");
 
   const loginSelector = createSelector(
     state => state.Login,
@@ -64,8 +64,8 @@ const ProfileMenu = props => {
             {props.t("Profile")}{" "}
           </DropdownItem>
           <DropdownItem tag="a" href="/crypto-wallet">
-            <i className="bx bx-wallet font-size-16 align-middle me-1" />
-            {props.t("My Wallet")}
+            <i className="bx bx-message font-size-16 align-middle me-1" />
+            {props.t("Messages")}
           </DropdownItem>
           <DropdownItem tag="a" href="#">
             <span className="badge bg-success float-end">11</span>
