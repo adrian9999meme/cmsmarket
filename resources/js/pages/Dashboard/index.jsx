@@ -41,6 +41,9 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 import SummaryCards from "./SummaryCards";
 import TodaysOrdersProgress from "./TodaysOrdersProgress";
 import TopSellingStores from "./TopSellingStores";
+import RecentStores from "./RecentStores";
+import RecentSellers from "./RecentSellers";
+import RecentCustomers from "./RecentCustomers";
 
 const reports = [
   { title: "Orders", iconClass: "bx-copy-alt", description: "1,235" },
@@ -121,16 +124,16 @@ const Dashboard = props => {
 
           <Row>
             <Col xl="6">
-              <LatestTranaction />
+              <RecentStores />
             </Col>
             <Col xl="6">
-              <LatestTranaction />
+              <RecentSellers />
             </Col>
           </Row>
 
           <Row>
             <Col lg="12">
-              <LatestTranaction />
+              <RecentCustomers />
             </Col>
           </Row>
         </Container>
