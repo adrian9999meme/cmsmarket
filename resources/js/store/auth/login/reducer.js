@@ -50,6 +50,7 @@ const login = (state = initialState, action) => {
       break
     case SET_TOKEN:
       state = { ...state, token: action.payload }
+      localStorage.setItem('token', action.payload)
     case SET_USER:
       state = { ...state, user: action.payload }
     default:

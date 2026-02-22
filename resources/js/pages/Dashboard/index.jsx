@@ -25,7 +25,7 @@ import classNames from "classnames";
 //import Charts
 import StackedColumnChart from "./StackedColumnChart";
 //import action
-import { getChartsData as onGetChartsData } from "../../store/actions";
+import { getCurrentUser, getChartsData as onGetChartsData } from "../../store/actions";
 // import image
 import modalimage1 from "../../../images/product/img-7.png";
 import modalimage2 from "../../../images/product/img-4.png";

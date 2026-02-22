@@ -34,7 +34,8 @@ class UserController extends Controller
     {
         try {
             $user = null;
-            if ($request->token) {
+            $token = $request->bearerToken();
+            if ($token) {
                 try {
                     if (!$user = JWTAuth::parseToken()->authenticate()) {
                         return $this->responseWithError(__('unauthorized_user'), [], 401);
@@ -46,10 +47,33 @@ class UserController extends Controller
 
             $digital_products = $this->digitalProductOrders($user->id);
 
+            // Add the user's refresh token to the response if present
+            $refreshToken = null;
+            if ($request->hasHeader('Authorization')) {
+                try {
+                    // Get the Bearer token from the Authorization header
+                    $authHeader = $request->header('Authorization');
+                    
+                    // Check if the header has the "Bearer " prefix
+                    if (strpos($authHeader, 'Bearer ') === 0) {
+                        // Extract the token part
+                        $refreshToken = substr($authHeader, 7); // Remove "Bearer " part
+                    }
+                    
+                    // Optionally, you can validate the token here if needed
+                    // $refreshToken = JWTAuth::getToken();
+                    
+                } catch (\Exception $e) {
+                    $refreshToken = null; // Set to null in case of any errors
+                }
+            }
+
             $data = [
+                'token'             =>$refreshToken,
                 'id'                => $user->id,
                 'first_name'        => $user->first_name,
                 'last_name'         => $user->last_name,
+                'role'              => $user->user_type ?? null,
                 'email'             => nullCheck($user->email),
                 'phone'             => nullCheck($user->phone),
                 'gender'            => nullCheck($user->gender),
