@@ -825,7 +825,7 @@ class PaymentController extends Controller
     public function redirect_to_merchant($url)
     {
         ?>
-        <html xmlns="http://www.w3.org/1999/xhtml">
+        <html xmlns="https://www.w3.org/1999/xhtml">
         <head><script type="text/javascript">
                 function closethisasap() { document.forms["redirectpost"].submit(); }
             </script></head>
@@ -1164,7 +1164,7 @@ class PaymentController extends Controller
         $trx_id                             = $this->tokenGenerator($data);
         $amount                             = $this->findAmount($data,$orders,$active_currency);
         $success_url                        = $this->successUrl($request,$this->findUser($data),$amount);
-        $logo                               = settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['original_image']) ?  get_media(@settingHelper('dark_logo')['original_image'], @settingHelper('dark_logo')['storage']) : static_asset('images/default/dark-logo.png');
+        $logo                               = settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['original_image']) ?  get_media(@settingHelper('dark_logo')['original_image'], @settingHelper('dark_logo')['storage']) : static_asset('storage/images/default/dark-logo.png');
 
         $skrilRequest                       = new SkrillRequest();
         $skrilRequest->pay_to_email         = settingHelper('skrill_merchant_email'); // your merchant email

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createSelector } from "reselect";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import {
   Container,
   Row,
@@ -23,8 +24,8 @@ import {
   NavLink,
 } from "reactstrap";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
-import { addNewCustomer, deleteCustomer, getCustomers, updateCustomer } from "../../store/actions";
-
+import { addNewCustomer, deleteCustomer, getCustomers, setActiveCustomer, updateCustomer } from "../../store/actions";
+import defaultCustomerImg from '../../../images/default/user.jpg'
 // Mock data - no database (MVP)
 const MOCK_CUSTOMERS = [
   {
@@ -105,6 +106,7 @@ const CustomersBreakdown = () => {
   document.title = "Customers Breakdown | LEKIT Ltd";
 
   const dispatch = useDispatch();
+  const { subdomain } = useParams()
 
   const [activeTab, setActiveTab] = useState("customers");
   const [searchTerm, setSearchTerm] = useState("");
@@ -114,6 +116,10 @@ const CustomersBreakdown = () => {
   const [modalMode, setModalMode] = useState("add"); // add | edit | view
   const [modalType, setModalType] = useState("customers"); // customers | trade
   const [currentRecord, setCurrentRecord] = useState(null);
+  const [query, setQuery] = useState({
+    subdomain: 'all',
+    searchKeyword: ''
+  })
 
   const ecommerceSelector = createSelector(
     state => state.ecommerce,
@@ -129,61 +135,73 @@ const CustomersBreakdown = () => {
   }, [allcustomers]);
 
   useEffect(() => {
-    dispatch(getCustomers());
+    dispatch(getCustomers(query));
   }, [dispatch]);
 
   const initialFormState = {
-    id: "",
-    name: "",
+    id: null,
+    balance: null,
+    billing_address: [],
+    country_id: null,
+    created_at: "",
+    currency_code: null,
+    date_of_birth: null,
     email: "",
-    tel: "",
-    address: "",
-    lastLogin: "",
-    // trade-specific
-    companyName: "",
-    industry: "",
-    companyAddress: "",
-    tradeDiscounts: "",
+    firebase_auth_id: null,
+    first_name: "",
+    full_name: "",
+    gender: "",
+    image_id: null,
+    images: [],
+    is_deleted: 0,
+    is_password_set: 0,
+    is_user_banned: 0,
+    lang_code: "",
+    last_ip: null,
+    last_login: "",
+    last_name: "",
+    last_password_change: null,
+    last_recharge: 0,
+    newsletter_enable: 0,
+    otp: null,
+    permissions: [],
+    phone: "",
+    pickup_hub_id: null,
+    profile_image: "",
+    role_id: null,
+    shipping_address: [],
+    socials: [],
+    status: 0,
+    updated_at: "",
+    user_profile_image: "",
+    user_type: "",
+    password: '',
+    password_confirmation: ''
   };
   const [formValues, setFormValues] = useState(initialFormState);
 
-  const toggleStatus = (type, id) => {
-    if (type === "customers") {
-      // setCustomers((prev = []) =>
-      //   prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c))
-      // );
-      const customerToUpdate = customers.find(customer => customer.id === id);
-      if (!customerToUpdate) return;
-      const updatedCustomer = {
-        ...customerToUpdate,
-        status: customerToUpdate.status === 'Active' ? 'Blocked' : 'Active'
-      };
-      console.log("update:", updatedCustomer)
-      dispatch(updateCustomer(updatedCustomer));
-    } else {
-      setTradeCustomers((prev = []) =>
-        prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c))
-      );
-    }
+  const toggleStatus = (id) => {
+    const customerToUpdate = customers.find(customer => customer.id === id);
+    if (!customerToUpdate) return;
+    const updatedCustomer = {
+      ...customerToUpdate,
+      status: customerToUpdate.status === 1 ? 0 : 1
+    };
+
+    dispatch(setActiveCustomer(updatedCustomer));
   };
 
   const openAddModal = () => {
-    const isTrade = activeTab === "trade";
     setModalMode("add");
-    setModalType(isTrade ? "trade" : "customers");
     setCurrentRecord(null);
     setFormValues({
       ...initialFormState,
-      id: isTrade
-        ? `TC${String((tradeCustomers?.length || 0) + 1).padStart(3, "0")}`
-        : `C${String((customers?.length || 0) + 1).padStart(3, "0")}`,
     });
     setModalOpen(true);
   };
 
-  const openViewOrEditModal = (type, mode, record) => {
+  const openViewOrEditModal = (mode, record) => {
     setModalMode(mode); // view or edit
-    setModalType(type); // customers or trade
     setCurrentRecord(record);
     setFormValues({
       ...initialFormState,
@@ -207,124 +225,51 @@ const CustomersBreakdown = () => {
       return;
     }
 
-    if (modalType === "customers") {
-      if (modalMode === "add") {
-        const newCustomer = {
-          id: formValues.id || `C${String((customers?.length || 0) + 1).padStart(3, "0")}`,
-          name: formValues.name,
-          email: formValues.email,
-          tel: formValues.tel,
-          address: formValues.address,
-          lastLogin:
-            formValues.lastLogin ||
-            new Date().toISOString().slice(0, 16).replace("T", " "),
-          orders: 0,
-          tickets: 0,
-          active: true,
-        };
-        // setCustomers((prev = []) => [...prev, newCustomer]);
-        // send backend
-        dispatch(addNewCustomer(newCustomer));
-      } else if (modalMode === "edit" && currentRecord) {
-        const filteredCustomer = customers.filter(
-          customer => customer.id.toString() === currentRecord.id.toString()
-        );
-        const editCustomer = {
-          ...filteredCustomer[0],
-          name: formValues.name,
-          email: formValues.email,
-          phone: formValues.tel,
-          address: formValues.address,
-          last_login: formValues.lastLogin
-        }
-        // setCustomers((prev = []) =>
-        //   prev.map((c) =>
-        //     c.id === currentRecord.id
-        //       ? {
-        //         ...c,
-        //         name: formValues.name,
-        //         email: formValues.email,
-        //         tel: formValues.tel,
-        //         address: formValues.address,
-        //         lastLogin: formValues.lastLogin || c.lastLogin,
-        //       }
-        //       : c
-        //   )
-        // );
-        dispatch(updateCustomer(editCustomer))
+    if (modalMode === "add") {
+      const newCustomer = {
+        first_name: formValues.first_name || "",
+        last_name: formValues.last_name || "",
+        email: formValues.email || "",
+        phone: formValues.phone || "",
+        status: formValues.status,
+        user_type: "customer",
+        image_id: null,
+        images: [],
+        address: formValues.address || "",
+        password: formValues.password || "",
+        password_confirmation: formValues.password_confirmation || "",
+      };
+      // setCustomers((prev = []) => [...prev, newCustomer]);
+      // send backend
+      dispatch(addNewCustomer(newCustomer));
+    } else if (modalMode === "edit" && currentRecord) {
+      const filteredCustomer = customers.filter(
+        customer => customer.id.toString() === currentRecord.id.toString()
+      );
+      const editCustomer = {
+        ...filteredCustomer[0],
+        first_name: formValues.first_name || "",
+        last_name: formValues.last_name || "",
+        email: formValues.email || "",
+        phone: formValues.phone || "",
+        status: formValues.status,
+        user_type: "customer",
+        image_id: null,
+        images: [],
+        address: formValues.address || "",
+        password: formValues.password || "",
+        password_confirmation: formValues.password_confirmation || "",
       }
-    } else {
-      // trade customers
-      if (modalMode === "add") {
-        const newTrade = {
-          id: formValues.id || `TC${String((tradeCustomers?.length || 0) + 1).padStart(3, "0")}`,
-          name: formValues.name,
-          companyName: formValues.companyName,
-          industry: formValues.industry,
-          companyAddress: formValues.companyAddress,
-          last_login:
-            formValues.lastLogin ||
-            new Date().toISOString().slice(0, 16).replace("T", " "),
-          orders: 0,
-          tickets: 0,
-          tradeDiscounts: formValues.tradeDiscounts || "0%",
-          active: true,
-        };
-        setTradeCustomers((prev = []) => [...prev, newTrade]);
-      } else if (modalMode === "edit" && currentRecord) {
-        setTradeCustomers((prev = []) =>
-          prev.map((c) =>
-            c.id === currentRecord.id
-              ? {
-                ...c,
-                name: formValues.name,
-                companyName: formValues.companyName,
-                industry: formValues.industry,
-                companyAddress: formValues.companyAddress,
-                last_login: formValues.lastLogin || c.lastLogin,
-                tradeDiscounts: formValues.tradeDiscounts || c.tradeDiscounts,
-              }
-              : c
-          )
-        );
-      }
+
+      dispatch(updateCustomer(editCustomer))
     }
 
-    setModalOpen(false);
+    // setModalOpen(false);
   };
 
-  const filteredCustomers = useMemo(() => {
-    if (!Array.isArray(customers) || customers.length === 0) return [];
-    if (!searchTerm.trim()) return customers;
-    const term = searchTerm.toLowerCase();
-    return customers.filter(
-      (c) =>
-        c.address?.toLowerCase?.().includes(term) ||
-        c.name?.toLowerCase?.().includes(term) ||
-        c.email?.toLowerCase?.().includes(term)
-    );
-  }, [customers, searchTerm]);
-
-  const filteredTradeCustomers = useMemo(() => {
-    if (!Array.isArray(tradeCustomers) || tradeCustomers.length === 0) return [];
-    if (!searchTerm.trim()) return tradeCustomers;
-    const term = searchTerm.toLowerCase();
-    return tradeCustomers.filter(
-      (c) =>
-        c.id?.toLowerCase?.().includes(term) ||
-        c.name?.toLowerCase?.().includes(term) ||
-        (c.companyName && c.companyName.toLowerCase().includes(term))
-    );
-  }, [tradeCustomers, searchTerm]);
-
-  const handleRemoveCustomer = (type, id) => {
+  const handleRemove = (id) => {
     if (!window.confirm("Remove this customer?")) return;
-    if (type === "customers") {
-      dispatch(deleteCustomer(id))
-      // setCustomers((prev = []) => Array.isArray(prev) ? prev.filter((c) => c.id !== id) : []);
-    }
-    else
-      setTradeCustomers((prev = []) => Array.isArray(prev) ? prev.filter((c) => c.id !== id) : []);
+    dispatch(deleteCustomer(id))
   };
 
   // Action icon with title (tooltip on hover) – one-click actions
@@ -360,191 +305,95 @@ const CustomersBreakdown = () => {
             </Col>
           </Row>
 
-          {/* Toggle: Customers / Trade Customers + count */}
-          <Row className="mb-3">
-            <Col xs={12}>
-              <div className="d-flex flex-wrap align-items-center justify-content-between">
-                <Nav pills className="gap-2 mb-2 mb-sm-0">
-                  <NavItem>
-                    <NavLink
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setActiveTab("customers");
-                      }}
-                      className={
-                        "px-4 py-2 rounded-pill fw-semibold d-flex align-items-center" +
-                        (activeTab === "customers"
-                          ? " bg-primary text-white shadow-sm"
-                          : " bg-light text-dark")
-                      }
-                    >
-                      <span>Customers</span>
-                      <span className={"badge ms-2 " + (activeTab === "customers" ? "bg-light text-primary" : "bg-secondary")}>
-                        {filteredCustomers?.length}
-                      </span>
-                    </NavLink>
-                  </NavItem>
-                  {/* <NavItem>
-                    <NavLink
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setActiveTab("trade");
-                      }}
-                      className={
-                        "px-4 py-2 rounded-pill fw-semibold d-flex align-items-center" +
-                        (activeTab === "trade"
-                          ? " bg-primary text-white shadow-sm"
-                          : " bg-light text-dark")
-                      }
-                    >
-                      <span>Trade Customers</span>
-                      <span className={"badge ms-2 " + (activeTab === "trade" ? "bg-light text-primary" : "bg-secondary")}>
-                        {filteredTradeCustomers.length}
-                      </span>
-                    </NavLink>
-                  </NavItem> */}
-                </Nav>
-                <p className="text-muted small mb-0">
-                  {activeTab === "customers"
-                    ? `Total: ${filteredCustomers?.length} customer${filteredCustomers?.length !== 1 ? "s" : ""}`
-                    : `Total: ${filteredTradeCustomers.length} trade customer${filteredTradeCustomers.length !== 1 ? "s" : ""}`}
-                </p>
-              </div>
-            </Col>
-          </Row>
-
           <Row>
             <Col xs={12}>
               <Card>
                 <CardBody>
-                  {activeTab === "customers" ? (
-                    <div className="table-responsive">
-                      <Table className="table table-bordered table-nowrap align-middle mb-0">
-                        <thead className="table-light">
-                          <tr>
-                            <th>Customer ID</th>
-                            <th>Customer Name</th>
-                            <th>Email</th>
-                            <th>Tel</th>
-                            <th>Address</th>
-                            <th>Last Login</th>
-                            <th>Info</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredCustomers && filteredCustomers.map((row) => (
-                            <tr key={row.id}>
-                              <td>{row.id}</td>
-                              <td>{row.name}</td>
-                              <td>{row.email}</td>
-                              <td>{row.phone}</td>
-                              <td>{row.address}</td>
-                              <td>{row.last_login}</td>
-                              <td>
-                                <small>
-                                  Orders: {row?.orders || 0}, Tickets: {row?.tickets || 0}
-                                </small>
-                              </td>
-                              <td>
-                                <div className="form-check form-switch">
-                                  <Input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id={`cust-${row.id}`}
-                                    checked={row.status === 'Active'}
-                                    onChange={() => toggleStatus("customers", row.id)}
-                                  />
-                                  <label className="form-check-label" htmlFor={`cust-${row.id}`}>
-                                    {row.status === 'Active' ? "Active" : "Blocked"}
-                                  </label>
-                                </div>
-                              </td>
-                              <td>
-                                <div className="d-flex justify-content-start gap-1 flex-wrap">
-                                  <ActionIcon title="View Profile" iconClass="bx-user" onClick={() => openViewOrEditModal("customers", "view", row)} />
-                                  <ActionIcon title="Edit Profile" iconClass="bx-edit-alt" onClick={() => openViewOrEditModal("customers", "edit", row)} />
-                                  {/* <ActionIcon title="Orders" iconClass="bx-cart" onClick={() => { }} />
-                                  <ActionIcon title="Tickets" iconClass="bx-support" onClick={() => { }} />
-                                  <ActionIcon title="Contact Customer" iconClass="bx-envelope" onClick={() => { }} /> */}
-                                  <ActionIcon title="Remove" iconClass="bx-trash" colorClass="text-danger" onClick={() => handleRemoveCustomer("customers", row.id)} />
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="table-responsive">
-                      <Table className="table table-bordered table-nowrap align-middle mb-0">
-                        <thead className="table-light">
-                          <tr>
-                            <th>Customer ID</th>
-                            <th>Customer Name</th>
-                            <th>Company Name</th>
-                            <th>Company Address</th>
-                            <th>Last Login</th>
-                            <th>Info</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredTradeCustomers && filteredTradeCustomers.map((row) => (
-                            <tr key={row.id}>
-                              <td>{row.id}</td>
-                              <td>{row.name}</td>
-                              <td>
+                  <div className="table-responsive">
+                    <Table className="table table-bordered table-nowrap align-middle mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th>Name</th>
+                          <th>Phone</th>
+                          <th>Current Balance</th>
+                          <th>Last Login</th>
+                          <th>Status</th>
+                          <th>Options</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {customers && customers.map((row) => (
+                          <tr key={row.id}>
+                            <td>
+                              <div className="d-flex gap-2 align-items-center">
                                 <div>
-                                  <strong>{row.companyName}</strong>
-                                  <br />
-                                  <small className="text-muted">{row.industry}</small>
-                                </div>
-                              </td>
-                              <td>{row.companyAddress}</td>
-                              <td>{row.lastLogin}</td>
-                              <td>
-                                <small>
-                                  Orders: {row.orders}, Tickets: {row.tickets}, Trade Discounts: {row.tradeDiscounts}
-                                </small>
-                              </td>
-                              <td>
-                                <div className="form-check form-switch">
-                                  <Input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id={`trade-${row.id}`}
-                                    checked={row.active}
-                                    onChange={() => toggleStatus("trade", row.id)}
+                                  <img
+                                    src={row.profile_image || defaultCustomerImg}
+                                    className="rounded me-2"
+                                    alt=""
+                                    style={{ width: 36, height: 36, objectFit: "contain" }}
                                   />
-                                  <label className="form-check-label" htmlFor={`trade-${row.id}`}>
-                                    {row.active ? "Active" : "Blocked"}
-                                  </label>
                                 </div>
-                              </td>
-                              <td>
-                                <div className="d-flex justify-content-start gap-1 flex-wrap">
-                                  <ActionIcon title="View Profile" iconClass="bx-user" onClick={() => openViewOrEditModal("trade", "view", row)} />
-                                  <ActionIcon title="Edit Profile" iconClass="bx-edit-alt" onClick={() => openViewOrEditModal("trade", "edit", row)} />
-                                  <ActionIcon title="Orders" iconClass="bx-cart" onClick={() => { }} />
-                                  <ActionIcon title="Products" iconClass="bx-package" onClick={() => { }} />
-                                  <ActionIcon title="Statistics" iconClass="bx-bar-chart" onClick={() => { }} />
-                                  <ActionIcon title="Contact Store" iconClass="bx-envelope" onClick={() => { }} />
-                                  <ActionIcon title="Admin Profiles" iconClass="bx-user-circle" onClick={() => { }} />
-                                  <ActionIcon title="Block Store" iconClass="bx-block" onClick={() => { }} />
-                                  <ActionIcon title="Remove Store" iconClass="bx-trash" colorClass="text-danger" onClick={() => handleRemoveCustomer("trade", row.id)} />
+                                <div>
+                                  <p className="mb-1">{row.full_name}</p>
+                                  <p className="mb-1">{row.email}</p>
                                 </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    </div>
-                  )}
+                              </div>
+                            </td>
+                            <td>
+                              <div>
+                                <strong>{row.phone}</strong>
+                              </div>
+                            </td>
+                            <td>{row.balance}</td>
+                            <td>{row.last_login}</td>
+                            <td>
+                              <div className="form-check form-switch">
+                                <Input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  id={`trade-${row.id}`}
+                                  checked={row.status}
+                                  onChange={() => toggleStatus(row.id)}
+                                />
+                                <label className="form-check-label" htmlFor={`${row.id}`}>
+                                  {row.status ? "Active" : "Blocked"}
+                                </label>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="d-flex justify-content-start gap-1 flex-wrap">
+                                <Button
+                                  color="link"
+                                  className={`p-1`}
+                                  title="View Profile"
+                                  onClick={() => openViewOrEditModal("view", row)}
+                                >
+                                  <i className={`bx bx-user font-size-18`}></i>
+                                </Button>
+                                <Button
+                                  color="link"
+                                  className={`p-1`}
+                                  title="Edit Profile"
+                                  onClick={() => openViewOrEditModal("edit", row)}
+                                >
+                                  <i className={`bx bx-edit-alt font-size-18`}></i>
+                                </Button>
+                                <Button
+                                  color="link"
+                                  className={`p-1 text-danger`}
+                                  title="Remove"
+                                  onClick={() => handleRemove(row.id)}
+                                >
+                                  <i className={`bx bx-trash font-size-18`}></i>
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
                 </CardBody>
               </Card>
             </Col>
@@ -562,186 +411,93 @@ const CustomersBreakdown = () => {
             <ModalBody>
               <Form>
                 <Row className="mb-3">
-                  <Col md={4}>
+                  <Col md={6}>
                     <FormGroup>
-                      <Label for="field-id">Customer ID</Label>
+                      <Label for="field-first-name">First Name</Label>
                       <Input
-                        id="field-id"
-                        name="id"
+                        id="field-first-name"
+                        name="first_name"
                         type="text"
-                        value={formValues.id}
+                        value={formValues.first_name}
                         onChange={handleFormChange}
-                        readOnly={modalMode !== "add"}
+                        readOnly={modalMode === "view"}
                       />
                     </FormGroup>
                   </Col>
-                  <Col md={8}>
+                  <Col md={6}>
                     <FormGroup>
-                      <Label for="field-name">Customer Name</Label>
+                      <Label for="field-last-name">Last Name</Label>
                       <Input
-                        id="field-name"
-                        name="name"
+                        id="field-last-name"
+                        name="last_name"
                         type="text"
-                        value={formValues.name}
+                        value={formValues.last_name}
                         onChange={handleFormChange}
                         readOnly={modalMode === "view"}
                       />
                     </FormGroup>
                   </Col>
                 </Row>
-
-                {modalType === "customers" ? (
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="field-email">Email</Label>
+                      <Input
+                        id="field-email"
+                        name="email"
+                        type="email"
+                        value={formValues.email}
+                        onChange={handleFormChange}
+                        readOnly={modalMode === "view"}
+                      />
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="field-tel">Tel</Label>
+                      <Input
+                        id="field-tel"
+                        name="phone"
+                        type="text"
+                        value={formValues.phone}
+                        onChange={handleFormChange}
+                        readOnly={modalMode === "view"}
+                      />
+                    </FormGroup>
+                  </Col>
+                </Row>
+                {modalMode !== "view" && (
                   <>
                     <Row className="mb-3">
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="field-email">Email</Label>
+                          <Label for="field-password">Password</Label>
                           <Input
-                            id="field-email"
-                            name="email"
-                            type="email"
-                            value={formValues.email}
+                            id="field-password"
+                            name="password"
+                            type="password"
+                            value={formValues.password || ""}
                             onChange={handleFormChange}
-                            readOnly={modalMode === "view"}
+                            autoComplete="new-password"
                           />
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="field-tel">Tel</Label>
+                          <Label for="field-password-confirmation">Password Confirmation</Label>
                           <Input
-                            id="field-tel"
-                            name="tel"
-                            type="text"
-                            value={formValues.tel}
+                            id="field-password-confirmation"
+                            name="password_confirmation"
+                            type="password"
+                            value={formValues.password_confirmation || ""}
                             onChange={handleFormChange}
-                            readOnly={modalMode === "view"}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row className="mb-3">
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="field-address">Address</Label>
-                          <Input
-                            id="field-address"
-                            name="address"
-                            type="text"
-                            value={formValues.address}
-                            onChange={handleFormChange}
-                            readOnly={modalMode === "view"}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </>
-                ) : (
-                  <>
-                    <Row className="mb-3">
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="field-companyName">Company Name</Label>
-                          <Input
-                            id="field-companyName"
-                            name="companyName"
-                            type="text"
-                            value={formValues.companyName}
-                            onChange={handleFormChange}
-                            readOnly={modalMode === "view"}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="field-industry">Industry</Label>
-                          <Input
-                            id="field-industry"
-                            name="industry"
-                            type="text"
-                            value={formValues.industry}
-                            onChange={handleFormChange}
-                            readOnly={modalMode === "view"}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row className="mb-3">
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="field-companyAddress">Company Address</Label>
-                          <Input
-                            id="field-companyAddress"
-                            name="companyAddress"
-                            type="text"
-                            value={formValues.companyAddress}
-                            onChange={handleFormChange}
-                            readOnly={modalMode === "view"}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row className="mb-3">
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="field-email-trade">Contact Email</Label>
-                          <Input
-                            id="field-email-trade"
-                            name="email"
-                            type="email"
-                            value={formValues.email || ""}
-                            onChange={handleFormChange}
-                            readOnly={modalMode === "view"}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="field-tel-trade">Contact Tel</Label>
-                          <Input
-                            id="field-tel-trade"
-                            name="tel"
-                            type="text"
-                            value={formValues.tel || ""}
-                            onChange={handleFormChange}
-                            readOnly={modalMode === "view"}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row className="mb-3">
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="field-tradeDiscounts">Trade Discounts</Label>
-                          <Input
-                            id="field-tradeDiscounts"
-                            name="tradeDiscounts"
-                            type="text"
-                            value={formValues.tradeDiscounts}
-                            onChange={handleFormChange}
-                            readOnly={modalMode === "view"}
+                            autoComplete="new-password"
                           />
                         </FormGroup>
                       </Col>
                     </Row>
                   </>
                 )}
-
-                <Row className="mb-0">
-                  <Col md={6}>
-                    <FormGroup>
-                      <Label for="field-lastLogin">Last Login</Label>
-                      <Input
-                        id="field-lastLogin"
-                        name="lastLogin"
-                        type="text"
-                        value={formValues.lastLogin}
-                        onChange={handleFormChange}
-                        readOnly={modalMode === "view"}
-                      />
-                    </FormGroup>
-                  </Col>
-                </Row>
               </Form>
             </ModalBody>
             <ModalFooter>

@@ -65,7 +65,7 @@ class ProductStock extends Model
     }
     public function getImage190x230Attribute()
     {
-        return @is_file_exists($this->image['image_190x230'] , $this->image['storage']) ? @get_media($this->image['image_190x230'],$this->image['storage']) : static_asset('images/default/190x230_no_bg.png');
+        return @is_file_exists($this->image['image_190x230'] , $this->image['storage']) ? @get_media($this->image['image_190x230'],$this->image['storage']) : static_asset('storage/images/default/190x230_no_bg.png');
     }
 
 }

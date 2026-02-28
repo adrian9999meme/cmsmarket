@@ -15,7 +15,7 @@ class AddOnResource extends JsonResource
             'purchase_code'         => nullCheck($this->purchase_code),
             'version'               => nullCheck($this->version),
             'status'                => (bool)$this->status,
-            'image'                 => $this->image ? get_media($this->image) : static_asset('images/default/default-image-40x40.png')
+            'image'                 => $this->image ? get_media($this->image) : static_asset('storage/images/default/default-image-40x40.png')
         ];
         $lang = $request->lang;
 

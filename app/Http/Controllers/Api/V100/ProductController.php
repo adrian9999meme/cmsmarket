@@ -344,7 +344,7 @@ class ProductController extends Controller
             $images = '';
 
             if ($stock) {
-                $images = @is_file_exists($stock->image['image_320x320'], $stock->image['storage']) ? @get_media($stock->image['image_320x320'], $stock->image['storage']) : static_asset('images/default/default-image-320x320.png');
+                $images = @is_file_exists($stock->image['image_320x320'], $stock->image['storage']) ? @get_media($stock->image['image_320x320'], $stock->image['storage']) : static_asset('storage/images/default/default-image-320x320.png');
             }
             $data = [
                 'product_stock'  => [

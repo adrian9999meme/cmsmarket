@@ -13,7 +13,15 @@ const initialState = {
   error: "",
   loading: false,
   token: localStorage.getItem("token") || null,
-  user: null
+  user: {
+    email: '',
+    first_name: '',
+    last_name: '',
+    image: '',
+    phone: '',
+    role: '',
+    socials: [],
+  }
 }
 
 const login = (state = initialState, action) => {
@@ -42,6 +50,7 @@ const login = (state = initialState, action) => {
       break
     case SET_TOKEN:
       state = { ...state, token: action.payload }
+      localStorage.setItem('token', action.payload)
     case SET_USER:
       state = { ...state, user: action.payload }
     default:

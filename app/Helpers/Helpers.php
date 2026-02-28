@@ -703,7 +703,7 @@ if (!function_exists('getFileLink')) {
             if (@is_file_exists($array[$size], $array['storage'])):
                 return get_media($array[$size], $array['storage']);
             else:
-                return static_asset('images/default/default-image-320x320.png');
+                return static_asset('storage/images/default/default-image-320x320.png');
             endif;
         }
         if (is_array($array) && array_key_exists('image_' . $size, $array)) :
@@ -711,7 +711,7 @@ if (!function_exists('getFileLink')) {
                 return get_media($array['image_' . $size], $array['storage']);
             endif;
         endif;
-        return static_asset('images/default/default-image-' . $size . '.png');
+        return static_asset('storage/images/default/default-image-' . $size . '.png');
     }
 }
 

@@ -50,7 +50,7 @@ class Coupon extends Model
 
     public function getImage145x110Attribute()
     {
-        return @is_file_exists($this->banner['image_145x110'] , $this->banner['storage']) ? @get_media($this->banner['image_145x110'],$this->banner['storage']) : static_asset('images/default/default-image-105x75.png');
+        return @is_file_exists($this->banner['image_145x110'] , $this->banner['storage']) ? @get_media($this->banner['image_145x110'],$this->banner['storage']) : static_asset('storage/images/default/default-image-105x75.png');
     }
     public function getTitleAttribute()
     {

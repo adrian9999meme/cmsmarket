@@ -5,7 +5,8 @@ import {
   LOGOUT_USER_SUCCESS,
   API_ERROR,
   SET_TOKEN,
-  SET_USER
+  SET_USER,
+  GET_CURRENT_USER
 } from "./actionTypes"
 
 export const loginUser = (user, history) => {
@@ -46,6 +47,13 @@ export const apiError = error => {
 export const setToken = (token) => {
   return {
     type: SET_TOKEN,
+    payload: token
+  }
+}
+
+export const getCurrentUser = (token) => {
+  return {
+    type: GET_CURRENT_USER,
     payload: token
   }
 }

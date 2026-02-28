@@ -204,8 +204,8 @@ class HomeController extends Controller
         endif;
 
         $settings = [
-            'light_logo'                        => settingHelper('light_logo') != [] && @is_file_exists(settingHelper('light_logo')['original_image']) ?  get_media(@settingHelper('light_logo')['original_image'], @settingHelper('light_logo')['storage']) : static_asset('images/default/logo.png'),
-            'dark_logo'                         => settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['image_138x52']) ?  get_media(@settingHelper('dark_logo')['image_138x52'], @settingHelper('dark_logo')['storage']) : static_asset('images/default/dark-logo.png'),
+            'light_logo'                        => settingHelper('light_logo') != [] && @is_file_exists(settingHelper('light_logo')['original_image']) ?  get_media(@settingHelper('light_logo')['original_image'], @settingHelper('light_logo')['storage']) : static_asset('storage/images/default/logo.png'),
+            'dark_logo'                         => settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['image_138x52']) ?  get_media(@settingHelper('dark_logo')['image_138x52'], @settingHelper('dark_logo')['storage']) : static_asset('storage/images/default/dark-logo.png'),
             'subscription_section'              => settingHelper('show_subscription_section'),
             'copyright'                         => settingHelper('copyright',languageCheck()),
             'about_description'                 => settingHelper('about_description',languageCheck()),
@@ -255,7 +255,7 @@ class HomeController extends Controller
             'wholesale_price_variations_show'   => settingHelper('wholesale_price_variations_show'),
             'gdpr'                              => settingHelper('cookies_agreement', $lang),
             'gdpr_enable'                       => settingHelper('cookies_status'),
-            'footer_logo'                       => settingHelper('footer_logo') != [] && @is_file_exists(settingHelper('footer_logo')['original_image']) ? get_media(settingHelper('footer_logo')['original_image'],settingHelper('footer_logo')['storage']) : static_asset('images/default/logo-89x33.png'),
+            'footer_logo'                       => settingHelper('footer_logo') != [] && @is_file_exists(settingHelper('footer_logo')['original_image']) ? get_media(settingHelper('footer_logo')['original_image'],settingHelper('footer_logo')['storage']) : static_asset('storage/images/default/logo-89x33.png'),
             'text_direction'                    => session()->has('text_direction') ? session()->get('text_direction') : 'ltl',
             'demo_mode'                         => isDemoServer(),
             'ssl_sandbox'                       => settingHelper('is_sslcommerz_sandbox_mode_activated'),

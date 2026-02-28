@@ -11,18 +11,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return response()->json([
-        'message' => 'API-only backend',
-        'version' => 'v100',
-        'docs'    => url('api/v100/configs'),
-        'health'  => url('health'),
-    ], 200, [], JSON_UNESCAPED_SLASHES);
-});
+// Route::get('/', function () {
+//     return response()->json([
+//         'message' => 'API-only backend',
+//         'version' => 'v100',
+//         'docs'    => url('api/v100/configs'),
+//         'health'  => url('health'),
+//     ], 200, [], JSON_UNESCAPED_SLASHES);
+// });
 
-Route::get('health', function () {
-    return response()->json(['status' => 'ok', 'timestamp' => now()->toIso8601String()]);
-});
+// Route::get('health', function () {
+//     return response()->json(['status' => 'ok', 'timestamp' => now()->toIso8601String()]);
+// });
 
 Route::get('/{any}', function () {
     return view('home');

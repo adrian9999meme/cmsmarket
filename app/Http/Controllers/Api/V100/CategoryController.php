@@ -27,7 +27,7 @@ class CategoryController extends Controller
             $featured = [
                 'title'               =>'Featured Category',
                 'icon'                =>'mdi mdi-crowd',
-                'banner'              => settingHelper('featured_category_banner') ? getFileLink('240x100',settingHelper('featured_category_banner')['images']) : static_asset('images/default/130x95_no_bg.png'),
+                'banner'              => settingHelper('featured_category_banner') ? getFileLink('240x100',settingHelper('featured_category_banner')['images']) : static_asset('storage/images/default/130x95_no_bg.png'),
                 'featured_sub_categories' => CategoryWithoutChildResource::collection(Category::where('is_featured',1)->where('status',1)->paginate(get_pagination('api_paginate'))),
             ];
             $data = [

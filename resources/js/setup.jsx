@@ -1,10 +1,11 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route } from "react-router-dom";
 import { createSelector } from "reselect";
 
 import { layoutTypes } from "./constants/layout";
-import {publicRoutes, authProtectedRoutes} from "./routes/allRoutes";
+import { publicRoutes, authProtectedRoutes } from "./routes/allRoutes";
+import { getCurrentUser } from "./store/actions";
 
 import VerticalLayout from "./components/VerticalLayout/";
 import HorizontalLayout from "./components/HorizontalLayout/";
@@ -20,61 +21,72 @@ import Pages404 from "./pages/Utility/pages-404";
 const getLayout = (layoutType) => {
     let Layout = VerticalLayout;
     switch (layoutType) {
-      case layoutTypes.VERTICAL:
-        Layout = VerticalLayout;
-        break;
-      case layoutTypes.HORIZONTAL:
-        Layout = HorizontalLayout;
-        break;
-      default:
-        break;
+        case layoutTypes.VERTICAL:
+            Layout = VerticalLayout;
+            break;
+        case layoutTypes.HORIZONTAL:
+            Layout = HorizontalLayout;
+            break;
+        default:
+            break;
     }
     return Layout;
-  };
+};
 
 const Index = () => {
+    const dispatch = useDispatch()
     const selectLayoutData = createSelector(
         (state) => state.Layout,
         (layoutType) => layoutType
     );
     const { layoutType } = useSelector(selectLayoutData);
     const Layout = getLayout(layoutType);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (token) {
+            // optionally fetch current user
+            dispatch(getCurrentUser(token));
+        }
+    }, []);
+
     return (
         <React.Fragment>
-        <Routes>
-            <Route>
-                {publicRoutes.map((route, idx) => (
-                    <Route
-                        path={route.path}
-                        element={
-                            <NonAuthLayout>
-                                {route.component}
-                            </NonAuthLayout>
-                        }
-                        key={idx}
-                        exact={true}
-                    />
-                ))}
-            </Route>
+            <Routes>
+                <Route>
+                    {publicRoutes.map((route, idx) => (
+                        <Route
+                            path={route.path}
+                            element={
+                                <NonAuthLayout>
+                                    {route.component}
+                                </NonAuthLayout>
+                            }
+                            key={idx}
+                            exact={true}
+                        />
+                    ))}
+                </Route>
 
-            <Route>
-                {authProtectedRoutes.map((route, idx) => (
-                    <Route
-                        path={route.path}
-                        element={
-                            <AuthProtected>
-                                <Layout>{route.component}</Layout>
-                            </AuthProtected>
-                        }
-                        key={idx}
-                        exact={true}
-                    />
-                ))}
-            </Route>
-            <Route path="*" element={<Pages404 />} />
-        </Routes>
-    </React.Fragment>
+                <Route>
+                    {authProtectedRoutes.map((route, idx) => (
+                        <Route
+                            path={route.path}
+                            element={
+                                <AuthProtected>
+                                    <Layout>{route.component}</Layout>
+                                </AuthProtected>
+                            }
+                            key={idx}
+                            exact={true}
+                        />
+                    ))}
+                </Route>
+                <Route path="*" element={<Pages404 />} />
+            </Routes>
+        </React.Fragment>
     );
-  };
-  
-  export default Index;
+};
+
+export default Index;

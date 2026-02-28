@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { withTranslation } from "react-i18next";
+// Redux
+import { connect, useSelector } from "react-redux";
+//i18n
+import { Link } from "react-router-dom";
+import { createSelector } from "reselect";
+import withRouter from "../../Common/withRouter";
 import PropTypes from 'prop-types';
 import {
   Dropdown,
@@ -7,13 +14,7 @@ import {
   DropdownItem,
 } from "reactstrap";
 
-//i18n
-import { withTranslation } from "react-i18next";
-// Redux
-import { connect } from "react-redux";
-import { Link } from "react-router-dom";
-import withRouter from "../../Common/withRouter";
-
+const APP_FILE_URL = import.meta.env.VITE_APP_FILE_URL
 // users
 import user1 from "../../../../images/users/avatar-1.jpg";
 
@@ -21,14 +22,21 @@ const ProfileMenu = props => {
   // Declare a new state variable, which we'll call "menu"
   const [menu, setMenu] = useState(false);
 
-  const [username, setusername] = useState("Admin");
+  const [name, setUsername] = useState("");
 
+  const loginSelector = createSelector(
+    state => state.Login,
+    login => ({
+      user: login.user
+    })
+  )
+  const { user } = useSelector(loginSelector)
+  const [currentUser, setCurrentUser] = useState({})
   useEffect(() => {
-    const obj = JSON.parse(sessionStorage.getItem("authUser"));
-    if (obj) {
-      setusername(obj.name);
-    }
-  }, []);
+    setCurrentUser(user);
+    setUsername(`${user.first_name || 'unknown'} ${user.last_name || ''}`);
+  }, [user]);
+
   return (
     <React.Fragment>
       <Dropdown
@@ -43,10 +51,10 @@ const ProfileMenu = props => {
         >
           <img
             className="rounded-circle header-profile-user"
-            src={user1}
+            src={currentUser && currentUser.image ? currentUser.image : user1}
             alt="Header Avatar"
           />
-          <span className="d-none d-xl-inline-block ms-2 me-1">{username}</span>
+          <span className="d-none d-xl-inline-block ms-2 me-1">{currentUser.role || 'unknown'}</span>
           <i className="mdi mdi-chevron-down d-none d-xl-inline-block" />
         </DropdownToggle>
         <DropdownMenu className="dropdown-menu-end">
@@ -56,8 +64,8 @@ const ProfileMenu = props => {
             {props.t("Profile")}{" "}
           </DropdownItem>
           <DropdownItem tag="a" href="/crypto-wallet">
-            <i className="bx bx-wallet font-size-16 align-middle me-1" />
-            {props.t("My Wallet")}
+            <i className="bx bx-message font-size-16 align-middle me-1" />
+            {props.t("Messages")}
           </DropdownItem>
           <DropdownItem tag="a" href="#">
             <span className="badge bg-success float-end">11</span>

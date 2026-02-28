@@ -25,7 +25,7 @@ import classNames from "classnames";
 //import Charts
 import StackedColumnChart from "./StackedColumnChart";
 //import action
-import { getChartsData as onGetChartsData } from "../../store/actions";
+import { getCurrentUser, getChartsData as onGetChartsData } from "../../store/actions";
 // import image
 import modalimage1 from "../../../images/product/img-7.png";
 import modalimage2 from "../../../images/product/img-4.png";
@@ -38,6 +38,12 @@ import TopCities from "./TopCities";
 import LatestTranaction from "./LatestTranaction";
 //Import Breadcrumb
 import Breadcrumbs from "../../components/Common/Breadcrumb";
+import SummaryCards from "./SummaryCards";
+import TodaysOrdersProgress from "./TodaysOrdersProgress";
+import TopSellingStores from "./TopSellingStores";
+import RecentStores from "./RecentStores";
+import RecentSellers from "./RecentSellers";
+import RecentCustomers from "./RecentCustomers";
 
 const reports = [
   { title: "Orders", iconClass: "bx-copy-alt", description: "1,235" },
@@ -50,14 +56,14 @@ const reports = [
 ];
 
 const Dashboard = props => {
-  
+  document.title = "Dashboard";
   const [modal, setmodal] = useState(false);
   const [subscribemodal, setSubscribemodal] = useState(false);
   const [periodData, setPeriodData] = useState([]);
   const [periodType, setPeriodType] = useState("Year");
-  
+
   const dispatch = useDispatch();
-  
+
   const dashboardSelector = createSelector(
     state => state.Dashboard,
     dashboard => ({
@@ -66,15 +72,15 @@ const Dashboard = props => {
       date: dashboard.date,
     })
   );
-  
+
   const { chartsData, timediffer, date } = useSelector(dashboardSelector);
-  
+
   useEffect(() => {
     setTimeout(() => {
       setSubscribemodal(true);
     }, 2000);
   }, []);
-  
+
   useEffect(() => {
     setPeriodData(chartsData);
   }, [chartsData]);
@@ -98,84 +104,36 @@ const Dashboard = props => {
             breadcrumbItem={props.t("Dashboard")}
           />
 
+          <SummaryCards />
+
           <Row>
             <Col xl="4">
               <WelcomeComp />
-              <MonthlyEarning />
             </Col>
             <Col xl="8">
               <Row>
-                {/* Reports Render */}
-                {(reports || [])?.map((report, key) => (
-                  <Col md="4" key={"_col_" + key}>
-                    <Card className="mini-stats-wid">
-                      <CardBody>
-                        <div className="d-flex">
-                          <div className="flex-grow-1">
-                            <p className="text-muted fw-medium">
-                              {report.title}
-                            </p>
-                            <h4 className="mb-0">{report.description}</h4>
-                          </div>
-                          <div className="avatar-sm rounded-circle bg-primary align-self-center mini-stat-icon">
-                            <span className="avatar-title rounded-circle bg-primary">
-                              <i className={"bx " + report.iconClass + " font-size-24"}></i>
-                            </span>
-                          </div>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  </Col>
-                ))}
+                <Col xl="6">
+                  <TodaysOrdersProgress />
+                </Col>
+                <Col xl="6">
+                  <TopSellingStores />
+                </Col>
               </Row>
-
-              <Card>
-                <CardBody>
-                  <div className="d-sm-flex flex-wrap">
-                    <h4 className="card-title mb-4">Orders Delivered</h4>
-                    <div className="ms-auto">
-                      <ul className="nav nav-pills">
-                        <li className="nav-item">
-                          <Link to="#" className={classNames({ active: periodType === "Week" }, "nav-link")} onClick={() => { onChangeChartPeriod("Week"); }} id="one_month">
-                            Week
-                          </Link>{" "}
-                        </li>
-                        <li className="nav-item">
-                          <Link to="#" className={classNames({ active: periodType === "Month" }, "nav-link")} onClick={() => { onChangeChartPeriod("Month"); }} id="one_month">
-                            Month
-                          </Link>
-                        </li>
-                        <li className="nav-item">
-                          <Link to="#" className={classNames({ active: periodType === "Year" }, "nav-link")} onClick={() => { onChangeChartPeriod("Year"); }} id="one_month">
-                            Year
-                          </Link>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  {/* <div className="clearfix"></div> */}
-                  <StackedColumnChart periodData={periodData} dataColors='["--bs-primary", "--bs-warning", "--bs-success"]' />
-                </CardBody>
-              </Card>
             </Col>
           </Row>
 
           <Row>
-            <Col xl="4">
-              <SocialSource />
+            <Col xl="6">
+              <RecentStores />
             </Col>
-            <Col xl="4">
-              <ActivityComp />
-            </Col>
-
-            <Col xl="4">
-              <TopCities />
+            <Col xl="6">
+              <RecentSellers />
             </Col>
           </Row>
 
           <Row>
             <Col lg="12">
-              <LatestTranaction />
+              <RecentCustomers />
             </Col>
           </Row>
         </Container>

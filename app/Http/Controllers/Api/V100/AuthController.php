@@ -89,6 +89,7 @@ class AuthController extends Controller
             $data['phone']          = nullCheck($user->phone);
             $data['email']          = nullCheck($user->email);
             $data['socials']        = $user->socials == null ? [] : $user->socials;
+            $data['role']           = $user->user_type ?? null;
             Cart::where('user_id', getWalkInCustomer()->id)->where('trx_id',$request->trx_id)->update(['user_id' => $user->id]);
 
             return $this->responseWithSuccess(__('Login Successfully'),$data,200);

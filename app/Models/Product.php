@@ -202,7 +202,7 @@ class Product extends Model
 
     public function getImage190x230Attribute()
     {
-        return @is_file_exists($this->thumbnail['image_190x230'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_190x230'],$this->thumbnail['storage']) : static_asset('images/default/190x230_no_bg.png');
+        return @is_file_exists($this->thumbnail['image_190x230'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_190x230'],$this->thumbnail['storage']) : static_asset('storage/images/default/190x230_no_bg.png');
     }
 
     public function getImage40x40Attribute()
@@ -212,12 +212,12 @@ class Product extends Model
 
     public function getImage110x122Attribute()
     {
-        return @is_file_exists($this->thumbnail['image_110x122'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_110x122'],$this->thumbnail['storage']) : static_asset('images/default/default-image-72x72.png');
+        return @is_file_exists($this->thumbnail['image_110x122'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_110x122'],$this->thumbnail['storage']) : static_asset('storage/images/default/default-image-72x72.png');
     }
 
     public function getImage72x72Attribute()
     {
-        return @is_file_exists($this->thumbnail['image_72x72'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_72x72'],$this->thumbnail['storage']) : static_asset('images/default/default-image-72x72.png');
+        return @is_file_exists($this->thumbnail['image_72x72'] , $this->thumbnail['storage']) ? @get_media($this->thumbnail['image_72x72'],$this->thumbnail['storage']) : static_asset('storage/images/default/default-image-72x72.png');
     }
 
     public function getSpecialDiscountCheckAttribute()

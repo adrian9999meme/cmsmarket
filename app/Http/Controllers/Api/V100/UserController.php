@@ -34,7 +34,8 @@ class UserController extends Controller
     {
         try {
             $user = null;
-            if ($request->token) {
+            $token = $request->bearerToken();
+            if ($token) {
                 try {
                     if (!$user = JWTAuth::parseToken()->authenticate()) {
                         return $this->responseWithError(__('unauthorized_user'), [], 401);
@@ -46,10 +47,33 @@ class UserController extends Controller
 
             $digital_products = $this->digitalProductOrders($user->id);
 
+            // Add the user's refresh token to the response if present
+            $refreshToken = null;
+            if ($request->hasHeader('Authorization')) {
+                try {
+                    // Get the Bearer token from the Authorization header
+                    $authHeader = $request->header('Authorization');
+                    
+                    // Check if the header has the "Bearer " prefix
+                    if (strpos($authHeader, 'Bearer ') === 0) {
+                        // Extract the token part
+                        $refreshToken = substr($authHeader, 7); // Remove "Bearer " part
+                    }
+                    
+                    // Optionally, you can validate the token here if needed
+                    // $refreshToken = JWTAuth::getToken();
+                    
+                } catch (\Exception $e) {
+                    $refreshToken = null; // Set to null in case of any errors
+                }
+            }
+
             $data = [
+                'token'             =>$refreshToken,
                 'id'                => $user->id,
                 'first_name'        => $user->first_name,
                 'last_name'         => $user->last_name,
+                'role'              => $user->user_type ?? null,
                 'email'             => nullCheck($user->email),
                 'phone'             => nullCheck($user->phone),
                 'gender'            => nullCheck($user->gender),
@@ -345,10 +369,10 @@ class UserController extends Controller
                     'ngn_exchange_rate' => $ngn_exchange_rate,
                     'paystack_activated'=> $is_paystack_activated,
                     'fw_activated'      => $is_flutterwave_activated,
-                    'dark_logo'         => settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['original_image']) ?  get_media(@settingHelper('dark_logo')['original_image'], @settingHelper('dark_logo')['storage']) : static_asset('images/default/dark-logo.png'),
+                    'dark_logo'         => settingHelper('dark_logo') != [] && @is_file_exists(settingHelper('dark_logo')['original_image']) ?  get_media(@settingHelper('dark_logo')['original_image'], @settingHelper('dark_logo')['storage']) : static_asset('storage/images/default/dark-logo.png'),
                     'favicon'           => @is_file_exists(@settingHelper('favicon')['image_57x57_url']) ? get_media(settingHelper('favicon')['image_57x57_url']) : static_asset('images/ico/apple-touch-icon-57-precomposed.png'),
                     'default_assets'    => [
-                        'preloader'                     => static_asset('images/default/preloader.gif'),
+                        'preloader'                     => static_asset('storage/images/default/preloader.gif'),
                         'review_image'                  => static_asset('images/others/env.svg'),
                     ]
                 ];

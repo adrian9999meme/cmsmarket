@@ -39,14 +39,45 @@ class StoreController extends Controller
 
     public function index(Request $request)
     {
-        try{
+        try {
+            // Get status and keyword from the request (with defaults if not present)
+            $status = $request->get('status', null);
+            $searchKeyword = $request->get('keyword', '');
+
+            // Call repository with additional filters for status and keyword
             $stores = $this->stores->paginate($request, get_pagination('pagination'));
-            return view('admin.stores.index', compact('stores'));
+
+            // If GET_SELLERS_API expects filtering by status and keyword, apply them in the repository
+            // if (!is_null($status) && $status !== '') {
+            //     if ($status === 'pending') {
+            //         $users = $users->where('is_user_banned', 0);
+            //     } elseif ($status === 'blocked') {
+            //         $users = $users->where('is_user_banned', 1);
+            //     }
+            //     // If status is passed but not "pending" or "blocked", do not apply any additional filter
+            // }
+            if (!empty($searchKeyword)) {
+                $stores = $stores->where(function($query) use ($searchKeyword) {
+                    $query->where('store_name', 'like', "%{$searchKeyword}%")
+                          ->orWhere('address', 'like', "%{$searchKeyword}%")
+                          ->orWhere('store_email', 'like', "%{$searchKeyword}%");
+                });
+            }
+
+            // If $users is an Eloquent\Builder or Query, paginate after filtering
+            if ($stores instanceof \Illuminate\Database\Eloquent\Builder || $stores instanceof \Illuminate\Database\Query\Builder) {
+                $stores = $stores->paginate(get_pagination('pagination'));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message'=>'Retrieved stores successfully',
+                'data' => $stores
+            ]);
         } catch (\Exception $e) {
             Toastr::error($e->getMessage());
             return back();
         }
-
     }
     public function create()
     {

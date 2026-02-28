@@ -42,10 +42,10 @@ trait HomePage
                                     $image_2 = $media->get($item['thumbnail'][2]);
                                     $image_3 = $media->get($item['thumbnail'][3]);
                                     $thumb = [
-                                        @is_file_exists($image_0->image_variants['image_300x170'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_300x170'], $image_0->image_variants['storage']) . '_0' : static_asset('images/default/default-image-300x170.png') . '_0' => $item['url'][0],
-                                        @is_file_exists($image_1->image_variants['image_300x170'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_300x170'], $image_1->image_variants['storage']) . '_1' : static_asset('images/default/default-image-300x170.png') . '_1' => $item['url'][1],
-                                        @is_file_exists($image_2->image_variants['image_300x170'], $image_2->image_variants['storage']) ? @get_media($image_2->image_variants['image_300x170'], $image_2->image_variants['storage']) . '_2' : static_asset('images/default/default-image-300x170.png') . '_2' => $item['url'][2],
-                                        @is_file_exists($image_3->image_variants['image_300x170'], $image_3->image_variants['storage']) ? @get_media($image_3->image_variants['image_300x170'], $image_3->image_variants['storage']) . '_3' : static_asset('images/default/default-image-300x170.png') . '_3' => $item['url'][3],
+                                        @is_file_exists($image_0->image_variants['image_300x170'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_300x170'], $image_0->image_variants['storage']) . '_0' : static_asset('storage/images/default/default-image-300x170.png') . '_0' => $item['url'][0],
+                                        @is_file_exists($image_1->image_variants['image_300x170'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_300x170'], $image_1->image_variants['storage']) . '_1' : static_asset('storage/images/default/default-image-300x170.png') . '_1' => $item['url'][1],
+                                        @is_file_exists($image_2->image_variants['image_300x170'], $image_2->image_variants['storage']) ? @get_media($image_2->image_variants['image_300x170'], $image_2->image_variants['storage']) . '_2' : static_asset('storage/images/default/default-image-300x170.png') . '_2' => $item['url'][2],
+                                        @is_file_exists($image_3->image_variants['image_300x170'], $image_3->image_variants['storage']) ? @get_media($image_3->image_variants['image_300x170'], $image_3->image_variants['storage']) . '_3' : static_asset('storage/images/default/default-image-300x170.png') . '_3' => $item['url'][3],
                                     ];
                                     array_push($banners, $thumb);
                                     break;
@@ -54,9 +54,9 @@ trait HomePage
                                     $image_1 = $media->get($item['thumbnail'][1]);
                                     $image_2 = $media->get($item['thumbnail'][2]);
                                     $thumb = [
-                                        @is_file_exists($image_0->image_variants['image_400x235'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_400x235'], $image_0->image_variants['storage']) . '_0' : static_asset('images/default/default-image-400x235.png') . '_0' => $item['url'][0],
-                                        @is_file_exists($image_1->image_variants['image_400x235'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_400x235'], $image_1->image_variants['storage']) . '_1' : static_asset('images/default/default-image-400x235.png') . '_1' => $item['url'][1],
-                                        @is_file_exists($image_2->image_variants['image_400x235'], $image_2->image_variants['storage']) ? @get_media($image_2->image_variants['image_400x235'], $image_2->image_variants['storage']) . '_2' : static_asset('images/default/default-image-400x235.png') . '_2' => $item['url'][2],
+                                        @is_file_exists($image_0->image_variants['image_400x235'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_400x235'], $image_0->image_variants['storage']) . '_0' : static_asset('storage/images/default/default-image-400x235.png') . '_0' => $item['url'][0],
+                                        @is_file_exists($image_1->image_variants['image_400x235'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_400x235'], $image_1->image_variants['storage']) . '_1' : static_asset('storage/images/default/default-image-400x235.png') . '_1' => $item['url'][1],
+                                        @is_file_exists($image_2->image_variants['image_400x235'], $image_2->image_variants['storage']) ? @get_media($image_2->image_variants['image_400x235'], $image_2->image_variants['storage']) . '_2' : static_asset('storage/images/default/default-image-400x235.png') . '_2' => $item['url'][2],
                                     ];
                                     array_push($banners, $thumb);
                                     break;
@@ -64,15 +64,15 @@ trait HomePage
                                     $image_0 = $media->get($item['thumbnail'][0]);
                                     $image_1 = $media->get($item['thumbnail'][1]);
                                     $thumb = [
-                                        @is_file_exists($image_0->image_variants['image_620x320'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_620x320'], $image_0->image_variants['storage']) . '_0' : static_asset('images/default/default-image-620x320.png') . '_0' => $item['url'][0],
-                                        @is_file_exists($image_1->image_variants['image_620x320'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_620x320'], $image_1->image_variants['storage']) . '_1' : static_asset('images/default/default-image-620x320.png') . '_1' => $item['url'][1],
+                                        @is_file_exists($image_0->image_variants['image_620x320'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_620x320'], $image_0->image_variants['storage']) . '_0' : static_asset('storage/images/default/default-image-620x320.png') . '_0' => $item['url'][0],
+                                        @is_file_exists($image_1->image_variants['image_620x320'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_620x320'], $image_1->image_variants['storage']) . '_1' : static_asset('storage/images/default/default-image-620x320.png') . '_1' => $item['url'][1],
                                     ];
                                     array_push($banners, $thumb);
                                     break;
                                 case(1):
                                     $image_0 = $media->get($item['thumbnail'][0]);
                                     $thumb = [
-                                        @is_file_exists($image_0->image_variants['image_1260x452'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_1260x452'], $image_0->image_variants['storage']) . '_0' : static_asset('images/default/default-image-1280x420.png') . '_0' => $item['url'][0],
+                                        @is_file_exists($image_0->image_variants['image_1260x452'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_1260x452'], $image_0->image_variants['storage']) . '_0' : static_asset('storage/images/default/default-image-1280x420.png') . '_0' => $item['url'][0],
                                     ];
                                     array_push($banners, $thumb);
                                     break;
@@ -144,7 +144,7 @@ trait HomePage
                             $component_names[]=$set_key;
 
                             $image = $media->get($item['banner']);
-                            $category_sec_banner = $image && is_file_exists(@$image->image_variants['image_405x745'], @$image->image_variants['storage']) ? @get_media(@$image->image_variants['image_405x745'], $image->image_variants['storage']) : static_asset('images/default/default-image-405x745.png');
+                            $category_sec_banner = $image && is_file_exists(@$image->image_variants['image_405x745'], @$image->image_variants['storage']) ? @get_media(@$image->image_variants['image_405x745'], $image->image_variants['storage']) : static_asset('storage/images/default/default-image-405x745.png');
                             $category_sec_banner_url = $item['banner_url'];
                             $category_products = $category->categoryProducts($item['category']);
                             $category_get = $category->get($item['category']);
@@ -170,7 +170,7 @@ trait HomePage
                         if ($set_key == 'offer_ending_soon') {
                             $component_names[]=$set_key;
                             $image = @$media->get($item['banner']);
-                            $offer_end_sec_banner = $image && is_file_exists(@$image->image_variants['image_405x745'], @$image->image_variants['storage']) ? @get_media($image->image_variants['image_405x745'], $image->image_variants['storage']) : static_asset('images/default/default-image-405x745.png');
+                            $offer_end_sec_banner = $image && is_file_exists(@$image->image_variants['image_405x745'], @$image->image_variants['storage']) ? @get_media($image->image_variants['image_405x745'], $image->image_variants['storage']) : static_asset('storage/images/default/default-image-405x745.png');
                             $offer_end_sec_banner_url = @$item['banner_url'];
                             $offer_end = ProductResource::collection($this->product->offerEndingSoon());
                             $results = $this->keyDefine('offer_ending', $key, $offer_end, $results);
@@ -241,9 +241,9 @@ trait HomePage
                             $component_names[]=$set_key;
                             $image = $media->get($item['banner']);
                             if ($image)
-                                $download_section['banner'] = is_file_exists($image->image_variants['image_320x320'], $image->image_variants['storage']) ? @get_media($image->image_variants['image_320x320'], $image->image_variants['storage']) : static_asset('images/default/default-image-320x320.png');
+                                $download_section['banner'] = is_file_exists($image->image_variants['image_320x320'], $image->image_variants['storage']) ? @get_media($image->image_variants['image_320x320'], $image->image_variants['storage']) : static_asset('storage/images/default/default-image-320x320.png');
                             else {
-                                $download_section['banner'] = static_asset('images/default/default-image-320x320.png');
+                                $download_section['banner'] = static_asset('storage/images/default/default-image-320x320.png');
                             }
                             $download_section['text'] = $item['text'];
                             $download_section['sub_text'] = $item['sub_text'];
@@ -294,10 +294,10 @@ trait HomePage
                                 $image_2 = $media->get($item['thumbnail'][2]);
                                 $image_3 = $media->get($item['thumbnail'][3]);
                                 $thumb = [
-                                    @is_file_exists($image_0->image_variants['image_300x170'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_300x170'], $image_0->image_variants['storage']) . '_0' : static_asset('images/default/default-image-300x170.png') . '_0' => $item['url'][0],
-                                    @is_file_exists($image_1->image_variants['image_300x170'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_300x170'], $image_1->image_variants['storage']) . '_1' : static_asset('images/default/default-image-300x170.png') . '_1' => $item['url'][1],
-                                    @is_file_exists($image_2->image_variants['image_300x170'], $image_2->image_variants['storage']) ? @get_media($image_2->image_variants['image_300x170'], $image_2->image_variants['storage']) . '_2' : static_asset('images/default/default-image-300x170.png') . '_2' => $item['url'][2],
-                                    @is_file_exists($image_3->image_variants['image_300x170'], $image_3->image_variants['storage']) ? @get_media($image_3->image_variants['image_300x170'], $image_3->image_variants['storage']) . '_3' : static_asset('images/default/default-image-300x170.png') . '_3' => $item['url'][3],
+                                    @is_file_exists($image_0->image_variants['image_300x170'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_300x170'], $image_0->image_variants['storage']) . '_0' : static_asset('storage/images/default/default-image-300x170.png') . '_0' => $item['url'][0],
+                                    @is_file_exists($image_1->image_variants['image_300x170'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_300x170'], $image_1->image_variants['storage']) . '_1' : static_asset('storage/images/default/default-image-300x170.png') . '_1' => $item['url'][1],
+                                    @is_file_exists($image_2->image_variants['image_300x170'], $image_2->image_variants['storage']) ? @get_media($image_2->image_variants['image_300x170'], $image_2->image_variants['storage']) . '_2' : static_asset('storage/images/default/default-image-300x170.png') . '_2' => $item['url'][2],
+                                    @is_file_exists($image_3->image_variants['image_300x170'], $image_3->image_variants['storage']) ? @get_media($image_3->image_variants['image_300x170'], $image_3->image_variants['storage']) . '_3' : static_asset('storage/images/default/default-image-300x170.png') . '_3' => $item['url'][3],
                                 ];
                                 array_push($banners, $thumb);
                                 break;
@@ -306,9 +306,9 @@ trait HomePage
                                 $image_1 = $media->get($item['thumbnail'][1]);
                                 $image_2 = $media->get($item['thumbnail'][2]);
                                 $thumb = [
-                                    @is_file_exists($image_0->image_variants['image_400x235'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_400x235'], $image_0->image_variants['storage']) . '_0' : static_asset('images/default/default-image-400x235.png') . '_0' => $item['url'][0],
-                                    @is_file_exists($image_1->image_variants['image_400x235'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_400x235'], $image_1->image_variants['storage']) . '_1' : static_asset('images/default/default-image-400x235.png') . '_1' => $item['url'][1],
-                                    @is_file_exists($image_2->image_variants['image_400x235'], $image_2->image_variants['storage']) ? @get_media($image_2->image_variants['image_400x235'], $image_2->image_variants['storage']) . '_2' : static_asset('images/default/default-image-400x235.png') . '_2' => $item['url'][2],
+                                    @is_file_exists($image_0->image_variants['image_400x235'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_400x235'], $image_0->image_variants['storage']) . '_0' : static_asset('storage/images/default/default-image-400x235.png') . '_0' => $item['url'][0],
+                                    @is_file_exists($image_1->image_variants['image_400x235'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_400x235'], $image_1->image_variants['storage']) . '_1' : static_asset('storage/images/default/default-image-400x235.png') . '_1' => $item['url'][1],
+                                    @is_file_exists($image_2->image_variants['image_400x235'], $image_2->image_variants['storage']) ? @get_media($image_2->image_variants['image_400x235'], $image_2->image_variants['storage']) . '_2' : static_asset('storage/images/default/default-image-400x235.png') . '_2' => $item['url'][2],
                                 ];
                                 array_push($banners, $thumb);
                                 break;
@@ -316,15 +316,15 @@ trait HomePage
                                 $image_0 = $media->get($item['thumbnail'][0]);
                                 $image_1 = $media->get($item['thumbnail'][1]);
                                 $thumb = [
-                                    @is_file_exists($image_0->image_variants['image_620x320'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_620x320'], $image_0->image_variants['storage']) . '_0' : static_asset('images/default/default-image-620x320.png') . '_0' => $item['url'][0],
-                                    @is_file_exists($image_1->image_variants['image_620x320'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_620x320'], $image_1->image_variants['storage']) . '_1' : static_asset('images/default/default-image-620x320.png') . '_1' => $item['url'][1],
+                                    @is_file_exists($image_0->image_variants['image_620x320'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_620x320'], $image_0->image_variants['storage']) . '_0' : static_asset('storage/images/default/default-image-620x320.png') . '_0' => $item['url'][0],
+                                    @is_file_exists($image_1->image_variants['image_620x320'], $image_1->image_variants['storage']) ? @get_media($image_1->image_variants['image_620x320'], $image_1->image_variants['storage']) . '_1' : static_asset('storage/images/default/default-image-620x320.png') . '_1' => $item['url'][1],
                                 ];
                                 array_push($banners, $thumb);
                                 break;
                             case(1):
                                 $image_0 = $media->get($item['thumbnail'][0]);
                                 $thumb = [
-                                    @is_file_exists($image_0->image_variants['image_1260x452'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_1260x452'], $image_0->image_variants['storage']) . '_0' : static_asset('images/default/default-image-1280x420.png') . '_0' => $item['url'][0],
+                                    @is_file_exists($image_0->image_variants['image_1260x452'], $image_0->image_variants['storage']) ? @get_media($image_0->image_variants['image_1260x452'], $image_0->image_variants['storage']) . '_0' : static_asset('storage/images/default/default-image-1280x420.png') . '_0' => $item['url'][0],
                                 ];
                                 array_push($banners, $thumb);
                                 break;

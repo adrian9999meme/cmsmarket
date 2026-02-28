@@ -116,6 +116,39 @@ const latestTransaction = [
     },
 ];
 
+const recentStores = [
+    {
+        id: 1,
+        storeName: "Alpha Supplies",
+        status: "Active",
+        createdDate: "01 Jan, 2023"
+    },
+    {
+        id: 2,
+        storeName: "Beta Electronics",
+        status: "Inactive",
+        createdDate: "15 Feb, 2023"
+    },
+    {
+        id: 3,
+        storeName: "Gamma Fashion",
+        status: "Pending",
+        createdDate: "10 Mar, 2023"
+    },
+    {
+        id: 4,
+        storeName: "Delta Mart",
+        status: "Active",
+        createdDate: "24 Mar, 2023"
+    },
+    {
+        id: 5,
+        storeName: "Omega Books",
+        status: "Active",
+        createdDate: "02 Apr, 2023"
+    },
+];
+
 const activityData = [
     {
         id: 1,
@@ -173,6 +206,78 @@ const TopCitiesSelling = [
     }
 ]
 
+const recentSellers = [
+    {
+        id: 1,
+        sellerName: "Alice Smith",
+        email: "alice@example.com",
+        status: "Active",
+    },
+    {
+        id: 2,
+        sellerName: "Bob Johnson",
+        email: "bob@example.com",
+        status: "Inactive",
+    },
+    {
+        id: 3,
+        sellerName: "Charlie Lee",
+        email: "charlie@example.com",
+        status: "Pending",
+    },
+    {
+        id: 4,
+        sellerName: "David Kim",
+        email: "david@example.com",
+        status: "Active",
+    },
+    {
+        id: 5,
+        sellerName: "John smith",
+        email: "john@example.com",
+        status: "Active",
+    },
+];
+
+const recentCustomers = [
+    {
+        id: 1,
+        name: "Alice Smith",
+        email: "alice@example.com",
+        phone: "555-0100",
+        status: "Active",
+        // viewButton: to be rendered in the component, not included here
+    },
+    {
+        id: 2,
+        name: "Bob Johnson",
+        email: "bob@example.com",
+        phone: "555-0200",
+        status: "Inactive",
+    },
+    {
+        id: 3,
+        name: "Charlie Lee",
+        email: "charlie@example.com",
+        phone: "555-0300",
+        status: "Pending",
+    },
+    {
+        id: 4,
+        name: "David Kim",
+        email: "david@example.com",
+        phone: "555-0400",
+        status: "Active",
+    },
+    {
+        id: 5,
+        name: "John Smith",
+        email: "john@example.com",
+        phone: "555-0500",
+        status: "Active",
+    },
+];
 
 
-export { dahsboardEmail, activityData, latestTransaction, TopCitiesSelling };
+
+export { dahsboardEmail, activityData, latestTransaction, TopCitiesSelling, recentStores, recentSellers, recentCustomers };
