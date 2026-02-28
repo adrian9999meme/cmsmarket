@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 
-
 // //Import Scrollbar
 import SimpleBar from "simplebar-react";
 
@@ -16,115 +15,103 @@ import { withTranslation } from "react-i18next";
 
 const SidebarContent = props => {
   const ref = useRef();
-  const activateParentDropdown = useCallback((item) => {
+  const menuInstance = useRef(null);
+  const prevActiveItem = useRef(null);
+
+  // Helper to activate the focused menu and parents, and expand
+  const activateMenuItem = useCallback(item => {
+    if (!item) return;
+    // Remove previous activation if changed
+    if (prevActiveItem.current && prevActiveItem.current !== item) {
+      deactivateMenuItem(prevActiveItem.current);
+    }
+    // If already active, don't collapse/expand again
+    if (item.classList.contains("active")) return;
+    // Activate the menu item and parent structure
     item.classList.add("active");
-    const parent = item.parentElement;
-    const parent2El = parent.childNodes[1];
-
-    if (parent2El && parent2El.id !== "side-menu") {
-      parent2El.classList.add("mm-show");
+    let parent = item.parentElement;
+    while (parent && parent.getAttribute("id") !== "side-menu") {
+      if (parent.tagName === "LI") parent.classList.add("mm-active");
+      if (parent.tagName === "UL") parent.classList.add("mm-show");
+      parent = parent.parentElement;
     }
-
-    if (parent) {
-      parent.classList.add("mm-active");
-      const parent2 = parent.parentElement;
-
-      if (parent2) {
-        parent2.classList.add("mm-show"); // ul tag
-
-        const parent3 = parent2.parentElement; // li tag
-
-        if (parent3) {
-          parent3.classList.add("mm-active"); // li
-          parent3.childNodes[0].classList.add("mm-active"); //a
-          const parent4 = parent3.parentElement; // ul
-          if (parent4) {
-            parent4.classList.add("mm-show"); // ul
-            const parent5 = parent4.parentElement;
-            if (parent5) {
-              parent5.classList.add("mm-show"); // li
-              parent5.childNodes[0].classList.add("mm-active"); // a tag
-            }
-          }
-        }
-      }
-      scrollElement(item);
-      return false;
-    }
+    // Save current active item
+    prevActiveItem.current = item;
     scrollElement(item);
-    return false;
   }, []);
 
-  const removeActivation = (items) => {
-    for (var i = 0; i < items.length; ++i) {
-      var item = items[i];
-      const parent = items[i].parentElement;
-
-      if (item && item.classList.contains("active")) {
-        item.classList.remove("active");
-      }
-      if (parent) {
-        const parent2El =
-          parent.childNodes && parent.childNodes.lenght && parent.childNodes[1]
-            ? parent.childNodes[1]
-            : null;
-        if (parent2El && parent2El.id !== "side-menu") {
-          parent2El.classList.remove("mm-show");
-        }
-
-        parent.classList.remove("mm-active");
-        const parent2 = parent.parentElement;
-
-        if (parent2) {
-          parent2.classList.remove("mm-show");
-
-          const parent3 = parent2.parentElement;
-          if (parent3) {
-            parent3.classList.remove("mm-active"); // li
-            parent3.childNodes[0].classList.remove("mm-active");
-
-            const parent4 = parent3.parentElement; // ul
-            if (parent4) {
-              parent4.classList.remove("mm-show"); // ul
-              const parent5 = parent4.parentElement;
-              if (parent5) {
-                parent5.classList.remove("mm-show"); // li
-                parent5.childNodes[0].classList.remove("mm-active"); // a tag
-              }
-            }
-          }
-        }
-      }
+  // Helper to deactivate an activated menu item and all its parents
+  const deactivateMenuItem = (item) => {
+    if (!item) return;
+    // Remove active from item and all parent <li> and expand from <ul>
+    let parent = item.parentElement;
+    item.classList.remove("active");
+    while (parent && parent.getAttribute("id") !== "side-menu") {
+      if (parent.tagName === "LI") parent.classList.remove("mm-active");
+      if (parent.tagName === "UL") parent.classList.remove("mm-show");
+      parent = parent.parentElement;
     }
   };
 
+  // Find menu item matching the pathname
   const path = useLocation();
+
   const activeMenu = useCallback(() => {
     const pathName = path.pathname;
-    let matchingMenuItem = null;
     const ul = document.getElementById("side-menu");
-    const items = ul.getElementsByTagName("a");
-    removeActivation(items);
+    if (!ul) return;
 
+    const items = ul.getElementsByTagName("a");
+    let matchingMenuItem = null;
+
+    // Fix to ensure MetisMenu works with react-router Link:
+    // Instead of using pathname, use getAttribute("href") for comparison
+    // React-router 'to' prop will set href (may include a leading /)
     for (let i = 0; i < items.length; ++i) {
-      if (pathName === items[i].pathname) {
+      // Some browsers return relative or absolute paths in href, so check with endsWith
+      // Remove search/hash from pathname for matching
+      let linkHref = items[i].getAttribute("href");
+      // Handle hash routes
+      let cleanedPathName = pathName.split("?")[0].split("#")[0];
+      if (linkHref && (linkHref === cleanedPathName || linkHref === window.location.origin + cleanedPathName)) {
+        matchingMenuItem = items[i];
+        break;
+      }
+      // Also support router Link fallback: pathname ending match
+      if (linkHref && (cleanedPathName.endsWith(linkHref) || linkHref.endsWith(cleanedPathName))) {
         matchingMenuItem = items[i];
         break;
       }
     }
+
     if (matchingMenuItem) {
-      activateParentDropdown(matchingMenuItem);
+      activateMenuItem(matchingMenuItem);
+    } else if (prevActiveItem.current) {
+      deactivateMenuItem(prevActiveItem.current);
+      prevActiveItem.current = null;
     }
-  }, [path.pathname, activateParentDropdown]);
+  }, [path.pathname, activateMenuItem]);
 
   useEffect(() => {
-    ref.current.recalculate();
+    if (ref.current && ref.current.recalculate) ref.current.recalculate();
   }, []);
 
   useEffect(() => {
-    new MetisMenu("#side-menu");
+    if (menuInstance.current) {
+      menuInstance.current.dispose && menuInstance.current.dispose();
+      menuInstance.current = null;
+    }
+    menuInstance.current = new MetisMenu("#side-menu");
     activeMenu();
-  }, []);
+    // Clean up MetisMenu
+    return () => {
+      if (menuInstance.current && menuInstance.current.dispose) {
+        menuInstance.current.dispose();
+        menuInstance.current = null;
+      }
+    };
+    // eslint-disable-next-line
+  }, []); // Only run once on mount
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -155,15 +142,15 @@ const SidebarContent = props => {
             </li>
 
             <li>
-              <a href="#" className="has-arrow">
+              <a href="/sellers/all" className="has-arrow">
                 <i className="bx bx-user-voice"></i>
                 <span>{props.t("Sellers")}</span>
               </a>
               <ul className="sub-menu">
                 <li><Link to="/sellers/all"><i className="bx bx-store-alt"></i> {props.t("All Sellers")}</Link></li>
-                {/* <li><Link to="/sellers/pending"><i className="bx bx-time"></i> {props.t("Pending Approvals")}</Link></li>
+                <li><Link to="/sellers/pending"><i className="bx bx-time"></i> {props.t("Pending Approvals")}</Link></li>
                 <li><Link to="/sellers/blocked"><i className="bx bx-block"></i> {props.t("Blocked Sellers")}</Link></li>
-                <li><Link to="/sellers/add"><i className="bx bx-plus-circle"></i> {props.t("Add New Seller")}</Link></li> */}
+                <li><Link to="/sellers/add"><i className="bx bx-plus-circle"></i> {props.t("Add New Seller")}</Link></li>
               </ul>
             </li>
 
@@ -223,7 +210,6 @@ const SidebarContent = props => {
                 <li><Link to="/orders/cancelled"><i className="bx bx-block"></i> {props.t("Cancelled")}</Link></li>
               </ul>
             </li>
-
 
             <li>
               <a href="#" className="has-arrow">
