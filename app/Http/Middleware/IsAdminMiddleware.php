@@ -20,13 +20,15 @@ class IsAdminMiddleware
         if (Sentinel::check()):
             if (Sentinel::getUser()->user_type == 'admin' || Sentinel::getUser()->user_type == 'staff'):
                 return $next($request);
-            elseif(Sentinel::getUser()->user_type == 'seller'):
-                return redirect()->route('home');
             else:
-                return redirect()->route('home');
+                return response()->json([
+                    'error' => 'Unauthorized access. Admin or staff privileges required.'
+                ], 403);
             endif;
         else:
-            return  redirect()->route('admin.login.form');
+            return response()->json([
+                'error' => 'Unauthorized. Please login as admin or staff.'
+            ], 401);
         endif;
     }
 }

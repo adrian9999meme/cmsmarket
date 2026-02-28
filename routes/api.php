@@ -1,9 +1,13 @@
 <?php
 
 
+use App\Http\Controllers\Admin\StoreController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Admin\SellerController;
+
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\Api\V100\APIController;
-use App\Http\Controllers\Api\V100\AuthController;
 use App\Http\Controllers\Api\V100\BlogController;
 use App\Http\Controllers\Api\V100\BrandController;
 use App\Http\Controllers\Api\V100\CartController;
@@ -16,9 +20,26 @@ use App\Http\Controllers\Api\V100\ReviewController;
 use App\Http\Controllers\Api\V100\RewardSystemController;
 use App\Http\Controllers\Api\V100\ShippingController;
 use App\Http\Controllers\Api\V100\ShopController;
-use App\Http\Controllers\Api\V100\UserController;
 use App\Http\Controllers\Api\V100\VideoShoppingController;
 use App\Http\Controllers\Api\V100\WishlistController;
+// use App\Http\Controllers\Admin\WalletController;
+// use App\Http\Controllers\Api\V100\APIController;
+// use App\Http\Controllers\Api\V100\AuthController;
+// use App\Http\Controllers\Api\V100\BlogController;
+// use App\Http\Controllers\Api\V100\BrandController;
+// use App\Http\Controllers\Api\V100\CartController;
+// use App\Http\Controllers\Api\V100\CategoryController;
+// use App\Http\Controllers\Api\V100\HomeController;
+// use App\Http\Controllers\Api\V100\NotificationController;
+// use App\Http\Controllers\Api\V100\OrderController;
+// use App\Http\Controllers\Api\V100\ProductController;
+// use App\Http\Controllers\Api\V100\ReviewController;
+// use App\Http\Controllers\Api\V100\RewardSystemController;
+// use App\Http\Controllers\Api\V100\ShippingController;
+// use App\Http\Controllers\Api\V100\ShopController;
+// use App\Http\Controllers\Api\V100\UserController;
+// use App\Http\Controllers\Api\V100\VideoShoppingController;
+// use App\Http\Controllers\Api\V100\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -32,10 +53,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v100')->group(function () {
+Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
         Route::post('register', [AuthController::class, 'register']);
+
         Route::post('register-by-phone', [AuthController::class, 'registerByPhone']);
         Route::post('verify-registration-otp', [AuthController::class, 'verifyRegistrationOTP']);
         Route::post('get-login-otp', [AuthController::class, 'getOtp']);
@@ -47,12 +69,39 @@ Route::prefix('v100')->group(function () {
     });
 
     Route::middleware(['jwt.verify'])->group(function () {
+        // user profile
+        Route::get('profile', [UserController::class, 'profile']);
+        // admin view
+        Route::middleware(['adminCheck'])->group(function () {
+            // sellers
+            Route::get('sellers/fetch', [SellerController::class, 'index']);
+            Route::post('sellers/create', [SellerController::class, 'create']);
+            Route::put('sellers/edit/{id}', [SellerController::class, 'update']);
+            Route::put('sellers/setactive/{id}', [UserController::class, 'setActive']);
+            Route::delete('sellers/delete/{id}', [SellerController::class, 'delete']);
+            // stores
+            Route::get('stores/fetch', [StoreController::class, 'index']);
+            // customers
+            Route::get('customers/fetch', [\App\Http\Controllers\Admin\UserController::class, 'index']);
+            Route::post('customers/create', [\App\Http\Controllers\Admin\UserController::class, 'create']);
+            Route::put('customers/edit/{id}', [\App\Http\Controllers\Admin\UserController::class, 'update']);
+            Route::put('customers/setactive/{id}', [\App\Http\Controllers\Admin\UserController::class, 'setActive']);
+            Route::delete('customers/delete/{id}', [\App\Http\Controllers\Admin\UserController::class, 'delete']);
+
+        });
+        Route::post('logout', [AuthController::class, 'logout']);
+        Route::post('update-profile', [UserController::class, 'updateProfile']);
+        Route::post('change-password', [UserController::class, 'changePassword']);
+        Route::get('delete-account', [UserController::class, 'destroy']);
+
         //product review
         Route::post('submit-review', [ReviewController::class, 'review']);
         Route::post('submit-reply', [ReviewController::class, 'reply']);
         Route::post('like-unlike-review', [ReviewController::class, 'reviewLike']);
         Route::get('unlike-review', [ReviewController::class, 'unlikeReview']);
         Route::post('delete-coupon', [ShopController::class, 'deleteCoupon']);
+
+        // sellers review
 
         //blog review
         Route::post('blog/submit-review', [BlogController::class, 'storeComment']);
@@ -74,12 +123,6 @@ Route::prefix('v100')->group(function () {
         //wishlist
         Route::get('favourite-products', [WishlistController::class, 'index']);
         Route::get('favourite/{product_id}', [WishlistController::class, 'addOrRemove']);
-
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::get('profile', [UserController::class, 'profile']);
-        Route::post('update-profile', [UserController::class, 'updateProfile']);
-        Route::post('change-password', [UserController::class, 'changePassword']);
-        Route::get('delete-account', [UserController::class, 'destroy']);
 
         Route::get('followed-shop', [ShopController::class, 'followedShop']);
         Route::get('followed-shop/{seller_id}', [ShopController::class, 'followUnfollowShop']);

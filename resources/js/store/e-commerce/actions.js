@@ -74,6 +74,7 @@ import {
   DELETE_STORE_REQUEST,
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
+  SET_ACTIVE_CUSTOMER,
 } from "./actionTypes";
 
 export const getProducts = () => ({
@@ -178,9 +179,9 @@ export const getCartDataFail = error => ({
   payload: error,
 });
 
-export const getCustomers = (keyword) => ({
+export const getCustomers = (query) => ({
   type: GET_CUSTOMERS,
-  payload: keyword
+  payload: query
 });
 
 export const getCustomersSuccess = customers => ({
@@ -210,6 +211,11 @@ export const addCustomerFail = error => ({
 
 export const updateCustomer = customer => ({
   type: UPDATE_CUSTOMER,
+  payload: customer,
+});
+
+export const setActiveCustomer = customer => ({
+  type: SET_ACTIVE_CUSTOMER,
   payload: customer,
 });
 
@@ -341,9 +347,9 @@ export const addNewSellerFail = error => ({
 });
 
 // GET SELLERS
-export const getSellersRequest = () => ({
+export const getSellersRequest = (query) => ({
   type: GET_SELLER_REQUEST,
-  payload: {},
+  payload: query,
 });
 export const getSellersSuccess = (sellers) => ({
   type: GET_SELLER_SUCCESS,
@@ -397,9 +403,9 @@ export const addNewStoreFail = error => ({
 });
 
 // GET STORES
-export const getStoresRequest = () => ({
+export const getStoresRequest = (query) => ({
   type: GET_STORE_REQUEST,
-  payload: {},
+  payload: query,
 });
 export const getStoresSuccess = (stores) => ({
   type: GET_STORE_SUCCESS,

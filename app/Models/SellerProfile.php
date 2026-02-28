@@ -15,7 +15,7 @@ class SellerProfile extends Model
     protected $appends = [];
 
     protected $fillable = [
-        'shop_name', 'user_id', 'slug', 'phone_no', 'address', 'license_no', 'logo', 'shop_banner', 'tax_paper',
+        'shop_name', 'user_id', 'slug', 'phone_no', 'address', 'license_no', 'logo', 'shop_banner', 'tax_paper', 'company_email', 'company_name', 'company_type', 'company_website', 'city', 'postcode',
         'shop_page_contents', 'meta_title', 'meta_description', 'verified_at','seller_country_id','affiliate_amount','affiliate_amount_type','ai_review_option'
     ];
 

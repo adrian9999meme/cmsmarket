@@ -474,7 +474,7 @@ class WalletController extends Controller
     public function redirect_to_merchant($url)
     {
         ?>
-        <html xmlns="http://www.w3.org/1999/xhtml">
+        <html xmlns="https://www.w3.org/1999/xhtml">
         <head><script type="text/javascript">
                 function closethisasap() { document.forms["redirectpost"].submit(); }
             </script></head>

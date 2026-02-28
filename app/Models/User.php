@@ -33,7 +33,8 @@ class User extends EloquentUser implements JWTSubject, ContractAuthenticatable
         'referral_code',
         'referred_by_user',
         'balance',
-        'ai_review_option'
+        'ai_review_option',
+        'status'
     ];
     protected $hidden = [
         'password',

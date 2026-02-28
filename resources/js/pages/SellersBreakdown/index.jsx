@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createSelector } from "reselect";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import {
   Container,
   Row,
@@ -25,89 +26,43 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 import defaultLogoImg from "../../../images/companies/img-1.png";
 
 // Placeholder logo - in real app would be seller logo URL
-const defaultLogo = defaultLogoImg;
-
-// Mock data - no database (MVP)
-const MOCK_SELLERS = [
-  {
-    id: "S001",
-    sellerNumber: "SEL-001",
-    companyName: "HomePro Supplies Ltd",
-    companyLogo: defaultLogoImg,
-    director: {
-      name: "James Wilson",
-      position: "Managing Director",
-      email: "j.wilson@homepro.co.uk",
-      tel: "+44 7700 900100",
-    },
-    industry: "Domestic products",
-    storesCount: 5,
-    lastLogin: "2024-01-16 09:22",
-    orders: 1240,
-    published: true,
-  },
-  {
-    id: "S002",
-    sellerNumber: "SEL-002",
-    companyName: "ElectroWorld Ltd",
-    companyLogo: defaultLogoImg,
-    director: {
-      name: "Sarah Mitchell",
-      position: "Sales Director",
-      email: "s.mitchell@electroworld.com",
-      tel: "+44 7700 900200",
-    },
-    industry: "Electrical products",
-    storesCount: 3,
-    lastLogin: "2024-01-15 14:18",
-    orders: 892,
-    published: true,
-  },
-  {
-    id: "S003",
-    sellerNumber: "SEL-003",
-    companyName: "BuildRight Materials",
-    companyLogo: defaultLogoImg,
-    director: {
-      name: "David Clarke",
-      position: "Operations Manager",
-      email: "d.clarke@buildright.co.uk",
-      tel: "+44 7700 900300",
-    },
-    industry: "Construction & building materials",
-    storesCount: 8,
-    lastLogin: "2024-01-14 11:05",
-    orders: 2156,
-    published: false,
-  },
-];
 
 const initialFormState = {
-  sellerNumber: "",
-  companyName: "",
-  companyLogo: "",
-  directorName: "",
-  directorPosition: "",
-  directorEmail: "",
-  directorTel: "",
-  industry: "",
-  storesCount: 0,
-  lastLogin: "",
-  orders: 0,
-  published: true,
+  company_name: "",
+  address: "",
+  postcode: "",
+  city: "",
+  phone_no: "",
+  company_email: "",
+  license_no: "",
+  company_website: "",
+  company_type: "",
+  number_employees: "",
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone: "",
+  password: "",
+  password_confirmation: "",
+  status: 0,
 };
 
 const SellersBreakdown = () => {
+
   document.title = "Sellers Breakdown | LEKIT Ltd";
 
+  const { status } = useParams();
   const dispatch = useDispatch()
-
   const [searchTerm, setSearchTerm] = useState("");
   const [sellers, setSellers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // add | edit | view
   const [currentRecord, setCurrentRecord] = useState(null);
   const [formValues, setFormValues] = useState(initialFormState);
+  const [query, setQuery] = useState({
+    status: 'all',
+    searchKeyword: ''
+  })
 
   const ecommerceSelector = createSelector(
     state => state.ecommerce,
@@ -118,78 +73,63 @@ const SellersBreakdown = () => {
   const { allsellers } = useSelector(ecommerceSelector);
 
   useEffect(() => {
-    const alteredSellers = Array.isArray(allsellers)
-      ? allsellers.map(s => ({
-        id: s.id,
-        sellerNumber: `SEL-${s.id}`,
-        companyName: s.company_name,
-        companyLogo: defaultLogoImg,
-        director: {
-          name: "David Clarke",
-          position: "Operations Manager",
-          email: s.company_email,
-          tel: s.phone_no,
-        },
-        industry: s.company_type,
-        storesCount: 8,
-        lastLogin: "2024-01-14 11:05",
-        orders: 2156,
-        published: s.published || false,
-      }))
-      : [];
-    setSellers(Array.isArray(alteredSellers) ? alteredSellers : []);
+    setSellers(allsellers)
   }, [allsellers]);
 
   useEffect(() => {
-    dispatch(getSellersRequest());
+    if (status === 'all') {
+      setQuery({ ...query, status: '' })
+      dispatch(getSellersRequest(query));
+    } else if (status === 'pending') {
+      setQuery({ ...query, status: 'pending' })
+      dispatch(getSellersRequest(query));
+    } else if (status === 'blocked') {
+      setQuery({ ...query, status: 'blocked' })
+      dispatch(getSellersRequest(query));
+    } else if (status === 'add') {
+
+    }
   }, [dispatch]);
 
   const togglePublish = (id) => {
-    const seller = sellers.find(seller => seller.id === id);
+    const seller = sellers.find(seller => seller.seller_profile.id === id);
     if (seller) {
-      const updatedSeller = { ...seller, published: !seller.published };
-      dispatch(editSellerRequest(updatedSeller));
+      const updatedSeller = { ...seller, status: !seller.status };
+      // dispatch(editSellerRequest(updatedSeller));
     }
   };
-
-  const filteredSellers = useMemo(() => {
-    if (!searchTerm.trim()) return sellers;
-    const term = searchTerm.toLowerCase();
-    return sellers.filter(
-      (s) =>
-        s.sellerNumber.toLowerCase().includes(term) ||
-        s.companyName.toLowerCase().includes(term) ||
-        s.director.name.toLowerCase().includes(term) ||
-        s.industry.toLowerCase().includes(term)
-    );
-  }, [sellers, searchTerm]);
 
   const openAddModal = () => {
     setModalMode("add");
     setCurrentRecord(null);
     setFormValues({
       ...initialFormState,
-      sellerNumber: `SEL-${String(sellers.length + 1).padStart(3, "0")}`,
     });
     setModalOpen(true);
   };
 
-  const openViewOrEditModal = (mode, record) => {
+  const openViewOrEditModal = (mode, row) => {
+    const record = sellers.find(s => s.seller_profile.id === row.seller_profile.id)
     setModalMode(mode);
     setCurrentRecord(record);
     setFormValues({
-      sellerNumber: record.sellerNumber,
-      companyName: record.companyName,
-      companyLogo: record.companyLogo || "",
-      directorName: record.director.name,
-      directorPosition: record.director.position,
-      directorEmail: record.director.email,
-      directorTel: record.director.tel,
-      industry: record.industry,
-      storesCount: record.storesCount,
-      lastLogin: record.lastLogin,
-      orders: record.orders,
-      published: record.published,
+      company_name: record.seller_profile?.company_name || "",
+      address: record.seller_profile?.address || "",
+      postcode: record.seller_profile?.postcode || "",
+      city: record.seller_profile?.city || "",
+      phone_no: record.seller_profile?.phone_no || "",
+      company_email: record.seller_profile?.company_email || "",
+      license_no: record.seller_profile?.license_no || "",
+      company_website: record.seller_profile?.company_website || "",
+      company_type: record.seller_profile?.company_type || "",
+      number_employees: record.seller_profile?.number_employees || "",
+      status: record.seller_profile.status,
+      first_name: record.first_name,
+      last_name: record.last_name,
+      email: record.email,
+      phone: record.phone,
+      password: '',
+      password_confirmation: ''
     });
     setModalOpen(true);
   };
@@ -198,89 +138,68 @@ const SellersBreakdown = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    const parsed = name === "storesCount" || name === "orders" ? parseInt(value, 10) || 0 : value;
-    setFormValues((prev) => ({ ...prev, [name]: parsed }));
+    setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = () => {
     if (modalMode === "view") {
-      setModalOpen(false);
+      setModalOpen(true);
       return;
     }
 
     if (modalMode === "add") {
-      // const newSeller = {
-      //   id: `S${String(sellers.length + 1).padStart(3, "0")}`,
-      //   sellerNumber: formValues.sellerNumber,
-      //   companyName: formValues.companyName,
-      //   companyLogo: formValues.companyLogo || defaultLogoImg,
-      //   director: {
-      //     name: formValues.directorName,
-      //     position: formValues.directorPosition,
-      //     email: formValues.directorEmail,
-      //     tel: formValues.directorTel,
-      //   },
-      //   industry: formValues.industry,
-      //   storesCount: formValues.storesCount || 0,
-      //   lastLogin: formValues.lastLogin || new Date().toISOString().slice(0, 16).replace("T", " "),
-      //   orders: formValues.orders || 0,
-      //   published: formValues.published,
-      // };
       const newSeller = {
-        company_name: formValues.companyName,
-        company_email: formValues.directorEmail,
-        phone_no: formValues.directorTel,
-        company_type: formValues.industry,
-        published: formValues.published,
+        company_name: formValues.company_name || "",
+        address: formValues.address || "",
+        postcode: formValues.postcode || "",
+        city: formValues.city || "",
+        phone_no: formValues.phone_no || "",
+        company_email: formValues.company_email || "",
+        license_no: formValues.license_no || "",
+        company_website: formValues.company_website || "",
+        company_type: formValues.company_type || "",
+        number_employees: formValues.number_employees || "",
+        status: formValues.status,
+        first_name: formValues.first_name,
+        last_name: formValues.last_name,
+        email: formValues.email,
+        phone: formValues.phone,
+        password: formValues.password,
+        password_confirmation: formValues.password_confirmation
       };
-      // setSellers((prev) => [...prev, newSeller]);
-      dispatch(addNewSellerRequest(newSeller))
+
+      // dispatch(addNewSellerRequest(newSeller))
     } else if (modalMode === "edit" && currentRecord) {
-      // setSellers((prev) =>
-      //   prev.map((s) =>
-      //     s.id === currentRecord.id
-      //       ? {
-      //         ...s,
-      //         sellerNumber: formValues.sellerNumber,
-      //         companyName: formValues.companyName,
-      //         companyLogo: formValues.companyLogo || defaultLogoImg || s.companyLogo,
-      //         director: {
-      //           name: formValues.directorName,
-      //           position: formValues.directorPosition,
-      //           email: formValues.directorEmail,
-      //           tel: formValues.directorTel,
-      //         },
-      //         industry: formValues.industry,
-      //         storesCount: formValues.storesCount,
-      //         lastLogin: formValues.lastLogin,
-      //         orders: formValues.orders,
-      //         published: formValues.published,
-      //       }
-      //       : s
-      //   )
-      // );
+      const seller = sellers.find(item => item.seller_profile.id === currentRecord.seller_profile.id)
+      let updatedSeller = {
+        ...seller,
+        company_name: formValues.company_name,
+        address: formValues.address,
+        postcode: formValues.postcode,
+        city: formValues.city,
+        phone_no: formValues.phone_no,
+        company_email: formValues.company_email,
+        license_no: formValues.license_no,
+        company_website: formValues.company_website,
+        company_type: formValues.company_type,
+        number_employees: formValues.number_employees,
+        status: formValues.status,
+        first_name: formValues.first_name,
+        last_name: formValues.last_name,
+        email: formValues.email,
+        phone: formValues.phone,
+        password: formValues.password,
+        password_confirmation: formValues.password_confirmation
+      }
 
-      const updatedSeller = sellers.map((s) =>
-        s.id === currentRecord.id
-          ? {
-            id: currentRecord.id,
-            company_name: formValues.companyName,
-            company_email: formValues.directorEmail,
-            phone_no: formValues.directorTel,
-            company_type: formValues.industry,
-            published: formValues.published,
-          }
-          : {}
-      ).find(item => item.id === currentRecord.id)
-
-      dispatch(editSellerRequest(updatedSeller))
+      // dispatch(editSellerRequest(updatedSeller))
     }
-    setModalOpen(false);
+    // setModalOpen(false);
   };
 
   const handleRemove = (id) => {
     if (window.confirm("Remove this seller?")) {
-      dispatch(deleteSellerRequest(id))
+      // dispatch(deleteSellerRequest(id))
     }
   };
 
@@ -308,8 +227,8 @@ const SellersBreakdown = () => {
                 <Input
                   type="text"
                   placeholder="SEARCH SELLER"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={query.searchKeyword}
+                  onChange={(e) => setQuery({ ...query, searchKeyword: e.target.value })}
                   className="form-control"
                 />
               </InputGroup>
@@ -330,47 +249,59 @@ const SellersBreakdown = () => {
                     <Table className="table table-bordered table-nowrap align-middle mb-0">
                       <thead className="table-light">
                         <tr>
-                          <th>Seller #</th>
                           <th>Company Name</th>
                           <th>Director / Manager</th>
-                          <th>Industry</th>
-                          <th>Stats</th>
+                          <th>Info</th>
                           <th>Seller Publish</th>
-                          <th className="text-center">Actions</th>
+                          <th className="text-center">Options</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredSellers.map((row) => (
+                        {sellers.map((row) => (
                           <tr key={row.id}>
-                            <td>{row.sellerNumber}</td>
                             <td>
                               <div className="d-flex align-items-center">
-                                <img
-                                  src={row.companyLogo}
-                                  alt=""
-                                  className="rounded me-2"
-                                  style={{ width: 36, height: 36, objectFit: "contain" }}
-                                  onError={(e) => {
-                                    e.target.src = defaultLogoImg;
-                                  }}
-                                />
-                                <span>{row.companyName}</span>
+                                <div>
+                                  <img
+                                    src={row.seller_profile?.logo?.original_image || defaultLogoImg}
+                                    alt=""
+                                    className="rounded me-2"
+                                    style={{ width: 36, height: 36, objectFit: "contain" }}
+                                    onError={(e) => {
+                                      e.target.src = defaultLogoImg;
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <p className="mb-1">{row.seller_profile?.company_name}</p>
+                                  <p className="mb-1">{row.seller_profile?.company_email}</p>
+                                </div>
                               </div>
                             </td>
                             <td>
-                              <div className="d-flex flex-column small">
-                                <span className="fw-medium">{row.director.name}</span>
-                                <span className="text-muted">{row.director.position}</span>
-                                <span>{row.director.email}</span>
-                                <span>{row.director.tel}</span>
+                              <div className="d-flex gap-2 align-items-center">
+                                <div>
+                                  <img
+                                    src={row.profile_image || defaultLogoImg}
+                                    alt=""
+                                    className="rounded me-2"
+                                    style={{ width: 36, height: 36, objectFit: "contain" }}
+                                    onError={(e) => {
+                                      e.target.src = defaultLogoImg;
+                                    }}
+                                  />
+                                </div>
+                                <div className="d-flex flex-column small">
+                                  <span className="fw-medium">{row.full_name}</span>
+                                  <span className="text-muted">{row.email}</span>
+                                  <span>{row.phone}</span>
+                                </div>
                               </div>
                             </td>
-                            <td>{row.industry}</td>
                             <td>
                               <div className="small">
-                                <div>Stores: {row.storesCount}</div>
-                                <div>Last Login: {row.lastLogin}</div>
-                                <div>Orders: {row.orders}</div>
+                                <div>Current Balance: {row.balance}</div>
+                                <div>Last Login: {row.last_login}</div>
                               </div>
                             </td>
                             <td>
@@ -379,35 +310,40 @@ const SellersBreakdown = () => {
                                   className="form-check-input"
                                   type="checkbox"
                                   id={`pub-${row.id}`}
-                                  checked={row.published}
-                                  onChange={() => togglePublish(row.id)}
+                                  checked={row.status}
+                                  onChange={() => togglePublish(row.seller_profile.id)}
                                 />
                                 <label className="form-check-label" htmlFor={`pub-${row.id}`}>
-                                  {row.published ? "On" : "Off"}
+                                  {row.status ? "On" : "Off"}
                                 </label>
                               </div>
                             </td>
                             <td className="text-center">
                               <div className="d-flex justify-content-center gap-1 flex-wrap">
-                                <ActionIcon
-                                  iconClass="bx-user"
+                                <Button
+                                  color="link"
+                                  className={`p-1`}
                                   title="View Profile"
                                   onClick={() => openViewOrEditModal("view", row)}
-                                />
-                                <ActionIcon
-                                  iconClass="bx-edit-alt"
+                                >
+                                  <i className={`bx bx-user font-size-18`}></i>
+                                </Button>
+                                <Button
+                                  color="link"
+                                  className={`p-1`}
                                   title="Edit Profile"
                                   onClick={() => openViewOrEditModal("edit", row)}
-                                />
-                                {/* <ActionIcon iconClass="bx-folder" title="Company Files" onClick={() => { }} />
-                                <ActionIcon iconClass="bx-store" title="Stores" onClick={() => { }} />
-                                <ActionIcon iconClass="bx-envelope" title="Contact Director" onClick={() => { }} /> */}
-                                <ActionIcon
-                                  iconClass="bx-trash"
+                                >
+                                  <i className={`bx bx-edit-alt font-size-18`}></i>
+                                </Button>
+                                <Button
+                                  color="link"
+                                  className={`p-1 text-danger`}
                                   title="Remove"
-                                  colorClass="text-danger"
                                   onClick={() => handleRemove(row.id)}
-                                />
+                                >
+                                  <i className={`bx bx-trash font-size-18`}></i>
+                                </Button>
                               </div>
                             </td>
                           </tr>
@@ -429,27 +365,30 @@ const SellersBreakdown = () => {
         <ModalBody>
           <Form>
             <Row className="mb-3">
-              <Col md={4}>
+              <Col>
                 <FormGroup>
-                  <Label for="field-sellerNumber">Seller #</Label>
+                  <Label for="field-company-name">Company Name *</Label>
                   <Input
-                    id="field-sellerNumber"
-                    name="sellerNumber"
+                    id="field-company-name"
+                    name="company_name"
                     type="text"
-                    value={formValues.sellerNumber}
+                    value={formValues.company_name}
                     onChange={handleFormChange}
-                    readOnly={modalMode !== "add"}
+                    readOnly={modalMode === "view"}
                   />
                 </FormGroup>
               </Col>
-              <Col md={8}>
+            </Row>
+
+            <Row className="mb-3">
+              <Col>
                 <FormGroup>
-                  <Label for="field-companyName">Company Name</Label>
+                  <Label for="field-companyAddress">Address *</Label>
                   <Input
-                    id="field-companyName"
-                    name="companyName"
+                    id="field-address"
+                    name="address"
                     type="text"
-                    value={formValues.companyName}
+                    value={formValues.address}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
@@ -460,12 +399,12 @@ const SellersBreakdown = () => {
             <Row className="mb-3">
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-directorName">Director / Manager Name</Label>
+                  <Label for="field-postcode">Postcode</Label>
                   <Input
-                    id="field-directorName"
-                    name="directorName"
+                    id="field-postcode"
+                    name="postcode"
                     type="text"
-                    value={formValues.directorName}
+                    value={formValues.postcode}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
@@ -473,12 +412,28 @@ const SellersBreakdown = () => {
               </Col>
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-directorPosition">Position</Label>
+                  <Label for="field-city">City</Label>
                   <Input
-                    id="field-directorPosition"
-                    name="directorPosition"
+                    id="field-city"
+                    name="city"
                     type="text"
-                    value={formValues.directorPosition}
+                    value={formValues.city}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
+              <Col>
+                <FormGroup>
+                  <Label for="field-phone_no">Company Telephone</Label>
+                  <Input
+                    id="field-phone_no"
+                    name="phone_no"
+                    type="text"
+                    value={formValues.phone_no}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
@@ -489,12 +444,12 @@ const SellersBreakdown = () => {
             <Row className="mb-3">
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-directorEmail">Email</Label>
+                  <Label for="field-company_email">Company Email</Label>
                   <Input
-                    id="field-directorEmail"
-                    name="directorEmail"
+                    id="field-company_email"
+                    name="company_email"
                     type="email"
-                    value={formValues.directorEmail}
+                    value={formValues.company_email}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
@@ -502,12 +457,28 @@ const SellersBreakdown = () => {
               </Col>
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-directorTel">Tel</Label>
+                  <Label for="field-license_no">Company Number</Label>
                   <Input
-                    id="field-directorTel"
-                    name="directorTel"
+                    id="field-license_no"
+                    name="license_no"
                     type="text"
-                    value={formValues.directorTel}
+                    value={formValues.license_no}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
+              <Col>
+                <FormGroup>
+                  <Label for="field-company_website">Company Website</Label>
+                  <Input
+                    id="field-company_website"
+                    name="company_website"
+                    type="text"
+                    value={formValues.company_website || ""}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
@@ -518,41 +489,25 @@ const SellersBreakdown = () => {
             <Row className="mb-3">
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-industry">Industry</Label>
+                  <Label for="field-company_type">Company Type</Label>
                   <Input
-                    id="field-industry"
-                    name="industry"
+                    id="field-company_type"
+                    name="company_type"
                     type="text"
-                    value={formValues.industry}
-                    onChange={handleFormChange}
-                    placeholder="e.g. domestic products, electrical products"
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
-              <Col md={3}>
-                <FormGroup>
-                  <Label for="field-storesCount">Stores</Label>
-                  <Input
-                    id="field-storesCount"
-                    name="storesCount"
-                    type="number"
-                    min={0}
-                    value={formValues.storesCount}
+                    value={formValues.company_type || ""}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
                 </FormGroup>
               </Col>
-              <Col md={3}>
+              <Col md={6}>
                 <FormGroup>
-                  <Label for="field-orders">Orders</Label>
+                  <Label for="field-number_employees">Number of Employees</Label>
                   <Input
-                    id="field-orders"
-                    name="orders"
+                    id="field-number_employees"
+                    name="number_employees"
                     type="number"
-                    min={0}
-                    value={formValues.orders}
+                    value={formValues.number_employees || ""}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
                   />
@@ -560,20 +515,7 @@ const SellersBreakdown = () => {
               </Col>
             </Row>
 
-            <Row className="mb-0">
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="field-lastLogin">Last Login</Label>
-                  <Input
-                    id="field-lastLogin"
-                    name="lastLogin"
-                    type="text"
-                    value={formValues.lastLogin}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
+            <Row className="mb-1">
               {modalMode !== "view" && (
                 <Col md={6} className="d-flex align-items-end pb-3">
                   <FormGroup check className="form-switch">
@@ -581,9 +523,9 @@ const SellersBreakdown = () => {
                       type="checkbox"
                       name="published"
                       id="field-published"
-                      checked={formValues.published}
+                      checked={formValues.status}
                       onChange={(e) =>
-                        setFormValues((prev) => ({ ...prev, published: e.target.checked }))
+                        setFormValues((prev) => ({ ...prev, status: e.target.checked }))
                       }
                     />
                     <Label check for="field-published">
@@ -592,6 +534,104 @@ const SellersBreakdown = () => {
                   </FormGroup>
                 </Col>
               )}
+            </Row>
+
+            <Row className="mt-2">
+              <Col>
+                <br />
+                <p className="mt-5 mb-3">Director / Manager</p>
+              </Col>
+            </Row>
+
+            <Row className="mt-2">
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="field-first_name">First Name</Label>
+                  <Input
+                    id="field-first_name"
+                    name="first_name"
+                    type="text"
+                    value={formValues.first_name || ""}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="field-last_name">Last Name</Label>
+                  <Input
+                    id="field-last_name"
+                    name="last_name"
+                    type="text"
+                    value={formValues.last_name || ""}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col>
+                <FormGroup>
+                  <Label for="field-email">Email</Label>
+                  <Input
+                    id="field-email"
+                    name="email"
+                    type="text"
+                    value={formValues.email || ""}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col>
+                <FormGroup>
+                  <Label for="field-phone">Phone</Label>
+                  <Input
+                    id="field-phone"
+                    name="phone"
+                    type="text"
+                    value={formValues.phone || ""}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <FormGroup>
+                  <Label for="field-password">Password</Label>
+                  <Input
+                    id="field-password"
+                    name="password"
+                    type="text"
+                    value={formValues.password || ""}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <FormGroup>
+                  <Label for="field-password_confirmation">Confirm Password</Label>
+                  <Input
+                    id="field-password_confirmation"
+                    name="password_confirmation"
+                    type="text"
+                    value={formValues.password_confirmation || ""}
+                    onChange={handleFormChange}
+                    readOnly={modalMode === "view"}
+                  />
+                </FormGroup>
+              </Col>
             </Row>
           </Form>
         </ModalBody>

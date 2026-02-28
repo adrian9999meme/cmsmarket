@@ -2,6 +2,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { call, put, takeEvery } from "redux-saga/effects";
 
+import api from '../api'
 // Ecommerce Redux States
 import {
   GET_CART_DATA,
@@ -45,6 +46,7 @@ import {
   DELETE_STORE_REQUEST,
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
+  SET_ACTIVE_CUSTOMER,
 } from "./actionTypes";
 
 import {
@@ -108,6 +110,8 @@ import {
   deleteStoreFail,
 } from "./actions";
 
+import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API } from "../endpoints";
+
 //Include Both Helper File with needed methods
 // import {
 //   getCartData,
@@ -166,9 +170,9 @@ function* fetchCartData() {
   }
 }
 
-function* fetchCustomers({payload: keyword}) {
+function* fetchCustomers({ payload: { status, searchKeyword } }) {
   try {
-    const response = yield axios.get(`/api/customer/fetch/${keyword}`);
+    const response = yield api.get(`${GET_CUSTOMERS_API}?status=${status}&keyword=${searchKeyword}`);
     if (response.data?.success) {
       yield put(getCustomersSuccess(response.data?.data?.data));
       toast.success("Customers Fetch Successfully", { autoClose: 2000 });
@@ -179,9 +183,22 @@ function* fetchCustomers({payload: keyword}) {
   }
 }
 
-function* onUpdateCustomer({payload: customer}) {
+function* onUpdateCustomer({ payload: customer }) {
   try {
-    const response = yield axios.put(`/api/customer/edit/${customer.id}`, customer);
+    const response = yield api.put(`${EDIT_CUSTOMER_API}${customer.id}`, customer);
+    if (response.data?.success) {
+      yield put(updateCustomerSuccess(response.data?.data));
+      toast.success("Customer Update Successfully", { autoClose: 2000 });
+    }
+  } catch (error) {
+    yield put(updateCustomerFail(error));
+    toast.error("Customer Update Failed", { autoClose: 2000 });
+  }
+}
+
+function* onSetActiveCustomer({ payload: customer }) {
+  try {
+    const response = yield api.put(`${SET_ACTIVE_CUSTOMER_API}${customer.id}`, customer);
     if (response.data?.success) {
       yield put(updateCustomerSuccess(response.data?.data));
       toast.success("Customer Update Successfully", { autoClose: 2000 });
@@ -194,8 +211,8 @@ function* onUpdateCustomer({payload: customer}) {
 
 function* onDeleteCustomer({ payload: id }) {
   try {
-    const response = yield axios.delete(`/api/customer/delete/${id}`);
-    if (response.data?.success){
+    const response = yield api.delete(`${DELETE_CUSTOMER_API}${id}`);
+    if (response.data?.success) {
       yield put(deleteCustomerSuccess(response.data?.data));
       toast.success("Customer Deleted Successfully", { autoClose: 2000 });
     }
@@ -205,10 +222,10 @@ function* onDeleteCustomer({ payload: id }) {
   }
 }
 
-function* onAddNewCustomer(customer) {
+function* onAddNewCustomer({ payload: customer }) {
   try {
     console.log("customer:", customer)
-    const response = yield axios.post('/api/customer/create', customer.payload);
+    const response = yield api.post(ADD_NEW_CUSTOMER_API, customer);
     if (response.data?.data) {
       yield put(addCustomerSuccess(response.data?.data));
       toast.success("Customer Added Successfully", { autoClose: 1000 });
@@ -309,10 +326,9 @@ function* onAddComment({ payload: { productId, commentText } }) {
   }
 }
 
-function* onAddNewSeller({payload: seller}) {
+function* onAddNewSeller({ payload: seller }) {
   try {
-    const response = yield axios.post('/api/seller/create', seller);
-    console.log("response", response)
+    const response = yield api.post(ADD_NEW_SELLER_API, seller);
     if (response.data?.success) {
       yield put(addNewSellerSuccess(response.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
@@ -323,9 +339,9 @@ function* onAddNewSeller({payload: seller}) {
   }
 }
 
-function* fetchSellers() {
+function* fetchSellers({ payload: { status, searchKeyword } }) {
   try {
-    const response = yield axios.get('/api/seller/fetch');
+    const response = yield api.get(`${GET_SELLERS_API}?status=${status}&keyword=${searchKeyword}`);
     if (response.data?.success) {
       yield put(getSellersSuccess(response.data?.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
@@ -336,9 +352,9 @@ function* fetchSellers() {
   }
 }
 
-function* onEditSeller({payload: seller}) {
+function* onEditSeller({ payload: seller }) {
   try {
-    const response = yield axios.put(`/api/seller/edit/${seller.id}`, seller);
+    const response = yield api.put(`${EDIT_SELLER_API}${seller.id}`, seller);
     if (response.data?.success) {
       yield put(editSellerSuccess(response.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
@@ -349,9 +365,9 @@ function* onEditSeller({payload: seller}) {
   }
 }
 
-function* onDeleteSeller({payload: id}) {
+function* onDeleteSeller({ payload: id }) {
   try {
-    const response = yield axios.delete(`/api/seller/delete/${id}`);
+    const response = yield api.delete(`${DELETE_SELLER_API}${id}`);
     if (response.data?.success) {
       yield put(deleteSellerSuccess(response.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
@@ -362,9 +378,9 @@ function* onDeleteSeller({payload: id}) {
   }
 }
 
-function* onAddNewStore({payload: store}) {
+function* onAddNewStore({ payload: store }) {
   try {
-    const response = yield axios.post('/api/store/create', store);
+    const response = yield api.post(ADD_NEW_STORE_API, store);
     if (response.data?.success) {
       yield put(addNewStoreSuccess(response.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
@@ -375,9 +391,9 @@ function* onAddNewStore({payload: store}) {
   }
 }
 
-function* fetchStores() {
+function* fetchStores({ payload: { status, searchKeyword } }) {
   try {
-    const response = yield axios.get('/api/store/fetch');
+    const response = yield api.get(`${GET_STORES_API}?status=${status}&keyword=${searchKeyword}`);
     if (response.data?.success) {
       yield put(getStoresSuccess(response.data?.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
@@ -388,7 +404,7 @@ function* fetchStores() {
   }
 }
 
-function* onEditStore({payload: store}) {
+function* onEditStore({ payload: store }) {
   try {
     const response = yield axios.put(`/api/store/edit/${store.id}`, store);
     if (response.data?.success) {
@@ -401,7 +417,7 @@ function* onEditStore({payload: store}) {
   }
 }
 
-function* onDeleteStore({payload: id}) {
+function* onDeleteStore({ payload: id }) {
   try {
     const response = yield axios.delete(`/api/store/delete/${id}`);
     if (response.data?.success) {
@@ -423,6 +439,7 @@ function* ecommerceSaga() {
   yield takeEvery(ADD_NEW_CUSTOMER, onAddNewCustomer);
   yield takeEvery(UPDATE_CUSTOMER, onUpdateCustomer);
   yield takeEvery(DELETE_CUSTOMER, onDeleteCustomer);
+  yield takeEvery(SET_ACTIVE_CUSTOMER, onSetActiveCustomer);
   yield takeEvery(GET_SHOPS, fetchShops);
   yield takeEvery(ADD_NEW_ORDER, onAddNewOrder);
   yield takeEvery(UPDATE_ORDER, onUpdateOrder);
