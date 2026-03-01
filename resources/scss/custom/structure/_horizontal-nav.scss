@@ -16,6 +16,13 @@
         margin: 0;
         padding: 0;
     }
+	
+	.navbar-collapse {
+        background-color: transparent !important;
+    }
+    .navbar-collapse.show {
+        background-color: transparent !important;
+    }
 
     .navbar-nav {
         
