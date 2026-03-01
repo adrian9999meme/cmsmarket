@@ -101,21 +101,33 @@ class StoreRepository implements StoreInterface
             }
         }
 
-        return true;
+        // Return the newly created manager with its store profile loaded
+        return $user->load('storeProfile');
     }
 
     public function update($request)
     {
         $user = $this->get($request->id);
 
-        $user->first_name       = $request->first_name;
-        $user->last_name        = $request->last_name;
-        $user->phone            = $request->phone;
-        $user->email            = $request->email;
-        $user->currency_code    = $request->currency_code;
-        if ($request->password != ""):
-                $user->password = bcrypt($request->password);
-        endif;
+        // Only update user fields that are actually present in the request
+        if ($request->has('first_name')) {
+            $user->first_name = $request->first_name;
+        }
+        if ($request->has('last_name')) {
+            $user->last_name = $request->last_name;
+        }
+        if ($request->has('phone')) {
+            $user->phone = $request->phone;
+        }
+        if ($request->has('email')) {
+            $user->email = $request->email;
+        }
+        if ($request->has('currency_code')) {
+            $user->currency_code = $request->currency_code;
+        }
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
         $user->save();
         $request['user_id']     = $request->id;
 

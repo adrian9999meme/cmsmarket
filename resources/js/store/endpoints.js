@@ -6,6 +6,7 @@ export const GET_CURRENT_USER_API = API_VERSION + 'profile';
 
 // sellers
 export const GET_SELLERS_API = API_VERSION + 'sellers/fetch';
+export const HOME_STORE_CATEGORIES_API = API_VERSION + 'home/store-categories';
 export const ADD_NEW_SELLER_API = API_VERSION + 'sellers/create';
 export const EDIT_SELLER_API = API_VERSION + 'sellers/edit/';
 export const SET_ACTIVE_SELLER_API = API_VERSION + 'sellers/setactive/';

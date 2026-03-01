@@ -83,6 +83,12 @@ import {
   SET_STORE_ACTIVE_REQUEST,
   SET_STORE_ACTIVE_SUCCESS,
   SET_STORE_ACTIVE_FAIL,
+  GET_CATEGORIES_SUCCESS,
+  GET_SELLER_LIST_SUCCESS,
+  GET_SELLER_LIST_REQUEST,
+  GET_SELLER_LIST_FAIL,
+  GET_CATEGORIES_REQUEST,
+  GET_CATEGORIES_FAIL,
 } from "./actionTypes";
 
 export const getProducts = () => ({
@@ -368,9 +374,35 @@ export const getSellersSuccess = (sellers) => ({
   type: GET_SELLER_SUCCESS,
   payload: sellers,
 });
+export const getSellersListRequest = () => ({
+  type: GET_SELLER_LIST_REQUEST,
+});
+
+export const getSellersListSuccess = (sellers) => ({
+  type: GET_SELLER_LIST_SUCCESS,
+  payload: sellers,
+});
+
+export const getSellersListFail = (error) => ({
+  type: GET_SELLER_LIST_FAIL,
+  payload: error,
+});
 export const getSellersFail = (error) => ({
   type: GET_SELLER_FAIL,
   payload: {error},
+});
+
+// GET STORE CATEGORIES
+export const getCategoriesRequest = () => ({
+  type: GET_CATEGORIES_REQUEST,
+});
+export const getCategoriesSuccess = (cats) => ({
+  type: GET_CATEGORIES_SUCCESS,
+  payload: cats,
+});
+export const getCategoriesFail = (error) => ({
+  type: GET_CATEGORIES_FAIL,
+  payload: error,
 });
 
 // EDIT SELLER

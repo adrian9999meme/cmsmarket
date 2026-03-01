@@ -183,13 +183,7 @@ class SellerRepository implements SellerInterface
             $sellers->latest();
         }
 
-        if (!array_key_exists('paginate',$data))
-        {
-            $data['paginate'] = 12;
-        }
-
-
-        return $sellers->Available()->paginate($data['paginate']);
+        return $sellers->Available()->get();
     }
 
     public function homePageSellers()

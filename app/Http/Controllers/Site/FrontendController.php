@@ -236,8 +236,9 @@ class FrontendController extends Controller
     public function sellers(SellerInterface $seller,Request $request): \Illuminate\Http\JsonResponse
     {
         try {
+            $sellers = settingHelper('seller_system') == 1 ? $seller->allSeller($request->all()) : [];
             $data = [
-                'sellers' => settingHelper('seller_system') == 1 ? new ShopPaginateResource($seller->allSeller($request->all())) : []
+                'sellers' => $sellers
             ];
             return response()->json($data);
         } catch (\Exception $e) {

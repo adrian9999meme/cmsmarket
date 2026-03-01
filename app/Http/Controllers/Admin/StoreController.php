@@ -154,6 +154,57 @@ class StoreController extends Controller
         }
     }
 
+    /**
+     * API: create a new store (manager + store profile).
+     *
+     * POST /api/v1/stores/create
+     */
+    public function apiStore(UserStoreRequest $request)
+    {
+        if (isDemoServer()):
+            return response()->json([
+                'success' => false,
+                'message' => __('This function is disabled in demo server.'),
+            ], 403);
+        endif;
+
+        $this->validate($request, [
+            'seller_id' => 'required',
+            'store_name' => 'required|unique:stores',
+            'store_code' => 'required|unique:stores',
+            'address' => 'required',
+            'store_phone' => 'required',
+            'store_email' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
+            'store_description' => 'required'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $storeUser = $this->stores->store($request);
+
+            if (!$storeUser) {
+                throw new \Exception(__('Store could not be created'));
+            }
+
+            cache()->forget('exchange_rate');
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Store Created Successfully'),
+                'data'    => $storeUser,
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function edit(Request $request, $id)
     {
         try {
@@ -179,10 +230,16 @@ class StoreController extends Controller
         }
     }
 
-    public function update(UserUpdateRequest $request)
+    public function update(Request $request, $id = null)
     {
         if (isDemoServer()):
             Toastr::info(__('This function is disabled in demo server.'));
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('This function is disabled in demo server.'),
+                ], 403);
+            }
             return redirect()->back();
         endif;
 
@@ -198,17 +255,108 @@ class StoreController extends Controller
             'store_description' => 'required'
         ]);
 
+        /**
+         * Determine the owning user id.
+         * - For admin web form: no route {id}, we use $request->id (user id).
+         * - For API: route {id} is the store_profile id, we map it to user_id.
+         */
+        if ($id !== null) {
+            $storeProfile = \App\Models\StoreProfile::find($id);
+            $userId = $storeProfile ? $storeProfile->user_id : $request->user_id;
+        } else {
+            $userId = $request->id;
+        }
+
         DB::beginTransaction();
         try {
+            // Ensure repository and store profile layer get consistent ids
+            $request->merge(['id' => $userId, 'user_id' => $userId]);
+
             $this->stores->update($request);
             cache()->forget('exchange_rate');
-            Toastr::success(__('Data Updated Successfully'));
             DB::commit();
+
+            // If this is an API call, return JSON with updated store data
+            if ($request->expectsJson()) {
+                $stores = $this->stores->paginate($request, get_pagination('pagination'));
+                $newData = $stores->where('id', $userId)->first();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => __('Store Updated Successfully'),
+                    'data' => $newData,
+                ], 200);
+            }
+
+            // Otherwise behave like the original web controller
+            Toastr::success(__('Data Updated Successfully'));
             return redirect($request->r);
         } catch (\Exception $e) {
             DB::rollBack();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 500);
+            }
+
             Toastr::error($e->getMessage());
             return redirect()->back();
+        }
+    }
+
+    /**
+     * Delete a store (manager) by user id.
+     *
+     * Used by API: DELETE /api/v1/stores/delete/{id}
+     */
+    public function delete(Request $request, $id)
+    {
+        if (isDemoServer()):
+            return response()->json([
+                'success' => false,
+                'message' => __('This function is disabled in demo server.')
+            ], 403);
+        endif;
+
+        // Get the store user (manager)
+        $storeUserId = $id ?? $request->get('id');
+        if (!$storeUserId) {
+            return response()->json([
+                'success' => false,
+                'message' => __('Store ID is required')
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Fetch the user (manager) via repository
+            $storeUser = $this->stores->get($storeUserId);
+
+            if (!$storeUser || $storeUser->user_type !== 'manager') {
+                throw new \Exception(__('Store not found or could not be deleted'));
+            }
+
+            $deleteResult = $storeUser->delete();
+
+            if (!$deleteResult) {
+                throw new \Exception(__('Store could not be deleted'));
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Store deleted successfully'),
+                'data' => $storeUser
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 

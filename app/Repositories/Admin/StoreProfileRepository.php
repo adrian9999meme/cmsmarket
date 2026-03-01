@@ -115,12 +115,26 @@ class StoreProfileRepository implements StoreProfileInterface
             array_push($is_closed, 0);
         endif;
 
-        $open_time = $request->open_time;
-        $close_time = $request->close_time;
+        // Build opening hours:
+        // - If open_time/close_time arrays are provided, use them (admin form).
+        // - Else, if an opening_hours array is provided (API), use it directly.
         $opening_hours = [];
-        for($i=0; $i<count($open_time); $i++){
-            $opening_hours[] = Array('open'=>$open_time[$i], 'close'=>$close_time[$i], 'is_closed'=>$is_closed[$i]);
+
+        $open_time  = $request->open_time;
+        $close_time = $request->close_time;
+
+        if (is_array($open_time) && is_array($close_time) && count($open_time) === count($close_time)) {
+            for ($i = 0; $i < count($open_time); $i++) {
+                $opening_hours[] = [
+                    'open'      => $open_time[$i],
+                    'close'     => $close_time[$i],
+                    'is_closed' => $is_closed[$i] ?? 0,
+                ];
+            }
+        } elseif (is_array($request->opening_hours)) {
+            $opening_hours = $request->opening_hours;
         }
+
         $store->opening_hours = $opening_hours;
         
         if ($request->has('status')):
@@ -199,12 +213,28 @@ class StoreProfileRepository implements StoreProfileInterface
             array_push($is_closed, 0);
         endif;
 
-        $open_time = $request->open_time;
+        // Build opening hours on update:
+        // - If open_time/close_time arrays are provided, rebuild from them.
+        // - Else if opening_hours is provided (API), use it as-is.
+        // - Else keep existing opening_hours.
+        $opening_hours = $store->opening_hours ?? [];
+
+        $open_time  = $request->open_time;
         $close_time = $request->close_time;
-        $opening_hours = [];
-        for($i=0; $i<count($open_time); $i++){
-            $opening_hours[] = Array('open'=>$open_time[$i], 'close'=>$close_time[$i], 'is_closed'=>$is_closed[$i]);
+
+        if (is_array($open_time) && is_array($close_time) && count($open_time) === count($close_time)) {
+            $opening_hours = [];
+            for ($i = 0; $i < count($open_time); $i++) {
+                $opening_hours[] = [
+                    'open'      => $open_time[$i],
+                    'close'     => $close_time[$i],
+                    'is_closed' => $is_closed[$i] ?? 0,
+                ];
+            }
+        } elseif (is_array($request->opening_hours)) {
+            $opening_hours = $request->opening_hours;
         }
+
         $store->opening_hours = $opening_hours;
 
         if ($request->file('logo') != ''):
@@ -235,16 +265,20 @@ class StoreProfileRepository implements StoreProfileInterface
         $store->save();
 
         // Here we assign store category and store.
-        $cat = StoresCategory::where('store_id', $store->id)->get();
-        if(count($cat) == 0) {
-            StoresCategory::create([
-                'store_id' => $store->id, 'category_id' => $request->category
-            ]);
-        } else {
-            StoresCategory::where('store_id', $store->id)->update([
-                'store_id' => $store->id, 
-                'category_id' => $request->category
-            ]);
+        // For API updates, category may be omitted; in that case, keep existing category.
+        if ($request->has('category') && $request->category !== '' && $request->category !== null) {
+            $cat = StoresCategory::where('store_id', $store->id)->get();
+            if (count($cat) == 0) {
+                StoresCategory::create([
+                    'store_id'   => $store->id,
+                    'category_id'=> $request->category,
+                ]);
+            } else {
+                StoresCategory::where('store_id', $store->id)->update([
+                    'store_id'   => $store->id,
+                    'category_id'=> $request->category,
+                ]);
+            }
         }
 
         // $storesCategory=new StoresCategory();

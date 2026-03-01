@@ -28,6 +28,7 @@ import {
   GET_SELLER_REQUEST,
   GET_SELLER_SUCCESS,
   GET_SELLER_FAIL,
+  GET_SELLER_LIST_REQUEST,
   EDIT_SELLER_REQUEST,
   EDIT_SELLER_SUCCESS,
   EDIT_SELLER_FAIL,
@@ -46,6 +47,8 @@ import {
   DELETE_STORE_REQUEST,
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
+  GET_CATEGORIES,
+  GET_CATEGORIES_REQUEST,
   SET_STORE_ACTIVE_REQUEST,
   SET_ACTIVE_CUSTOMER,
   SET_ACTIVE_SELLER_REQUEST,
@@ -111,10 +114,14 @@ import {
   deleteStoreRequest,
   deleteStoreSuccess,
   deleteStoreFail,
+  getCategoriesSuccess,
+  getCategoriesFail,
+  getSellersListFail,
   getBlockedCustomersSuccess,
+  getSellersListSuccess,
 } from "./actions";
 
-import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API } from "../endpoints";
+import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API, EDIT_STORE_API, DELETE_STORE_API, HOME_STORE_CATEGORIES_API } from "../endpoints";
 
 //Include Both Helper File with needed methods
 // import {
@@ -184,7 +191,7 @@ function* fetchCustomers({ payload: { subdomain, searchKeyword } }) {
         yield put(getCustomersSuccess(response.data?.data));
       }
       toast.success("Customers Fetch Successfully", { autoClose: 2000 });
-    } 
+    }
   } catch (error) {
     yield put(getCustomersFail(error));
     toast.error("Customers Eetch Failed", { autoClose: 2000 });
@@ -360,6 +367,34 @@ function* fetchSellers({ payload: { status, searchKeyword } }) {
   }
 }
 
+function* fetchCategories() {
+  try {
+    const response = yield api.get(`${HOME_STORE_CATEGORIES_API}`);
+    if (response.data?.categories) {
+      yield put(getCategoriesSuccess(response.data.categories));
+      toast.success("Categories fetched", { autoClose: 1000 });
+    }
+  } catch (error) {
+    yield put(getCategoriesFail(error));
+    toast.error("Failed to load categories", { autoClose: 1000 });
+  }
+}
+
+function* fetchSellersList() {
+  try {
+    const response = yield api.get(GET_SELLERS_API);
+    // API returns paginated data under response.data.data (and items under .data)
+    const sellers = response?.data?.data?.data ?? response?.data?.data ?? [];
+    if (Array.isArray(sellers) && sellers.length >= 0) {
+      yield put(getSellersListSuccess(sellers));
+      toast.success("Sellers list fetched", { autoClose: 1000 });
+    }
+  } catch (error) {
+    yield put(getSellersListFail(error));
+    toast.error("Failed to load sellers list", { autoClose: 1000 });
+  }
+}
+
 function* onEditSeller({ payload: seller }) {
   try {
     const response = yield api.put(`${EDIT_SELLER_API}${seller.id}`, seller);
@@ -429,7 +464,7 @@ function* fetchStores({ payload: { status, searchKeyword } }) {
 
 function* onEditStore({ payload: store }) {
   try {
-    const response = yield axios.put(`/api/store/edit/${store.id}`, store);
+    const response = yield api.put(`${EDIT_STORE_API}${store.id}`, store);
     if (response.data?.success) {
       yield put(editStoreSuccess(response.data?.data));
       toast.success("Store Updated Successfully", { autoClose: 1000 })
@@ -442,7 +477,7 @@ function* onEditStore({ payload: store }) {
 
 function* onDeleteStore({ payload: id }) {
   try {
-    const response = yield axios.delete(`/api/store/delete/${id}`);
+    const response = yield api.delete(`${DELETE_STORE_API}${id}`);
     if (response.data?.success) {
       yield put(deleteStoreSuccess(response.data?.data));
       toast.success("Store Deleted Successfully", { autoClose: 1000 })
@@ -487,6 +522,7 @@ function* ecommerceSaga() {
   yield takeEvery(ON_ADD_REPLY, onAddReply);
   yield takeEvery(ON_ADD_COMMENT, onAddComment);
   yield takeEvery(ADD_SELLER_REQUEST, onAddNewSeller);
+  yield takeEvery(GET_SELLER_LIST_REQUEST, fetchSellersList);
   yield takeEvery(GET_SELLER_REQUEST, fetchSellers);
   yield takeEvery(EDIT_SELLER_REQUEST, onEditSeller);
   yield takeEvery(SET_ACTIVE_SELLER_REQUEST, onSetActiveSeller);
@@ -496,6 +532,7 @@ function* ecommerceSaga() {
   yield takeEvery(EDIT_STORE_REQUEST, onEditStore);
   yield takeEvery(SET_STORE_ACTIVE_REQUEST, onSetActiveStore);
   yield takeEvery(DELETE_STORE_REQUEST, onDeleteStore);
+  yield takeEvery(GET_CATEGORIES_REQUEST, fetchCategories);
 }
 
 export default ecommerceSaga;
