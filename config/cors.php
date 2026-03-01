@@ -22,7 +22,7 @@ return [
         'login',
     ],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['https://lekit.uk', 'https://cms96501.lekit.uk'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
