@@ -15,6 +15,7 @@ export const DELETE_SELLER_API = API_VERSION + 'sellers/delete/';
 export const GET_STORES_API = API_VERSION + 'stores/fetch';
 export const ADD_NEW_STORE_API = API_VERSION + 'stores/create';
 export const EDIT_STORE_API = API_VERSION + 'stores/edit/';
+export const SET_STORE_ACTIVE_API = API_VERSION + 'stores/setactive/';
 export const DELETE_STORE_API = API_VERSION + 'stores/delete/';
 
 // customers

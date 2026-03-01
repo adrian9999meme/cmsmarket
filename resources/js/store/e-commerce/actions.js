@@ -80,6 +80,9 @@ import {
   SET_ACTIVE_SELLER_FAIL,
   GET_BLOCKED_CUSTOMERS_SUCCESS,
   GET_BLOCKED_CUSTOMERS_FAIL,
+  SET_STORE_ACTIVE_REQUEST,
+  SET_STORE_ACTIVE_SUCCESS,
+  SET_STORE_ACTIVE_FAIL,
 } from "./actionTypes";
 
 export const getProducts = () => ({
@@ -453,6 +456,21 @@ export const editStoreFail = error => ({
   type: EDIT_STORE_FAIL,
   payload: error,
 });
+
+// SET STORE ACTIVE STATUS
+export const setStoreActiveRequest = (store) => ({
+  type: SET_STORE_ACTIVE_REQUEST,
+  payload: store,
+});
+export const setStoreActiveSuccess = (store) => ({
+  type: SET_STORE_ACTIVE_SUCCESS,
+  payload: store,
+});
+export const setStoreActiveFail = (error) => ({
+  type: SET_STORE_ACTIVE_FAIL,
+  payload: error,
+});
+
 
 // DELETE STORE
 export const deleteStoreRequest = (id) => ({

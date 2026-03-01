@@ -81,6 +81,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('sellers/delete/{id}', [SellerController::class, 'delete']);
             // stores
             Route::get('stores/fetch', [StoreController::class, 'index']);
+            Route::put('stores/setactive/{id}', [StoreController::class, 'setActive']);
             // customers
             Route::get('customers/fetch', [\App\Http\Controllers\Admin\UserController::class, 'index']);
             Route::post('customers/create', [\App\Http\Controllers\Admin\UserController::class, 'create']);

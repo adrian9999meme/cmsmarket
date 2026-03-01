@@ -20,6 +20,6 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 
-<FilesMatch "\.(js|css|woff|woff2|ttf|eot|svg)$">
-    Header set Access-Control-Allow-Origin "https://lekit.uk"
-</FilesMatch>
+# <FilesMatch "\.(js|css|woff|woff2|ttf|eot|svg)$">
+#     Header set Access-Control-Allow-Origin "https://lekit.uk"
+# </FilesMatch>

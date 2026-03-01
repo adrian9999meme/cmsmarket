@@ -9,6 +9,8 @@ use App\Http\Resources\SiteResource\CouponPaginateResource;
 use App\Http\Resources\SiteResource\ProductPaginateResource;
 use App\Http\Resources\SiteResource\ProductResource;
 use App\Imports\SellerImport;
+use App\Models\StoreProfile;
+use App\Models\User;
 use App\Repositories\Interfaces\Admin\Marketing\CouponInterface;
 use App\Repositories\Interfaces\Admin\MediaInterface;
 use App\Repositories\Interfaces\Admin\Product\ProductInterface;
@@ -27,14 +29,14 @@ class StoreController extends Controller
 
     protected $stores;
     protected $storeProfile;
-    public function __construct(StoreInterface $stores,StoreCategoryInterface $categories,StoreProfileInterface $storeProfile)
+    public function __construct(StoreInterface $stores, StoreCategoryInterface $categories, StoreProfileInterface $storeProfile)
     {
-        if(settingHelper('seller_system') != 1){
+        if (settingHelper('seller_system') != 1) {
             abort(403);
         }
         $this->stores = $stores;
-        $this->categories       = $categories;
-        $this->storeProfile=$storeProfile;
+        $this->categories = $categories;
+        $this->storeProfile = $storeProfile;
     }
 
     public function index(Request $request)
@@ -57,10 +59,10 @@ class StoreController extends Controller
             //     // If status is passed but not "pending" or "blocked", do not apply any additional filter
             // }
             if (!empty($searchKeyword)) {
-                $stores = $stores->where(function($query) use ($searchKeyword) {
+                $stores = $stores->where(function ($query) use ($searchKeyword) {
                     $query->where('store_name', 'like', "%{$searchKeyword}%")
-                          ->orWhere('address', 'like', "%{$searchKeyword}%")
-                          ->orWhere('store_email', 'like', "%{$searchKeyword}%");
+                        ->orWhere('address', 'like', "%{$searchKeyword}%")
+                        ->orWhere('store_email', 'like', "%{$searchKeyword}%");
                 });
             }
 
@@ -71,7 +73,7 @@ class StoreController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message'=>'Retrieved stores successfully',
+                'message' => 'Retrieved stores successfully',
                 'data' => $stores
             ]);
         } catch (\Exception $e) {
@@ -79,10 +81,43 @@ class StoreController extends Controller
             return back();
         }
     }
+
+    public function setActive(Request $request, $id)
+    {
+        // Find the user that owns the given store profile id
+        $user = User::whereHas('storeProfile', function ($q) use ($id) {
+            $q->where('id', $id);
+        })->with('storeProfile')->first();
+
+        if ($user && $user->storeProfile) {
+            // Update the status
+            if ($request->has('store_profile.status')) {
+                $user->storeProfile->status = $request->input('store_profile.status');
+            } elseif ($request->has('status')) {
+                $user->storeProfile->status = $request->input('status');
+            }
+            $user->storeProfile->save();
+            // Reload the user with fresh storeProfile
+            $user->refresh();
+            $user->load('storeProfile');
+            return response()->json([
+                'success' => true,
+                'message' => 'Store status updated successfully',
+                'data' => $user
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Store profile not found',
+                'data' => null
+            ], 404);
+        }
+    }
+
     public function create()
     {
         $data = [
-            'categories'    => $this->categories->allCategory()->where('parent_id', null)->where('status',1),
+            'categories' => $this->categories->allCategory()->where('parent_id', null)->where('status', 1),
             'currency_list' => currencyList(),
             'sellers' => $this->stores->allSeller()->get(),
             'selected_category' => null
@@ -125,12 +160,12 @@ class StoreController extends Controller
             $user = $this->stores->get($id);
             if ($user) {
                 $data = [
-                    'categories'    => $this->categories->allCategory()->where('parent_id', null)->where('status',1),
+                    'categories' => $this->categories->allCategory()->where('parent_id', null)->where('status', 1),
                     'currency_list' => currencyList(),
                     'r' => $request->r != '' ? $request->r : $request->server('HTTP_REFERER'),
                     'user' => $user,
                     'sellers' => $this->stores->allSeller()->get(),
-                    'selected_category'  => $this->storeProfile->getStoresCategory($id),
+                    'selected_category' => $this->storeProfile->getStoresCategory($id),
                 ];
                 // dd($data);
             } else {
@@ -162,7 +197,7 @@ class StoreController extends Controller
             'longitude' => 'required',
             'store_description' => 'required'
         ]);
-        
+
         DB::beginTransaction();
         try {
             $this->stores->update($request);

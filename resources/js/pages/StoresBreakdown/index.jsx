@@ -21,7 +21,7 @@ import {
   Label,
 } from "reactstrap";
 
-import { addNewStoreRequest, deleteStoreRequest, editStoreRequest, getStoresRequest } from "../../store/actions";
+import { addNewStoreRequest, deleteStoreRequest, editStoreRequest, getStoresRequest, setStoreActiveRequest } from "../../store/actions";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import defaultLogoImg from "../../../images/companies/img-2.png";
 
@@ -416,24 +416,19 @@ const StoresBreakdown = () => {
     // setStores((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const toggleOpenStatus = (id) => {
-    setStores((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, status: s.store_profile.status === 1 ? 0 : 1 } : s
-      )
-    );
-  };
+  const toggleOpenStatus = (row) => {
+    // update status of store_profile
+    const updatedRow = {
+      ...row,
+      store_profile: {
+        ...row.store_profile,
+        status: row.store_profile.status === 1 ? 0 : 1,
+      },
+    };
 
-  const ActionIcon = ({ iconClass, title, onClick, colorClass = "text-primary" }) => (
-    <Button
-      color="link"
-      className={`p-1 ${colorClass}`}
-      title={title}
-      onClick={onClick}
-    >
-      <i className={`bx ${iconClass} font-size-18`}></i>
-    </Button>
-  );
+    // dispatch action to update the store status and pass updated row data
+    dispatch(setStoreActiveRequest(updatedRow));
+  };
 
   return (
     <React.Fragment>
@@ -573,7 +568,7 @@ const StoresBreakdown = () => {
                               <div className="d-flex align-items-center">
                                 <div>
                                   <img
-                                    src={`storage/${row.profile_image}` || defaultLogo}
+                                    src={row.profile_image || defaultLogo}
                                     alt=""
                                     className="rounded me-3"
                                     style={{ width: 32, height: 32, objectFit: "contain" }}
@@ -590,27 +585,18 @@ const StoresBreakdown = () => {
                               </div>
                             </td>
                             <td>
-                              <p className="mb-1">{`Current Balance: ${row?.balance}`}</p>
-                              <p className="mb-1">{`Last Login: ${row?.last_login}`}</p>
+                              <p className="mb-1">{`Current Balance: ${row?.balance || '-'}`}</p>
+                              <p className="mb-1">{`Last Login: ${row?.last_login || '-'}`}</p>
                             </td>
                             <td>
                               <div className="d-flex flex-column small">
-                                <span
-                                  className={
-                                    row.store_profile.status === 1
-                                      ? "text-success fw-semibold"
-                                      : "text-muted fw-semibold"
-                                  }
-                                >
-                                  {row.store_profile.status === 1 ? "Opened" : "Closed"}
-                                </span>
                                 <div className="form-check form-switch mt-1">
                                   <Input
                                     className="form-check-input"
                                     type="checkbox"
-                                    id={`open-${row.slug}`}
+                                    id={`open-${row.id}`}
                                     checked={row.store_profile.status === 1}
-                                    onChange={() => toggleOpenStatus(row.id)}
+                                    onClick={() => toggleOpenStatus(row)}
                                   />
                                   <Label
                                     className="form-check-label"

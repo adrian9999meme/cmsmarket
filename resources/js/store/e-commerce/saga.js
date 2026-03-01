@@ -46,6 +46,7 @@ import {
   DELETE_STORE_REQUEST,
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
+  SET_STORE_ACTIVE_REQUEST,
   SET_ACTIVE_CUSTOMER,
   SET_ACTIVE_SELLER_REQUEST,
   GET_BLOCKED_CUSTOMERS_SUCCESS,
@@ -113,7 +114,7 @@ import {
   getBlockedCustomersSuccess,
 } from "./actions";
 
-import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API } from "../endpoints";
+import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API } from "../endpoints";
 
 //Include Both Helper File with needed methods
 // import {
@@ -177,14 +178,13 @@ function* fetchCustomers({ payload: { subdomain, searchKeyword } }) {
   try {
     const response = yield api.get(`${GET_CUSTOMERS_API}?subdomain=${subdomain}&keyword=${searchKeyword}`);
     if (response.data?.success) {
-      console.log("response:", response.data)
       if (subdomain && subdomain === 'blocked') {
         yield put(getBlockedCustomersSuccess(response.data?.data))
       } else {
         yield put(getCustomersSuccess(response.data?.data));
       }
       toast.success("Customers Fetch Successfully", { autoClose: 2000 });
-    }
+    } 
   } catch (error) {
     yield put(getCustomersFail(error));
     toast.error("Customers Eetch Failed", { autoClose: 2000 });
@@ -453,6 +453,20 @@ function* onDeleteStore({ payload: id }) {
   }
 }
 
+function* onSetActiveStore({ payload: store }) {
+  try {
+    const response = yield api.put(`${SET_STORE_ACTIVE_API}${store.store_profile.id}`, store);
+    if (response.data?.success) {
+      const stores = response.data?.data?.data ?? response.data?.data ?? [];
+      yield put(editStoreSuccess(stores));
+      toast.success(response.data?.message || "Store status updated successfully", { autoClose: 1000 });
+    }
+  } catch (error) {
+    yield put(getStoresFail(error));
+    toast.error(error?.response?.data?.message || "Failed to update store status", { autoClose: 1000 });
+  }
+}
+
 function* ecommerceSaga() {
   yield takeEvery(GET_PRODUCTS, fetchProducts);
   yield takeEvery(GET_PRODUCT_DETAIL, fetchProductDetail);
@@ -480,6 +494,7 @@ function* ecommerceSaga() {
   yield takeEvery(ADD_STORE_REQUEST, onAddNewStore);
   yield takeEvery(GET_STORE_REQUEST, fetchStores);
   yield takeEvery(EDIT_STORE_REQUEST, onEditStore);
+  yield takeEvery(SET_STORE_ACTIVE_REQUEST, onSetActiveStore);
   yield takeEvery(DELETE_STORE_REQUEST, onDeleteStore);
 }
 
