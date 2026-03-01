@@ -71,12 +71,15 @@ const CustomersBreakdown = () => {
 
   // Sync customers list from store to local state depending on current subdomain
   useEffect(() => {
-    if (query.subdomain === "all") {
+    if (query.subdomain === "all" || query.subdomain === "add") {
       setCustomers(Array.isArray(allcustomers) ? allcustomers : []);
     } else if (query.subdomain === "blocked") {
       setCustomers(Array.isArray(blockedCustomers) ? blockedCustomers : []);
     } else {
       setCustomers([]);
+    }
+    if (query.subdomain === "add") {
+      setModalOpen(true);
     }
   }, [query.subdomain, allcustomers, blockedCustomers]);
 
@@ -352,6 +355,13 @@ const CustomersBreakdown = () => {
                             </td>
                           </tr>
                         ))}
+                      {customers.length === 0 && (
+                        <tr>
+                          <td colSpan="100%" className="text-center">
+                            Not Found
+                          </td>
+                        </tr>
+                      )}
                       </tbody>
                     </Table>
                   </div>

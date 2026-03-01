@@ -555,9 +555,9 @@ const StoresBreakdown = () => {
                             <td>
                               <div className="d-flex align-items-center">
                                 <img
-                                  src={row.store_profile.logo.original_image || defaultLogo}
+                                  src={`storage/${row.store_profile.logo.original_image}` || defaultLogo}
                                   alt=""
-                                  className="rounded me-2"
+                                  className="rounded me-3"
                                   style={{ width: 32, height: 32, objectFit: "contain" }}
                                   onError={(e) => {
                                     e.target.src = defaultLogo;
@@ -573,9 +573,9 @@ const StoresBreakdown = () => {
                               <div className="d-flex align-items-center">
                                 <div>
                                   <img
-                                    src={row.profile_image || defaultLogo}
+                                    src={`storage/${row.profile_image}` || defaultLogo}
                                     alt=""
-                                    className="rounded me-2"
+                                    className="rounded me-3"
                                     style={{ width: 32, height: 32, objectFit: "contain" }}
                                     onError={(e) => {
                                       e.target.src = defaultLogo;
