@@ -78,6 +78,8 @@ import {
   SET_ACTIVE_SELLER_REQUEST,
   SET_ACTIVE_SELLER_SUCCESS,
   SET_ACTIVE_SELLER_FAIL,
+  GET_BLOCKED_CUSTOMERS_SUCCESS,
+  GET_BLOCKED_CUSTOMERS_FAIL,
 } from "./actionTypes";
 
 export const getProducts = () => ({
@@ -195,6 +197,11 @@ export const getCustomersSuccess = customers => ({
 export const getCustomersFail = error => ({
   type: GET_CUSTOMERS_FAIL,
   payload: error,
+});
+
+export const getBlockedCustomersSuccess = customers => ({
+  type: GET_BLOCKED_CUSTOMERS_SUCCESS,
+  payload: customers,
 });
 
 export const addNewCustomer = customer => ({

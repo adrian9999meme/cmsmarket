@@ -190,7 +190,7 @@ const authProtectedRoutes = [
   // stores
   { path: "/stores/:status", component: <StoresBreakdown /> },
   // customers
-  { path: "/customers/:status", component: <CustomersBreakdown /> },
+  { path: "/customers/:subdomain", component: <CustomersBreakdown /> },
 
   { path: "/sellers-breakdown", component: <SellersBreakdown /> },
   { path: "/stores-breakdown", component: <StoresBreakdown /> },

@@ -53,6 +53,7 @@ import {
   DELETE_STORE_REQUEST,
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
+  GET_BLOCKED_CUSTOMERS_SUCCESS,
 } from "./actionTypes";
 
 const INIT_STATE = {
@@ -61,6 +62,7 @@ const INIT_STATE = {
   orders: [],
   cartData: {},
   customers: [],
+  blockedCustomers: [],
   shops: [],
   productComments: [],
   sellers: [],
@@ -164,6 +166,12 @@ const Ecommerce = (state = INIT_STATE, action) => {
       return {
         ...state,
         customers: action.payload,
+      };
+
+    case GET_BLOCKED_CUSTOMERS_SUCCESS:
+      return {
+        ...state,
+        blockedCustomers: action.payload,
       };
 
     case GET_CUSTOMERS_FAIL:

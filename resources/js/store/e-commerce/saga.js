@@ -48,6 +48,7 @@ import {
   DELETE_STORE_FAIL,
   SET_ACTIVE_CUSTOMER,
   SET_ACTIVE_SELLER_REQUEST,
+  GET_BLOCKED_CUSTOMERS_SUCCESS,
 } from "./actionTypes";
 
 import {
@@ -109,6 +110,7 @@ import {
   deleteStoreRequest,
   deleteStoreSuccess,
   deleteStoreFail,
+  getBlockedCustomersSuccess,
 } from "./actions";
 
 import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API } from "../endpoints";
@@ -171,11 +173,16 @@ function* fetchCartData() {
   }
 }
 
-function* fetchCustomers({ payload: { status, searchKeyword } }) {
+function* fetchCustomers({ payload: { subdomain, searchKeyword } }) {
   try {
-    const response = yield api.get(`${GET_CUSTOMERS_API}?status=${status}&keyword=${searchKeyword}`);
+    const response = yield api.get(`${GET_CUSTOMERS_API}?subdomain=${subdomain}&keyword=${searchKeyword}`);
     if (response.data?.success) {
-      yield put(getCustomersSuccess(response.data?.data?.data));
+      console.log("response:", response.data)
+      if (subdomain && subdomain === 'blocked') {
+        yield put(getBlockedCustomersSuccess(response.data?.data))
+      } else {
+        yield put(getCustomersSuccess(response.data?.data));
+      }
       toast.success("Customers Fetch Successfully", { autoClose: 2000 });
     }
   } catch (error) {
