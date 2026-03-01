@@ -75,6 +75,9 @@ import {
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
   SET_ACTIVE_CUSTOMER,
+  SET_ACTIVE_SELLER_REQUEST,
+  SET_ACTIVE_SELLER_SUCCESS,
+  SET_ACTIVE_SELLER_FAIL,
 } from "./actionTypes";
 
 export const getProducts = () => ({
@@ -371,6 +374,20 @@ export const editSellerSuccess = seller => ({
 });
 export const editSellerFail = error => ({
   type: EDIT_SELLER_FAIL,
+  payload: error,
+});
+
+// SET ACTIVE SELLER
+export const setActiveSellerRequest = (seller) => ({
+  type: SET_ACTIVE_SELLER_REQUEST,
+  payload: seller,
+});
+export const setActiveSellerSuccess = seller => ({
+  type: SET_ACTIVE_SELLER_SUCCESS,
+  payload: seller,
+});
+export const setActiveSellerFail = error => ({
+  type: SET_ACTIVE_SELLER_FAIL,
   payload: error,
 });
 

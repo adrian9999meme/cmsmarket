@@ -47,6 +47,7 @@ import {
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
   SET_ACTIVE_CUSTOMER,
+  SET_ACTIVE_SELLER_REQUEST,
 } from "./actionTypes";
 
 import {
@@ -110,7 +111,7 @@ import {
   deleteStoreFail,
 } from "./actions";
 
-import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API } from "../endpoints";
+import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API } from "../endpoints";
 
 //Include Both Helper File with needed methods
 // import {
@@ -365,6 +366,21 @@ function* onEditSeller({ payload: seller }) {
   }
 }
 
+function* onSetActiveSeller({ payload: seller }) {
+  try {
+    // Assuming SET_ACTIVE_SELLER_API expects PATCH or PUT
+    const response = yield api.put(`${SET_ACTIVE_SELLER_API}${seller.id}`, seller);
+    if (response.data?.success) {
+      yield put(editSellerSuccess(response.data?.data));
+      toast.success(response.data?.message || "Seller status updated successfully", { autoClose: 1000 });
+    }
+  } catch (error) {
+    yield put(editSellerFail(error));
+    toast.error(error.data?.message || "Failed to update seller status", { autoClose: 1000 });
+  }
+}
+
+
 function* onDeleteSeller({ payload: id }) {
   try {
     const response = yield api.delete(`${DELETE_SELLER_API}${id}`);
@@ -452,6 +468,7 @@ function* ecommerceSaga() {
   yield takeEvery(ADD_SELLER_REQUEST, onAddNewSeller);
   yield takeEvery(GET_SELLER_REQUEST, fetchSellers);
   yield takeEvery(EDIT_SELLER_REQUEST, onEditSeller);
+  yield takeEvery(SET_ACTIVE_SELLER_REQUEST, onSetActiveSeller);
   yield takeEvery(DELETE_SELLER_REQUEST, onDeleteSeller);
   yield takeEvery(ADD_STORE_REQUEST, onAddNewStore);
   yield takeEvery(GET_STORE_REQUEST, fetchStores);

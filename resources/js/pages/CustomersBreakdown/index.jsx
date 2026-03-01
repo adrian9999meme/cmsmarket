@@ -353,10 +353,10 @@ const CustomersBreakdown = () => {
                                   className="form-check-input"
                                   type="checkbox"
                                   id={`trade-${row.id}`}
-                                  checked={row.status}
-                                  onChange={() => toggleStatus(row.id)}
+                                  checked={row.status === 1}
+                                  onClick={() => toggleStatus(row.id)}
                                 />
-                                <label className="form-check-label" htmlFor={`${row.id}`}>
+                                <label className="form-check-label" htmlFor={`trade-${row.id}`}>
                                   {row.status ? "Active" : "Blocked"}
                                 </label>
                               </div>

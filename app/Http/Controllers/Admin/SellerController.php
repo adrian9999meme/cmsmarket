@@ -96,7 +96,7 @@ class SellerController extends Controller
                 'first_name' => 'required|max:255',
                 'last_name' => 'required|max:255',
                 'email' => 'required|max:255|unique:users,email',
-                'phone' => 'nullable|max:20',
+                'phone' => 'required|nullable|max:20',
                 'password' => 'required|min:5|max:30|confirmed',
                 // seller
                 'company_name' => 'required|max:255',
@@ -105,9 +105,9 @@ class SellerController extends Controller
                 'city' => 'required|max:255',
                 'phone_no' => 'required|max:20',
                 'company_email' => 'required|email|max:255|unique:sellers',
-                'license_no' => 'nullable|max:255',
-                'company_website' => 'nullable|url|max:255',
-                'company_type' => 'nullable|max:255',
+                'license_no' => 'required|nullable|max:255',
+                'company_website' => 'required|nullable|url|max:255',
+                'company_type' => 'required|nullable|max:255',
                 'number_employees' => 'nullable|integer|min:1',
                 'status' => 'nullable|integer|in:0,1',
             ]);
@@ -194,6 +194,56 @@ class SellerController extends Controller
             'message' => 'Sellers fetched successfully',
             'data' => $sellers,
         ], 200);
+    }
+
+    public function setActive(Request $request, $id) {
+        if (isDemoServer()) {
+            Toastr::info(__('This function is disabled in demo server.'));
+            return redirect()->back();
+        }
+
+        DB::beginTransaction();
+        try {
+            $seller = $this->sellers->get($id);
+
+            if (!$seller) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Seller not found')
+                ], 404);
+            }
+
+            // Properly update status with $request->input('status')
+            $status = $request->input('status');
+            if (!in_array($status, ['active', 'inactive', 0, 1, '0', '1'])) {
+                // You can customize status validation as needed
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Invalid status provided.')
+                ], 422);
+            }
+
+            $seller->status = $status;
+            $seller->save();
+
+            DB::commit();
+            $sellers = $this->sellers->paginate($request, get_pagination('pagination'));
+            $newData = $sellers->where('id', $id)->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Seller Set Active successfully'),
+                'data' => $newData
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(UserStoreRequest $request)

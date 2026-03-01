@@ -21,11 +21,15 @@ import {
   Label,
 } from "reactstrap";
 
-import { addNewSellerRequest, deleteSellerRequest, editSellerRequest, getSellersRequest } from "../../store/actions";
+import {
+  addNewSellerRequest,
+  deleteSellerRequest,
+  editSellerRequest,
+  getSellersRequest,
+  setActiveSellerRequest,
+} from "../../store/actions";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import defaultLogoImg from "../../../images/companies/img-1.png";
-
-// Placeholder logo - in real app would be seller logo URL
 
 const initialFormState = {
   company_name: "",
@@ -48,63 +52,66 @@ const initialFormState = {
 };
 
 const SellersBreakdown = () => {
-
   document.title = "Sellers Breakdown | LEKIT Ltd";
 
-  const { status } = useParams();
+  const { subdomain } = useParams();
   const dispatch = useDispatch()
-  const [searchTerm, setSearchTerm] = useState("");
   const [sellers, setSellers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // add | edit | view
   const [currentRecord, setCurrentRecord] = useState(null);
   const [formValues, setFormValues] = useState(initialFormState);
   const [query, setQuery] = useState({
-    status: 'all',
+    subdomain: 'all',
     searchKeyword: ''
   })
 
   const ecommerceSelector = createSelector(
-    state => state.ecommerce,
-    ecommerce => ({
+    (state) => state.ecommerce,
+    (ecommerce) => ({
       allsellers: ecommerce.sellers,
     })
   );
   const { allsellers } = useSelector(ecommerceSelector);
 
+  // Fetch sellers when status or query changes
   useEffect(() => {
-    setSellers(allsellers)
+    let subdomainValue =
+      subdomain === "all"
+        ? ""
+        : subdomain === "pending"
+          ? "pending"
+          : subdomain === "blocked"
+            ? "blocked"
+            : "";
+    setQuery((prev) => ({
+      ...prev,
+      subdomain: subdomainValue,
+    }));
+    // Only pass the updated query after setQuery
+    // getSellersRequest expects current query
+    dispatch(getSellersRequest({ ...query, subdomain: subdomainValue }));
+    // eslint-disable-next-line
+  }, [dispatch, subdomain]);
+
+  // Filter by keyword in company name or director/manager name
+  useEffect(() => {
+    setSellers(allsellers);
   }, [allsellers]);
 
-  useEffect(() => {
-    if (status === 'all') {
-      setQuery({ ...query, status: '' })
-      dispatch(getSellersRequest(query));
-    } else if (status === 'pending') {
-      setQuery({ ...query, status: 'pending' })
-      dispatch(getSellersRequest(query));
-    } else if (status === 'blocked') {
-      setQuery({ ...query, status: 'blocked' })
-      dispatch(getSellersRequest(query));
-    } else if (status === 'add') {
-
-    }
-  }, [dispatch]);
-
   const togglePublish = (id) => {
-    const seller = sellers.find(seller => seller.seller_profile.id === id);
+    const seller = sellers.find(seller => seller.id === id);
     if (seller) {
-      const updatedSeller = { ...seller, status: !seller.status };
-      // dispatch(editSellerRequest(updatedSeller));
+      // Toggle seller_profile status directly
+      seller.status = seller.status === 1 ? 0 : 1;
+      dispatch(setActiveSellerRequest(seller));
     }
   };
 
   const openAddModal = () => {
     setModalMode("add");
     setCurrentRecord(null);
-    setFormValues({
-      ...initialFormState,
-    });
+    setFormValues(initialFormState);
     setModalOpen(true);
   };
 
@@ -137,15 +144,16 @@ const SellersBreakdown = () => {
   const closeModal = () => setModalOpen(false);
 
   const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? (checked ? 0 : 1) : value,
+    }));
   };
 
   const handleSave = () => {
-    if (modalMode === "view") {
-      setModalOpen(true);
-      return;
-    }
+    if (modalMode === "view") return;
 
     if (modalMode === "add") {
       const newSeller = {
@@ -203,17 +211,10 @@ const SellersBreakdown = () => {
     }
   };
 
-  // Reusable action icon – title on hover for tooltip
-  const ActionIcon = ({ iconClass, title, onClick, colorClass = "text-primary" }) => (
-    <Button
-      color="link"
-      className={`p-1 ${colorClass}`}
-      title={title}
-      onClick={onClick}
-    >
-      <i className={`bx ${iconClass} font-size-18`}></i>
-    </Button>
-  );
+  // For onError fallback for images
+  const handleImageError = (e) => {
+    e.target.src = defaultLogoImg;
+  };
 
   return (
     <React.Fragment>
@@ -228,7 +229,12 @@ const SellersBreakdown = () => {
                   type="text"
                   placeholder="SEARCH SELLER"
                   value={query.searchKeyword}
-                  onChange={(e) => setQuery({ ...query, searchKeyword: e.target.value })}
+                  onChange={(e) =>
+                    setQuery((prev) => ({
+                      ...prev,
+                      searchKeyword: e.target.value.trim().toLowerCase(),
+                    }))
+                  }
                   className="form-control"
                 />
               </InputGroup>
@@ -267,14 +273,16 @@ const SellersBreakdown = () => {
                                     alt=""
                                     className="rounded me-2"
                                     style={{ width: 36, height: 36, objectFit: "contain" }}
-                                    onError={(e) => {
-                                      e.target.src = defaultLogoImg;
-                                    }}
+                                    onError={handleImageError}
                                   />
                                 </div>
                                 <div>
-                                  <p className="mb-1">{row.seller_profile?.company_name}</p>
-                                  <p className="mb-1">{row.seller_profile?.company_email}</p>
+                                  <p className="mb-1">
+                                    {row.seller_profile?.company_name || "-"}
+                                  </p>
+                                  <p className="mb-1">
+                                    {row.seller_profile?.company_email || "-"}
+                                  </p>
                                 </div>
                               </div>
                             </td>
@@ -286,35 +294,39 @@ const SellersBreakdown = () => {
                                     alt=""
                                     className="rounded me-2"
                                     style={{ width: 36, height: 36, objectFit: "contain" }}
-                                    onError={(e) => {
-                                      e.target.src = defaultLogoImg;
-                                    }}
+                                    onError={handleImageError}
                                   />
                                 </div>
                                 <div className="d-flex flex-column small">
-                                  <span className="fw-medium">{row.full_name}</span>
-                                  <span className="text-muted">{row.email}</span>
-                                  <span>{row.phone}</span>
+                                  <span className="fw-medium">{row.full_name || "-"}</span>
+                                  <span className="text-muted">{row.email || "-"}</span>
+                                  <span>{row.phone || "-"}</span>
                                 </div>
                               </div>
                             </td>
                             <td>
                               <div className="small">
-                                <div>Current Balance: {row.balance}</div>
-                                <div>Last Login: {row.last_login}</div>
+                                <div>Current Balance: {row.balance ?? '-'}</div>
+                                <div>Last Login: {row.last_login ?? '-'}</div>
                               </div>
                             </td>
                             <td>
                               <div className="form-check form-switch">
                                 <Input
                                   className="form-check-input"
+                                  name="status"
                                   type="checkbox"
                                   id={`pub-${row.id}`}
-                                  checked={row.status}
-                                  onChange={() => togglePublish(row.seller_profile.id)}
+                                  checked={row.status === 1}
+                                  onClick={() =>
+                                    togglePublish(row.id)
+                                  }
                                 />
-                                <label className="form-check-label" htmlFor={`pub-${row.id}`}>
-                                  {row.status ? "On" : "Off"}
+                                <label
+                                  className="form-check-label"
+                                  htmlFor={`pub-${row.id}`}
+                                >
+                                  {!!row.status ? "On" : "Off"}
                                 </label>
                               </div>
                             </td>
@@ -348,6 +360,13 @@ const SellersBreakdown = () => {
                             </td>
                           </tr>
                         ))}
+                        {sellers.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="text-center">
+                              No sellers found.
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </Table>
                   </div>
@@ -360,7 +379,11 @@ const SellersBreakdown = () => {
 
       <Modal isOpen={modalOpen} toggle={closeModal} centered size="lg">
         <ModalHeader toggle={closeModal}>
-          {modalMode === "view" ? "View Profile" : modalMode === "edit" ? "Edit Profile" : "Add New Seller"}
+          {modalMode === "view"
+            ? "View Profile"
+            : modalMode === "edit"
+              ? "Edit Profile"
+              : "Add New Seller"}
         </ModalHeader>
         <ModalBody>
           <Form>
@@ -375,6 +398,7 @@ const SellersBreakdown = () => {
                     value={formValues.company_name}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. ACME Innovation Ltd"
                   />
                 </FormGroup>
               </Col>
@@ -383,7 +407,7 @@ const SellersBreakdown = () => {
             <Row className="mb-3">
               <Col>
                 <FormGroup>
-                  <Label for="field-companyAddress">Address *</Label>
+                  <Label for="field-address">Address *</Label>
                   <Input
                     id="field-address"
                     name="address"
@@ -391,6 +415,7 @@ const SellersBreakdown = () => {
                     value={formValues.address}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. 123 Main St, Suite 4B"
                   />
                 </FormGroup>
               </Col>
@@ -399,7 +424,7 @@ const SellersBreakdown = () => {
             <Row className="mb-3">
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-postcode">Postcode</Label>
+                  <Label for="field-postcode">Postcode *</Label>
                   <Input
                     id="field-postcode"
                     name="postcode"
@@ -407,12 +432,13 @@ const SellersBreakdown = () => {
                     value={formValues.postcode}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. 75000"
                   />
                 </FormGroup>
               </Col>
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-city">City</Label>
+                  <Label for="field-city">City *</Label>
                   <Input
                     id="field-city"
                     name="city"
@@ -420,6 +446,7 @@ const SellersBreakdown = () => {
                     value={formValues.city}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. London"
                   />
                 </FormGroup>
               </Col>
@@ -428,7 +455,7 @@ const SellersBreakdown = () => {
             <Row className="mb-3">
               <Col>
                 <FormGroup>
-                  <Label for="field-phone_no">Company Telephone</Label>
+                  <Label for="field-phone_no">Company Telephone *</Label>
                   <Input
                     id="field-phone_no"
                     name="phone_no"
@@ -436,6 +463,7 @@ const SellersBreakdown = () => {
                     value={formValues.phone_no}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. +44 123 456 789"
                   />
                 </FormGroup>
               </Col>
@@ -444,7 +472,7 @@ const SellersBreakdown = () => {
             <Row className="mb-3">
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-company_email">Company Email</Label>
+                  <Label for="field-company_email">Company Email *</Label>
                   <Input
                     id="field-company_email"
                     name="company_email"
@@ -452,12 +480,13 @@ const SellersBreakdown = () => {
                     value={formValues.company_email}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. info@acme.co.uk"
                   />
                 </FormGroup>
               </Col>
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-license_no">Company Number</Label>
+                  <Label for="field-license_no">Company Number *</Label>
                   <Input
                     id="field-license_no"
                     name="license_no"
@@ -465,6 +494,7 @@ const SellersBreakdown = () => {
                     value={formValues.license_no}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. 05432198"
                   />
                 </FormGroup>
               </Col>
@@ -473,14 +503,15 @@ const SellersBreakdown = () => {
             <Row className="mb-3">
               <Col>
                 <FormGroup>
-                  <Label for="field-company_website">Company Website</Label>
+                  <Label for="field-company_website">Company Website *</Label>
                   <Input
                     id="field-company_website"
                     name="company_website"
                     type="text"
-                    value={formValues.company_website || ""}
+                    value={formValues.company_website}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. acme.co.uk"
                   />
                 </FormGroup>
               </Col>
@@ -489,14 +520,15 @@ const SellersBreakdown = () => {
             <Row className="mb-3">
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-company_type">Company Type</Label>
+                  <Label for="field-company_type">Company Type *</Label>
                   <Input
                     id="field-company_type"
                     name="company_type"
                     type="text"
-                    value={formValues.company_type || ""}
+                    value={formValues.company_type}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. Ltd, SRL, or LLC"
                   />
                 </FormGroup>
               </Col>
@@ -507,9 +539,10 @@ const SellersBreakdown = () => {
                     id="field-number_employees"
                     name="number_employees"
                     type="number"
-                    value={formValues.number_employees || ""}
+                    value={formValues.number_employees}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. 50"
                   />
                 </FormGroup>
               </Col>
@@ -521,12 +554,10 @@ const SellersBreakdown = () => {
                   <FormGroup check className="form-switch">
                     <Input
                       type="checkbox"
-                      name="published"
+                      name="status"
                       id="field-published"
-                      checked={formValues.status}
-                      onChange={(e) =>
-                        setFormValues((prev) => ({ ...prev, status: e.target.checked }))
-                      }
+                      checked={formValues.status === 1}
+                      onClick={handleFormChange}
                     />
                     <Label check for="field-published">
                       Seller Published
@@ -536,37 +567,38 @@ const SellersBreakdown = () => {
               )}
             </Row>
 
-            <Row className="mt-2">
+            <Row>
               <Col>
-                <br />
-                <p className="mt-5 mb-3">Director / Manager</p>
+                <h5 className="mt-4 mb-3">Director / Manager</h5>
               </Col>
             </Row>
 
             <Row className="mt-2">
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-first_name">First Name</Label>
+                  <Label for="field-first_name">First Name *</Label>
                   <Input
                     id="field-first_name"
                     name="first_name"
                     type="text"
-                    value={formValues.first_name || ""}
+                    value={formValues.first_name}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. John"
                   />
                 </FormGroup>
               </Col>
               <Col md={6}>
                 <FormGroup>
-                  <Label for="field-last_name">Last Name</Label>
+                  <Label for="field-last_name">Last Name *</Label>
                   <Input
                     id="field-last_name"
                     name="last_name"
                     type="text"
-                    value={formValues.last_name || ""}
+                    value={formValues.last_name}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. Doe"
                   />
                 </FormGroup>
               </Col>
@@ -575,14 +607,15 @@ const SellersBreakdown = () => {
             <Row>
               <Col>
                 <FormGroup>
-                  <Label for="field-email">Email</Label>
+                  <Label for="field-email">Email *</Label>
                   <Input
                     id="field-email"
                     name="email"
-                    type="text"
-                    value={formValues.email || ""}
+                    type="email"
+                    value={formValues.email}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="e.g. john023@email.com"
                   />
                 </FormGroup>
               </Col>
@@ -591,29 +624,33 @@ const SellersBreakdown = () => {
             <Row>
               <Col>
                 <FormGroup>
-                  <Label for="field-phone">Phone</Label>
-                  <Input
-                    id="field-phone"
-                    name="phone"
-                    type="text"
-                    value={formValues.phone || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
+                  <Label for="field-phone">Phone *</Label>
+                  <InputGroup>
+                    <Input
+                      id="field-phone"
+                      name="phone"
+                      type="text"
+                      value={formValues.phone}
+                      onChange={handleFormChange}
+                      readOnly={modalMode === "view"}
+                      placeholder="e.g. +40 712 123 456"
+                    />
+                  </InputGroup>
                 </FormGroup>
               </Col>
             </Row>
             <Row>
               <Col>
                 <FormGroup>
-                  <Label for="field-password">Password</Label>
+                  <Label for="field-password">Password *</Label>
                   <Input
                     id="field-password"
                     name="password"
-                    type="text"
+                    type="password"
                     value={formValues.password || ""}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="Strong Password"
                   />
                 </FormGroup>
               </Col>
@@ -621,14 +658,15 @@ const SellersBreakdown = () => {
             <Row>
               <Col>
                 <FormGroup>
-                  <Label for="field-password_confirmation">Confirm Password</Label>
+                  <Label for="field-password_confirmation">Confirm Password *</Label>
                   <Input
                     id="field-password_confirmation"
                     name="password_confirmation"
-                    type="text"
+                    type="password"
                     value={formValues.password_confirmation || ""}
                     onChange={handleFormChange}
                     readOnly={modalMode === "view"}
+                    placeholder="Retype password"
                   />
                 </FormGroup>
               </Col>
