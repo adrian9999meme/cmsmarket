@@ -60,7 +60,7 @@ const OrdersBreakdown = () => {
     dispatch(getOrders(queryRef.current))
   }, [dispatch, filters])
 
-  
+
   // 🔁 Handle filter change
   const handleFilterChange = (field, value) => {
     if (field === 'keyword') {
@@ -71,8 +71,6 @@ const OrdersBreakdown = () => {
         [field]: value,
       }));
     }
-    console.log('fileters:', filters)
-    console.log('keyword:', keyword)
   };
 
   // 🔄 Reset filters

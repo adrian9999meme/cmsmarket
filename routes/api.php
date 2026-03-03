@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Admin\SellerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\Product\ProductController;   
+use App\Http\Controllers\Admin\DeliveryHero\DeliveryHeroController as DriverController;
 
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\Api\V100\APIController;
@@ -97,6 +98,11 @@ Route::prefix('v1')->group(function () {
             Route::get('orders/fetch', [OrderController::class, 'index']);
             // products
             Route::get('products/fetch', [ProductController::class, 'index']);
+            // drivers
+            Route::get('drivers/fetch', [DriverController::class, 'index']);
+            Route::post('drivers/add', [DriverController::class, 'create']);
+            Route::put('drivers/edit/{id}', [DriverController::class, 'update']);
+            // Route::delete('drivers/delete/{id}', [DriverController::class, 'delete']);
 
         });
         Route::post('logout', [AuthController::class, 'logout']);

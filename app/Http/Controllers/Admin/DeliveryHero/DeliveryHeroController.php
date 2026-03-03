@@ -19,7 +19,6 @@ class DeliveryHeroController extends Controller
     private $shipping;
     private $deliveryHero;
     private $settings;
-    private $delivery_heroes;
 
     public function __construct(DeliveryHeroInterface $deliveryHero,
                                 PickupHubInterface $pickup,
@@ -34,7 +33,12 @@ class DeliveryHeroController extends Controller
     public function index(Request $request){
         $deliveryHeroes = $this->deliveryHero->paginate($request, get_pagination('pagination'));
         $pickupHubs     = $this->pickup->all()->where('pick_up_status',1)->get();
-        return view('admin.delivery-hero.index',compact('deliveryHeroes','pickupHubs'));
+        return response()->json([
+            'success' => true,
+            'data' => $deliveryHeroes,
+            'pickup_hubs' => $pickupHubs,
+            'message' => __("Drivers retrieved successfully"),
+        ]);
     }
     public function retrieveDrivers(Request $request){
         $deliveryHeroes = $this->deliveryHero->retrieveAllDriver();

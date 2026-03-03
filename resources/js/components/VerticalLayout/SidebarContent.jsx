@@ -307,13 +307,13 @@ const SidebarContent = props => {
               </a>
               <ul className="sub-menu">
                 <li>
-                  <Link to="/drivers/online">
-                    <i className="bx bx-wifi"></i> {props.t("Drivers Online")}
+                  <Link to="/drivers/all">
+                    <i className="bx bx-id-card"></i> {props.t("All Drivers")}
                   </Link>
                 </li>
                 <li>
-                  <Link to="/drivers/all">
-                    <i className="bx bx-id-card"></i> {props.t("All Drivers")}
+                  <Link to="/drivers/online">
+                    <i className="bx bx-wifi"></i> {props.t("Drivers Online")}
                   </Link>
                 </li>
                 <li>

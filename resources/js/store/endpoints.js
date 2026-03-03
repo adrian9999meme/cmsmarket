@@ -28,3 +28,9 @@ export const SET_ACTIVE_CUSTOMER_API = API_VERSION + 'customers/setactive/';
 
 // orders
 export const GET_ORDERS_API = API_VERSION + 'orders/fetch'
+
+// drivers
+export const GET_DRIVERS_API = API_VERSION + 'drivers/fetch'
+export const ADD_NEW_DRIVER_API = API_VERSION + 'drivers/add'
+export const EDIT_DRIVER_API = API_VERSION + 'drivers/edit/'
+export const DELETE_DRIVER_API = API_VERSION + 'drivers/delete/'

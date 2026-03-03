@@ -176,6 +176,7 @@ import SellersBreakdown from "../pages/SellersBreakdown/index";
 // Stores Breakdown
 import StoresBreakdown from "../pages/StoresBreakdown/index";
 import OrdersBreakdown from "../pages/OrdersBreakdown";
+import DriversBreakdown from "../pages/DriversBeakdown";
 
 const authProtectedRoutes = [
   //Index Main
@@ -194,6 +195,8 @@ const authProtectedRoutes = [
   { path: "/customers/:subdomain", component: <CustomersBreakdown /> },
   // orders
   { path: "/orders/:subdomain", component: <OrdersBreakdown /> },
+  // drivers
+  { path: "/drivers/:subdomain", component: <DriversBreakdown /> },
 
   { path: "/sellers-breakdown", component: <SellersBreakdown /> },
   { path: "/stores-breakdown", component: <StoresBreakdown /> },
