@@ -354,11 +354,11 @@ function* onAddNewSeller({ payload: seller }) {
   }
 }
 
-function* fetchSellers({ payload: { status, searchKeyword } }) {
+function* fetchSellers({ payload: { subdomain, searchKeyword } }) {
   try {
-    const response = yield api.get(`${GET_SELLERS_API}?status=${status}&keyword=${searchKeyword}`);
+    const response = yield api.get(`${GET_SELLERS_API}?subdomain=${subdomain}&keyword=${searchKeyword}`);
     if (response.data?.success) {
-      yield put(getSellersSuccess(response.data?.data?.data));
+      yield put(getSellersSuccess(response.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
     }
   } catch (error) {
@@ -438,22 +438,41 @@ function* onDeleteSeller({ payload: id }) {
 
 function* onAddNewStore({ payload: store }) {
   try {
-    const response = yield api.post(ADD_NEW_STORE_API, store);
+    // if store is FormData, axios should use multipart/form-data header
+    let response;
+    if (store instanceof FormData) {
+      // remove default json header for this request so axios can set boundary
+      response = yield api.post(ADD_NEW_STORE_API, store, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    } else {
+      response = yield api.post(ADD_NEW_STORE_API, store);
+    }
+
     if (response.data?.success) {
       yield put(addNewStoreSuccess(response.data?.data));
-      toast.success(response.data?.message, { autoClose: 1000 })
+      toast.success(response.data?.message, { autoClose: 1000 });
     }
   } catch (error) {
     yield put(addNewStoreFail(error));
-    toast.error(error.data?.message, { autoClose: 1000 });
+    const resp = error.response || {};
+    // if Laravel validation failed, resp.data.errors contains field messages
+    if (resp.status === 422 && resp.data && resp.data.errors) {
+      Object.values(resp.data.errors).flat().forEach((msg) => {
+        toast.error(msg, { autoClose: 3000 });
+      });
+    } else {
+      toast.error(resp.data?.message || "Store creation failed", { autoClose: 1000 });
+    }
+    console.error("Add store error", resp);
   }
 }
 
-function* fetchStores({ payload: { status, searchKeyword } }) {
+function* fetchStores({ payload: { subdomain, searchKeyword } }) {
   try {
-    const response = yield api.get(`${GET_STORES_API}?status=${status}&keyword=${searchKeyword}`);
+    const response = yield api.get(`${GET_STORES_API}?subdomain=${subdomain}&keyword=${searchKeyword}`);
     if (response.data?.success) {
-      yield put(getStoresSuccess(response.data?.data?.data));
+      yield put(getStoresSuccess(response.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
     }
   } catch (error) {

@@ -76,7 +76,9 @@ const INIT_STATE = {
   sellersList: [],
   stores: [],
   storesCategories: [],
-  error: null
+  error: null,
+  storeLoading: false,
+  storeSubmitted: false,
 };
 
 const Ecommerce = (state = INIT_STATE, action) => {
@@ -329,10 +331,29 @@ const Ecommerce = (state = INIT_STATE, action) => {
         error: action.payload,
       };
 
+    case ADD_STORE_REQUEST:
+      return {
+        ...state,
+        storeLoading: true,
+        storeSubmitted: false,
+        error: null,
+      };
+
     case ADD_STORE_SUCCESS:
       return {
         ...state,
         stores: [action.payload, ...state.stores],
+        storeLoading: false,
+        storeSubmitted: true,
+        error: null,
+      };
+
+    case ADD_STORE_FAIL:
+      return {
+        ...state,
+        storeLoading: false,
+        storeSubmitted: false,
+        error: action.payload,
       };
 
     case GET_STORE_SUCCESS:

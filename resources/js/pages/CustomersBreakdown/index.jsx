@@ -256,7 +256,7 @@ const CustomersBreakdown = () => {
                   className="form-control"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      dispatch(getCustomers(query))
+                      dispatch(getCustomers({...queryRef.current}))
                     }
                   }}
                 />

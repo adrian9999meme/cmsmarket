@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createSelector } from "reselect";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -74,7 +74,13 @@ const SellersBreakdown = () => {
   );
   const { allsellers } = useSelector(ecommerceSelector);
 
-  // Fetch sellers when status or query changes
+  // Keep a ref to ensure latest value of query
+  const queryRef = useRef(query);
+
+  useEffect(() => {
+    queryRef.current = query;
+  }, [query]);
+
   useEffect(() => {
     let subdomainValue =
       subdomain === "all"
@@ -88,11 +94,15 @@ const SellersBreakdown = () => {
       ...prev,
       subdomain: subdomainValue,
     }));
-    // Only pass the updated query after setQuery
-    // getSellersRequest expects current query
-    dispatch(getSellersRequest({ ...query, subdomain: subdomainValue }));
+  }, [subdomain])
+  // Fetch sellers when status or query changes
+  useEffect(() => {
+    dispatch(getSellersRequest({ ...queryRef.current }));
+    if (query.subdomain === "add") {
+      setModalOpen(true)
+    }
     // eslint-disable-next-line
-  }, [dispatch, subdomain]);
+  }, [dispatch, query.subdomain]);
 
   // Filter by keyword in company name or director/manager name
   useEffect(() => {
@@ -105,6 +115,7 @@ const SellersBreakdown = () => {
       // Toggle seller_profile status directly
       seller.status = seller.status === 1 ? 0 : 1;
       dispatch(setActiveSellerRequest(seller));
+      dispatch(getSellersRequest({ ...queryRef.current }))
     }
   };
 
@@ -116,28 +127,30 @@ const SellersBreakdown = () => {
   };
 
   const openViewOrEditModal = (mode, row) => {
-    const record = sellers.find(s => s.seller_profile.id === row.seller_profile.id)
+    const record = sellers.find(s => s.seller_profile?.id === row.seller_profile?.id)
+    const profile = (record && record.seller_profile) ? record.seller_profile : {}
     setModalMode(mode);
     setCurrentRecord(record);
-    setFormValues({
-      company_name: record.seller_profile?.company_name || "",
-      address: record.seller_profile?.address || "",
-      postcode: record.seller_profile?.postcode || "",
-      city: record.seller_profile?.city || "",
-      phone_no: record.seller_profile?.phone_no || "",
-      company_email: record.seller_profile?.company_email || "",
-      license_no: record.seller_profile?.license_no || "",
-      company_website: record.seller_profile?.company_website || "",
-      company_type: record.seller_profile?.company_type || "",
-      number_employees: record.seller_profile?.number_employees || "",
-      status: record.seller_profile.status,
+    setFormValues((prev) => ({
+      ...prev,
+      company_name: profile?.company_name || "",
+      address: profile?.address || "",
+      postcode: profile?.postcode || "",
+      city: profile?.city || "",
+      phone_no: profile?.phone_no || "",
+      company_email: profile?.company_email || "",
+      license_no: profile?.license_no || "",
+      company_website: profile?.company_website || "",
+      company_type: profile?.company_type || "",
+      number_employees: profile?.number_employees || "",
+      status: record.status,
       first_name: record.first_name,
       last_name: record.last_name,
       email: record.email,
       phone: record.phone,
       password: '',
       password_confirmation: ''
-    });
+    }));
     setModalOpen(true);
   };
 
@@ -152,7 +165,9 @@ const SellersBreakdown = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = (e) => {
+    e.preventDefault();
+
     if (modalMode === "view") return;
 
     if (modalMode === "add") {
@@ -176,11 +191,11 @@ const SellersBreakdown = () => {
         password_confirmation: formValues.password_confirmation
       };
 
-      // dispatch(addNewSellerRequest(newSeller))
+      dispatch(addNewSellerRequest(newSeller))
     } else if (modalMode === "edit" && currentRecord) {
       const seller = sellers.find(item => item.seller_profile.id === currentRecord.seller_profile.id)
       let updatedSeller = {
-        ...seller,
+        id: seller.seller_profile.id,
         company_name: formValues.company_name,
         address: formValues.address,
         postcode: formValues.postcode,
@@ -196,18 +211,18 @@ const SellersBreakdown = () => {
         last_name: formValues.last_name,
         email: formValues.email,
         phone: formValues.phone,
-        password: formValues.password,
-        password_confirmation: formValues.password_confirmation
+        // password: formValues.password,
+        // password_confirmation: formValues.password_confirmation
       }
 
-      // dispatch(editSellerRequest(updatedSeller))
+      dispatch(editSellerRequest(updatedSeller))
     }
     // setModalOpen(false);
   };
 
   const handleRemove = (id) => {
     if (window.confirm("Remove this seller?")) {
-      // dispatch(deleteSellerRequest(id))
+      dispatch(deleteSellerRequest(id))
     }
   };
 
@@ -232,10 +247,15 @@ const SellersBreakdown = () => {
                   onChange={(e) =>
                     setQuery((prev) => ({
                       ...prev,
-                      searchKeyword: e.target.value.trim().toLowerCase(),
+                      searchKeyword: e.target.value,
                     }))
                   }
                   className="form-control"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      dispatch(getSellersRequest({ ...queryRef.current }));
+                    }
+                  }}
                 />
               </InputGroup>
             </Col>
@@ -263,7 +283,7 @@ const SellersBreakdown = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {sellers.map((row) => (
+                        {sellers?.map((row) => (
                           <tr key={row.id}>
                             <td>
                               <div className="d-flex align-items-center">
@@ -360,7 +380,7 @@ const SellersBreakdown = () => {
                             </td>
                           </tr>
                         ))}
-                        {sellers.length === 0 && (
+                        {sellers?.length === 0 && (
                           <tr>
                             <td colSpan={5} className="text-center">
                               No sellers found.
@@ -386,7 +406,7 @@ const SellersBreakdown = () => {
               : "Add New Seller"}
         </ModalHeader>
         <ModalBody>
-          <Form>
+          <Form onSubmit={handleSave}>
             <Row className="mb-3">
               <Col>
                 <FormGroup>
@@ -639,50 +659,56 @@ const SellersBreakdown = () => {
                 </FormGroup>
               </Col>
             </Row>
+            {modalMode === "add" ? (
+              <>
+                <Row>
+                  <Col>
+                    <FormGroup>
+                      <Label for="field-password">Password *</Label>
+                      <Input
+                        id="field-password"
+                        name="password"
+                        type="password"
+                        value={formValues.password || ""}
+                        onChange={handleFormChange}
+                        readOnly={modalMode === "view"}
+                        placeholder="Strong Password"
+                      />
+                    </FormGroup>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <FormGroup>
+                      <Label for="field-password_confirmation">Confirm Password *</Label>
+                      <Input
+                        id="field-password_confirmation"
+                        name="password_confirmation"
+                        type="password"
+                        value={formValues.password_confirmation || ""}
+                        onChange={handleFormChange}
+                        readOnly={modalMode === "view"}
+                        placeholder="Retype password"
+                      />
+                    </FormGroup>
+                  </Col>
+                </Row>
+              </>
+            ) : ""}
             <Row>
-              <Col>
-                <FormGroup>
-                  <Label for="field-password">Password *</Label>
-                  <Input
-                    id="field-password"
-                    name="password"
-                    type="password"
-                    value={formValues.password || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                    placeholder="Strong Password"
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <FormGroup>
-                  <Label for="field-password_confirmation">Confirm Password *</Label>
-                  <Input
-                    id="field-password_confirmation"
-                    name="password_confirmation"
-                    type="password"
-                    value={formValues.password_confirmation || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                    placeholder="Retype password"
-                  />
-                </FormGroup>
+              <Col md={6} className="d-flex gap-2">
+                <Button color="secondary" onClick={closeModal}>
+                  Close
+                </Button>
+                {modalMode !== "view" && (
+                  <Button type="submit" color="primary">
+                    Save
+                  </Button>
+                )}
               </Col>
             </Row>
           </Form>
         </ModalBody>
-        <ModalFooter>
-          <Button color="secondary" onClick={closeModal}>
-            Close
-          </Button>
-          {modalMode !== "view" && (
-            <Button color="primary" onClick={handleSave}>
-              Save
-            </Button>
-          )}
-        </ModalFooter>
       </Modal>
     </React.Fragment>
   );

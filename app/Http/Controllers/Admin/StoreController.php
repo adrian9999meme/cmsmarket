@@ -42,38 +42,48 @@ class StoreController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get status and keyword from the request (with defaults if not present)
-            $status = $request->get('status', null);
-            $searchKeyword = $request->get('keyword', '');
+            $query = User::query();
 
-            // Call repository with additional filters for status and keyword
-            $stores = $this->stores->paginate($request, get_pagination('pagination'));
+            $subdomain = strtolower(trim($request->get('subdomain', 'all')));
+            $searchKeyword = trim($request->get('keyword', ''));
 
-            // If GET_SELLERS_API expects filtering by status and keyword, apply them in the repository
-            // if (!is_null($status) && $status !== '') {
-            //     if ($status === 'pending') {
-            //         $users = $users->where('is_user_banned', 0);
-            //     } elseif ($status === 'blocked') {
-            //         $users = $users->where('is_user_banned', 1);
-            //     }
-            //     // If status is passed but not "pending" or "blocked", do not apply any additional filter
-            // }
+            $query->with('storeProfile')
+                ->where('user_type', 'manager')
+                ->latest();
+
+            // Status filter
+            if ($subdomain === "pending") {
+                $query->where('is_user_banned', 0)
+                    ->whereHas('storeProfile', function ($q) {
+                        $q->where('status', 0);
+                    });
+            } elseif ($subdomain === "blocked") {
+                $query->where('is_user_banned', 1);
+            } elseif ($subdomain === "active") {
+                $query->where('is_user_banned', 0)
+                    ->whereHas('storeProfile', function ($q) {
+                        $q->where('status', 1);
+                    });
+            }
+
+            // Search filter
             if (!empty($searchKeyword)) {
-                $stores = $stores->where(function ($query) use ($searchKeyword) {
-                    $query->where('store_name', 'like', "%{$searchKeyword}%")
-                        ->orWhere('address', 'like', "%{$searchKeyword}%")
-                        ->orWhere('store_email', 'like', "%{$searchKeyword}%");
+                $query->where(function ($q) use ($searchKeyword) {
+                    $q->where('first_name', 'like', "%{$searchKeyword}%")
+                        ->orWhere('last_name', 'like', "%{$searchKeyword}%")
+                        ->orWhere('email', 'like', "%{$searchKeyword}%")
+                        ->orWhereHas('storeProfile', function ($sub) use ($searchKeyword) {
+                            $sub->where('store_name', 'like', "%{$searchKeyword}%");
+                            $sub->where('address', 'like', "%{$searchKeyword}%");
+                        });
                 });
             }
 
-            // If $users is an Eloquent\Builder or Query, paginate after filtering
-            if ($stores instanceof \Illuminate\Database\Eloquent\Builder || $stores instanceof \Illuminate\Database\Query\Builder) {
-                $stores = $stores->paginate(get_pagination('pagination'));
-            }
+            $stores = $query->get();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Retrieved stores successfully',
+                'message' => 'Retrieved customers successfully',
                 'data' => $stores
             ]);
         } catch (\Exception $e) {
@@ -159,8 +169,13 @@ class StoreController extends Controller
      *
      * POST /api/v1/stores/create
      */
-    public function apiStore(UserStoreRequest $request)
+    public function apiStore(Request $request)
     {
+        // use a plain Request instead of UserStoreRequest so we can validate
+        // both manager/user fields and store fields in one shot.  The form
+        // request was triggering a 422 before the controller code even
+        // executed, which made it hard to figure out why the request failed.
+
         if (isDemoServer()):
             return response()->json([
                 'success' => false,
@@ -168,7 +183,10 @@ class StoreController extends Controller
             ], 403);
         endif;
 
+        // combined validation rules cover the manager (user) data as well as
+        // the store profile information that the front‑end is submitting.
         $this->validate($request, [
+            // store profile rules (same as earlier)
             'seller_id' => 'required',
             'store_name' => 'required|unique:stores',
             'store_code' => 'required|unique:stores',
@@ -177,7 +195,14 @@ class StoreController extends Controller
             'store_email' => 'required',
             'latitude' => 'required',
             'longitude' => 'required',
-            'store_description' => 'required'
+            'store_description' => 'required',
+
+            // manager/user rules (copied from UserStoreRequest)
+            'first_name' => 'required|max:50',
+            'last_name'  => 'required|max:50',
+            'phone'      => 'required|unique:users|min:4|max:20',
+            'email'      => 'required|unique:users|email|max:50',
+            'password'   => 'required|min:6|max:32',
         ]);
 
         DB::beginTransaction();
