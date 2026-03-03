@@ -53,6 +53,14 @@ import {
   DELETE_STORE_REQUEST,
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
+  GET_CATEGORIES,
+  GET_CATEGORIES_SUCCESS,
+  GET_CATEGORIES_FAIL,
+  GET_BLOCKED_CUSTOMERS_SUCCESS,
+  GET_SELLER_LIST_SUCCESS,
+  GET_SELLER_LIST_REQUEST,
+  GET_SELLER_LIST_FAIL,
+  GET_CATEGORIES_REQUEST,
 } from "./actionTypes";
 
 const INIT_STATE = {
@@ -61,11 +69,16 @@ const INIT_STATE = {
   orders: [],
   cartData: {},
   customers: [],
+  blockedCustomers: [],
   shops: [],
   productComments: [],
   sellers: [],
+  sellersList: [],
   stores: [],
-  error: null
+  storesCategories: [],
+  error: null,
+  storeLoading: false,
+  storeSubmitted: false,
 };
 
 const Ecommerce = (state = INIT_STATE, action) => {
@@ -166,6 +179,12 @@ const Ecommerce = (state = INIT_STATE, action) => {
         customers: action.payload,
       };
 
+    case GET_BLOCKED_CUSTOMERS_SUCCESS:
+      return {
+        ...state,
+        blockedCustomers: action.payload,
+      };
+
     case GET_CUSTOMERS_FAIL:
       return {
         ...state,
@@ -264,6 +283,27 @@ const Ecommerce = (state = INIT_STATE, action) => {
         sellers: action.payload,
       };
 
+    case GET_SELLER_LIST_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+
+    case GET_SELLER_LIST_SUCCESS:
+      return {
+        ...state,
+        sellersList: action.payload,
+        loading: false,
+      };
+
+    case GET_SELLER_LIST_FAIL:
+      return {
+        ...state,
+        error: action.payload,
+        loading: false,
+      };
+
     case EDIT_SELLER_SUCCESS:
       return {
         ...state,
@@ -291,16 +331,56 @@ const Ecommerce = (state = INIT_STATE, action) => {
         error: action.payload,
       };
 
+    case ADD_STORE_REQUEST:
+      return {
+        ...state,
+        storeLoading: true,
+        storeSubmitted: false,
+        error: null,
+      };
+
     case ADD_STORE_SUCCESS:
       return {
         ...state,
         stores: [action.payload, ...state.stores],
+        storeLoading: false,
+        storeSubmitted: true,
+        error: null,
+      };
+
+    case ADD_STORE_FAIL:
+      return {
+        ...state,
+        storeLoading: false,
+        storeSubmitted: false,
+        error: action.payload,
       };
 
     case GET_STORE_SUCCESS:
       return {
         ...state,
         stores: action.payload,
+      };
+
+    case GET_CATEGORIES_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+
+    case GET_CATEGORIES_SUCCESS:
+      return {
+        ...state,
+        storesCategories: action.payload,
+        loading: false,
+      };
+
+    case GET_CATEGORIES_FAIL:
+      return {
+        ...state,
+        error: action.payload,
+        loading: false,
       };
 
     case EDIT_STORE_SUCCESS:

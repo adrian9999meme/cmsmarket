@@ -77,10 +77,14 @@ Route::prefix('v1')->group(function () {
             Route::get('sellers/fetch', [SellerController::class, 'index']);
             Route::post('sellers/create', [SellerController::class, 'create']);
             Route::put('sellers/edit/{id}', [SellerController::class, 'update']);
-            Route::put('sellers/setactive/{id}', [UserController::class, 'setActive']);
+            Route::put('sellers/setactive/{id}', [SellerController::class, 'setActive']);
             Route::delete('sellers/delete/{id}', [SellerController::class, 'delete']);
             // stores
             Route::get('stores/fetch', [StoreController::class, 'index']);
+            Route::post('stores/create', [StoreController::class, 'apiStore']);
+            Route::put('stores/edit/{id}', [StoreController::class, 'update']);
+            Route::put('stores/setactive/{id}', [StoreController::class, 'setActive']);
+            Route::delete('stores/delete/{id}', [StoreController::class, 'delete']);
             // customers
             Route::get('customers/fetch', [\App\Http\Controllers\Admin\UserController::class, 'index']);
             Route::post('customers/create', [\App\Http\Controllers\Admin\UserController::class, 'create']);
@@ -115,6 +119,12 @@ Route::prefix('v1')->group(function () {
         Route::get('notifications', [NotificationController::class, 'index']);
         Route::get('delete-notification/{id}', [NotificationController::class, 'destroy']);
         Route::get('delete-all-notifications', [NotificationController::class, 'destroyAll']);
+    });
+
+    // public frontend endpoints
+    Route::get('home/store-categories', [\App\Http\Controllers\Site\FrontendController::class, 'storeCategories']);
+
+
 
         //shipping address
         Route::resource('shipping-addresses', ShippingController::class)->only('store', 'edit', 'destroy');
@@ -137,7 +147,8 @@ Route::prefix('v1')->group(function () {
         Route::get('sellers', [\App\Http\Controllers\Api\V100\ChatSystemController::class, 'sellers']);
         Route::get('messages', [\App\Http\Controllers\Api\V100\ChatSystemController::class, 'messages']);
         Route::post('send-message', [\App\Http\Controllers\Api\V100\ChatSystemController::class, 'sendMessage']);
-    });
+
+        Route::get('home/sellers', [\App\Http\Controllers\Site\FrontendController::class, 'sellers']);
 
     Route::get('configs', [APIController::class, 'config']);
     Route::get('home-screen', [HomeController::class, 'homePageData']);

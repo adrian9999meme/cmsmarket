@@ -75,6 +75,20 @@ import {
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
   SET_ACTIVE_CUSTOMER,
+  SET_ACTIVE_SELLER_REQUEST,
+  SET_ACTIVE_SELLER_SUCCESS,
+  SET_ACTIVE_SELLER_FAIL,
+  GET_BLOCKED_CUSTOMERS_SUCCESS,
+  GET_BLOCKED_CUSTOMERS_FAIL,
+  SET_STORE_ACTIVE_REQUEST,
+  SET_STORE_ACTIVE_SUCCESS,
+  SET_STORE_ACTIVE_FAIL,
+  GET_CATEGORIES_SUCCESS,
+  GET_SELLER_LIST_SUCCESS,
+  GET_SELLER_LIST_REQUEST,
+  GET_SELLER_LIST_FAIL,
+  GET_CATEGORIES_REQUEST,
+  GET_CATEGORIES_FAIL,
 } from "./actionTypes";
 
 export const getProducts = () => ({
@@ -192,6 +206,11 @@ export const getCustomersSuccess = customers => ({
 export const getCustomersFail = error => ({
   type: GET_CUSTOMERS_FAIL,
   payload: error,
+});
+
+export const getBlockedCustomersSuccess = customers => ({
+  type: GET_BLOCKED_CUSTOMERS_SUCCESS,
+  payload: customers,
 });
 
 export const addNewCustomer = customer => ({
@@ -355,9 +374,35 @@ export const getSellersSuccess = (sellers) => ({
   type: GET_SELLER_SUCCESS,
   payload: sellers,
 });
+export const getSellersListRequest = () => ({
+  type: GET_SELLER_LIST_REQUEST,
+});
+
+export const getSellersListSuccess = (sellers) => ({
+  type: GET_SELLER_LIST_SUCCESS,
+  payload: sellers,
+});
+
+export const getSellersListFail = (error) => ({
+  type: GET_SELLER_LIST_FAIL,
+  payload: error,
+});
 export const getSellersFail = (error) => ({
   type: GET_SELLER_FAIL,
   payload: {error},
+});
+
+// GET STORE CATEGORIES
+export const getCategoriesRequest = () => ({
+  type: GET_CATEGORIES_REQUEST,
+});
+export const getCategoriesSuccess = (cats) => ({
+  type: GET_CATEGORIES_SUCCESS,
+  payload: cats,
+});
+export const getCategoriesFail = (error) => ({
+  type: GET_CATEGORIES_FAIL,
+  payload: error,
 });
 
 // EDIT SELLER
@@ -371,6 +416,20 @@ export const editSellerSuccess = seller => ({
 });
 export const editSellerFail = error => ({
   type: EDIT_SELLER_FAIL,
+  payload: error,
+});
+
+// SET ACTIVE SELLER
+export const setActiveSellerRequest = (seller) => ({
+  type: SET_ACTIVE_SELLER_REQUEST,
+  payload: seller,
+});
+export const setActiveSellerSuccess = seller => ({
+  type: SET_ACTIVE_SELLER_SUCCESS,
+  payload: seller,
+});
+export const setActiveSellerFail = error => ({
+  type: SET_ACTIVE_SELLER_FAIL,
   payload: error,
 });
 
@@ -429,6 +488,21 @@ export const editStoreFail = error => ({
   type: EDIT_STORE_FAIL,
   payload: error,
 });
+
+// SET STORE ACTIVE STATUS
+export const setStoreActiveRequest = (store) => ({
+  type: SET_STORE_ACTIVE_REQUEST,
+  payload: store,
+});
+export const setStoreActiveSuccess = (store) => ({
+  type: SET_STORE_ACTIVE_SUCCESS,
+  payload: store,
+});
+export const setStoreActiveFail = (error) => ({
+  type: SET_STORE_ACTIVE_FAIL,
+  payload: error,
+});
+
 
 // DELETE STORE
 export const deleteStoreRequest = (id) => ({

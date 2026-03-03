@@ -235,7 +235,7 @@ Route::middleware(['XSS', 'isInstalled'])->group(function () {
     Route::post('blog/unlike-reply', [BlogController::class, 'unlikeBlogReply'])->name('blog.unlike.reply');
     Route::post('track-order', [FrontendController::class, 'trackOrder'])->name('track.order');
     Route::get('home/brands', [FrontendController::class, 'brands'])->name('brands.all');
-    Route::get('home/sellers', [FrontendController::class, 'sellers'])->name('front.sellers');
+
     Route::get('home/stores', [FrontendController::class, 'stores'])->name('front.stores');
     Route::get('home/get-store/{id}', [FrontendController::class, 'getStore'])->name('front.getStore');
     //test

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createSelector } from "reselect";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -26,117 +26,76 @@ import {
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import { addNewCustomer, deleteCustomer, getCustomers, setActiveCustomer, updateCustomer } from "../../store/actions";
 import defaultCustomerImg from '../../../images/default/user.jpg'
-// Mock data - no database (MVP)
-const MOCK_CUSTOMERS = [
-  {
-    id: "C001",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    tel: "+44 7700 900123",
-    address: "12 High Street, London SW1A 1AA",
-    lastLogin: "2024-01-15 09:32",
-    orders: 24,
-    tickets: 2,
-    active: true,
-  },
-  {
-    id: "C002",
-    name: "Sarah Johnson",
-    email: "sarah.j@example.com",
-    tel: "+44 7700 900456",
-    address: "45 Park Lane, Manchester M1 2AB",
-    lastLogin: "2024-01-14 14:20",
-    orders: 8,
-    tickets: 0,
-    active: true,
-  },
-  {
-    id: "C003",
-    name: "Michael Brown",
-    email: "m.brown@example.com",
-    tel: "+44 7700 900789",
-    address: "78 Queen St, Birmingham B1 1AA",
-    lastLogin: "2024-01-10 11:05",
-    orders: 15,
-    tickets: 1,
-    active: false,
-  },
-];
-
-const MOCK_TRADE_CUSTOMERS = [
-  {
-    id: "TC001",
-    name: "Mark McDaniel",
-    companyName: "Mark McDaniel LTD",
-    industry: "electric and plumbing",
-    companyAddress: "100 Industrial Way, Leeds LS1 2XY",
-    lastLogin: "2024-01-16 08:15",
-    orders: 156,
-    tickets: 5,
-    tradeDiscounts: "12%",
-    active: true,
-  },
-  {
-    id: "TC002",
-    name: "Emma Wilson",
-    companyName: "Wilson Builders Ltd",
-    industry: "construction",
-    companyAddress: "22 Builder's Row, Bristol BS1 4AA",
-    lastLogin: "2024-01-13 16:42",
-    orders: 89,
-    tickets: 2,
-    tradeDiscounts: "8%",
-    active: true,
-  },
-  {
-    id: "TC003",
-    name: "David Clark",
-    companyName: "Clark Supplies Co",
-    industry: "wholesale hardware",
-    companyAddress: "5 Warehouse Rd, Glasgow G1 1BB",
-    lastLogin: "2024-01-08 10:30",
-    orders: 234,
-    tickets: 12,
-    tradeDiscounts: "15%",
-    active: false,
-  },
-];
 
 const CustomersBreakdown = () => {
   document.title = "Customers Breakdown | LEKIT Ltd";
 
   const dispatch = useDispatch();
-  const { subdomain } = useParams()
+  const { subdomain = "all" } = useParams();
 
   const [activeTab, setActiveTab] = useState("customers");
-  const [searchTerm, setSearchTerm] = useState("");
   const [customers, setCustomers] = useState([]);
-  const [tradeCustomers, setTradeCustomers] = useState(MOCK_TRADE_CUSTOMERS);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // add | edit | view
   const [modalType, setModalType] = useState("customers"); // customers | trade
   const [currentRecord, setCurrentRecord] = useState(null);
   const [query, setQuery] = useState({
-    subdomain: 'all',
-    searchKeyword: ''
-  })
+    subdomain: typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all",
+    searchKeyword: ""
+  });
 
+  // Selector for customers and blocked customers from the redux store
   const ecommerceSelector = createSelector(
     state => state.ecommerce,
     ecommerce => ({
       allcustomers: ecommerce.customers,
+      blockedCustomers: ecommerce.blockedCustomers
     })
   );
-  const { allcustomers } = useSelector(ecommerceSelector);
+  const { allcustomers, blockedCustomers } = useSelector(ecommerceSelector);
+
+  // Keep a ref to ensure latest value of query
+  const queryRef = useRef(query);
 
   useEffect(() => {
-    // Protect against undefined/null or non-array allcustomers
-    setCustomers(Array.isArray(allcustomers) ? allcustomers : []);
-  }, [allcustomers]);
+    queryRef.current = query;
+  }, [query]);
 
+  // Keep query.subdomain in sync with url subdomain param
   useEffect(() => {
-    dispatch(getCustomers(query));
-  }, [dispatch]);
+    setQuery((prev) => ({
+      ...prev,
+      subdomain: typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all"
+    }));
+  }, [subdomain]);
+
+  // Sync customers list from store to local state depending on current subdomain
+  useEffect(() => {
+    if (query.subdomain === "all" || query.subdomain === "add") {
+      setCustomers(Array.isArray(allcustomers) ? allcustomers : []);
+    } else if (query.subdomain === "blocked") {
+      setCustomers(Array.isArray(blockedCustomers) ? blockedCustomers : []);
+    } else {
+      setCustomers([]);
+    }
+    if (query.subdomain === "add") {
+      setModalOpen(true);
+    }
+  }, [query.subdomain, allcustomers, blockedCustomers]);
+
+  // Fetch customers when subdomain or search changes
+  useEffect(() => {
+    // Only fetch for 'all' or 'blocked'; the API expects subdomain. Always pass up-to-date query.
+    if (
+      (query.subdomain === "all" && (!Array.isArray(allcustomers) || allcustomers.length === 0)) ||
+      (query.subdomain === "blocked" && (!Array.isArray(blockedCustomers) || blockedCustomers.length === 0))
+    ) {
+      dispatch(getCustomers({
+        ...queryRef.current
+      }));
+    }
+    // Do not fetch for unknown subdomains or when store already has data
+  }, [query.subdomain, allcustomers, blockedCustomers, dispatch]);
 
   const initialFormState = {
     id: null,
@@ -175,8 +134,8 @@ const CustomersBreakdown = () => {
     updated_at: "",
     user_profile_image: "",
     user_type: "",
-    password: '',
-    password_confirmation: ''
+    password: "",
+    password_confirmation: ""
   };
   const [formValues, setFormValues] = useState(initialFormState);
 
@@ -187,16 +146,13 @@ const CustomersBreakdown = () => {
       ...customerToUpdate,
       status: customerToUpdate.status === 1 ? 0 : 1
     };
-
     dispatch(setActiveCustomer(updatedCustomer));
   };
 
   const openAddModal = () => {
     setModalMode("add");
     setCurrentRecord(null);
-    setFormValues({
-      ...initialFormState,
-    });
+    setFormValues({ ...initialFormState });
     setModalOpen(true);
   };
 
@@ -239,13 +195,12 @@ const CustomersBreakdown = () => {
         password: formValues.password || "",
         password_confirmation: formValues.password_confirmation || "",
       };
-      // setCustomers((prev = []) => [...prev, newCustomer]);
-      // send backend
       dispatch(addNewCustomer(newCustomer));
     } else if (modalMode === "edit" && currentRecord) {
       const filteredCustomer = customers.filter(
-        customer => customer.id.toString() === currentRecord.id.toString()
+        customer => String(customer.id) === String(currentRecord.id)
       );
+      if (filteredCustomer.length === 0) return;
       const editCustomer = {
         ...filteredCustomer[0],
         first_name: formValues.first_name || "",
@@ -259,17 +214,15 @@ const CustomersBreakdown = () => {
         address: formValues.address || "",
         password: formValues.password || "",
         password_confirmation: formValues.password_confirmation || "",
-      }
-
-      dispatch(updateCustomer(editCustomer))
+      };
+      dispatch(updateCustomer(editCustomer));
     }
-
-    // setModalOpen(false);
+    // Optionally: setModalOpen(false);
   };
 
   const handleRemove = (id) => {
     if (!window.confirm("Remove this customer?")) return;
-    dispatch(deleteCustomer(id))
+    dispatch(deleteCustomer(id));
   };
 
   // Action icon with title (tooltip on hover) – one-click actions
@@ -292,9 +245,20 @@ const CustomersBreakdown = () => {
                 <Input
                   type="text"
                   placeholder="SEARCH CUSTOMERS"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={query.searchKeyword}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setQuery(prevQuery => ({
+                      ...prevQuery,
+                      searchKeyword: value,
+                    }));
+                  }}
                   className="form-control"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      dispatch(getCustomers({...queryRef.current}))
+                    }
+                  }}
                 />
               </InputGroup>
             </Col>
@@ -353,10 +317,10 @@ const CustomersBreakdown = () => {
                                   className="form-check-input"
                                   type="checkbox"
                                   id={`trade-${row.id}`}
-                                  checked={row.status}
-                                  onChange={() => toggleStatus(row.id)}
+                                  checked={row.status === 1}
+                                  onClick={() => toggleStatus(row.id)}
                                 />
-                                <label className="form-check-label" htmlFor={`${row.id}`}>
+                                <label className="form-check-label" htmlFor={`trade-${row.id}`}>
                                   {row.status ? "Active" : "Blocked"}
                                 </label>
                               </div>
@@ -391,6 +355,13 @@ const CustomersBreakdown = () => {
                             </td>
                           </tr>
                         ))}
+                      {customers.length === 0 && (
+                        <tr>
+                          <td colSpan="100%" className="text-center">
+                            Not Found
+                          </td>
+                        </tr>
+                      )}
                       </tbody>
                     </Table>
                   </div>

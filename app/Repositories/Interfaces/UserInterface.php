@@ -11,6 +11,8 @@ interface UserInterface{
 
     public function get($id);
 
+    public function getBlocked();
+
     public function store($data);
 
     public function update($data);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { createSelector } from "reselect";
@@ -18,422 +18,482 @@ import {
   ModalFooter,
   Form,
   FormGroup,
+  FormText,
   Label,
+  Badge,
+  Spinner,
+  FormFeedback,
+  Nav,
+  NavItem,
+  NavLink,
+  Toast,
+  ToastBody,
+  ToastHeader,
+  TabContent,
 } from "reactstrap";
 
-import { addNewStoreRequest, deleteStoreRequest, editStoreRequest, getStoresRequest } from "../../store/actions";
+import classnames from "classnames";
+
+import { addNewStoreRequest, deleteStoreRequest, editStoreRequest, getStoresRequest, setStoreActiveRequest, getSellersListSuccess, getCategoriesSuccess, getSellersRequest, getSellersListRequest, getCategoriesRequest } from "../../store/e-commerce/actions";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import defaultLogoImg from "../../../images/companies/img-2.png";
+import api from "../../store/api";
 
 const defaultLogo = defaultLogoImg;
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-// Updated Mock data - no database (MVP) to the new format
-const MOCK_STORES = [
-  {
-    seller_id: "SELLER001",
-    user_id: "USER001",
-    store_name: "HomePro Main Store",
-    slug: "homepro-main-store",
-    store_phone: "+44 1234 567890",
-    store_email: "info@homepro.com",
-    address: "12 High Street, London SW1A 1AA",
-    city: "London",
-    postcode: "SW1A 1AA",
-    status: "open",
-    opening_hours: "08:00",
-    logo: defaultLogoImg,
-    todaysOrders: 32,
-    totalOrders: 1240,
-    totalCustomersOrders: 980,
-    productsCount: 245,
-  },
-  {
-    seller_id: "SELLER002",
-    user_id: "USER002",
-    store_name: "ElectroWorld City",
-    slug: "electroworld-city",
-    store_phone: "+44 5678 123456",
-    store_email: "contact@electroworld.com",
-    address: "45 Park Lane, Manchester M1 2AB",
-    city: "Manchester",
-    postcode: "M1 2AB",
-    status: "closed",
-    opening_hours: "09:30",
-    logo: defaultLogoImg,
-    todaysOrders: 18,
-    totalOrders: 892,
-    totalCustomersOrders: 650,
-    productsCount: 310,
-  },
-  {
-    seller_id: "SELLER003",
-    user_id: "USER003",
-    store_name: "BuildRight Superstore",
-    slug: "buildright-superstore",
-    store_phone: "+44 9876 543210",
-    store_email: "sales@buildright.com",
-    address: "78 Queen St, Birmingham B1 1AA",
-    city: "Birmingham",
-    postcode: "B1 1AA",
-    status: "open",
-    opening_hours: "07:30",
-    logo: defaultLogoImg,
-    todaysOrders: 54,
-    totalOrders: 2156,
-    totalCustomersOrders: 1740,
-    productsCount: 520,
-  },
+const DEFAULT_OPENING_HOURS = [
+  { open: "09:00 AM", close: "06:00 PM", is_closed: "0" }, // Monday
+  { open: "09:00 AM", close: "06:00 PM", is_closed: "0" }, // Tuesday
+  { open: "09:00 AM", close: "06:00 PM", is_closed: "0" }, // Wednesday
+  { open: "09:00 AM", close: "06:00 PM", is_closed: "0" }, // Thursday
+  { open: "09:00 AM", close: "06:00 PM", is_closed: "0" }, // Friday
+  { open: "09:00 AM", close: "06:00 PM", is_closed: "0" }, // Saturday
+  { open: "09:00 AM", close: "06:00 PM", is_closed: "1" }, // Sunday
+];
+
+const CATEGORIES = [
+  { id: 1, name: "Electronics" },
+  { id: 2, name: "Clothing" },
+  { id: 3, name: "Food & Beverage" },
+  { id: 4, name: "Home & Garden" },
+  { id: 5, name: "Books & Media" },
+  { id: 6, name: "Sports & Outdoors" },
+  { id: 7, name: "Health & Beauty" },
+  { id: 8, name: "Toys & Games" },
+  { id: 9, name: "Other" },
 ];
 
 const initialFormState = {
-  id: "",
   seller_id: "",
-  store_id: "", // for some forms/usecases
-  user_id: "", // left for legacy support if needed
-  first_name: "",
-  last_name: "",
-  email: "",
-  phone: "",
-  password: "",
-  password_confirmation: "",
   store_name: "",
   store_code: "",
   address: "",
   postcode: "",
   city: "",
-  country_id: "",
   store_phone: "",
   store_email: "",
   latitude: "",
   longitude: "",
   store_description: "",
-  store_comments: "",
-  logo: {
-    storage: "",
-    original_image: "",
-    image_100x38: "",
-    image_89x33: "",
-    image_118x45: "",
-    image_138x52: "",
-    image_48x25: "",
-    image_40x40: "",
-    image_197x152: "",
-    image_120x80: "",
-    image_82x82: "",
-    image_617x145: "",
-    image_297x203: "",
-    image_72x72: "",
-    image_270x260: "",
-    image_320x320: "",
-    image_1900x625: "",
-    image_1300x400: "",
-  },
-  main_banner: {
-    storage: "",
-    original_image: "",
-    image_100x38: "",
-    image_89x33: "",
-    image_118x45: "",
-    image_138x52: "",
-    image_48x25: "",
-    image_40x40: "",
-    image_197x152: "",
-    image_120x80: "",
-    image_82x82: "",
-    image_617x145: "",
-    image_297x203: "",
-    image_72x72: "",
-    image_270x260: "",
-    image_320x320: "",
-    image_1900x625: "",
-    image_1300x400: "",
-  },
-  banner: {
-    storage: "",
-    original_image: "",
-    image_100x38: "",
-    image_89x33: "",
-    image_118x45: "",
-    image_138x52: "",
-    image_48x25: "",
-    image_40x40: "",
-    image_197x152: "",
-    image_120x80: "",
-    image_82x82: "",
-    image_617x145: "",
-    image_297x203: "",
-    image_72x72: "",
-    image_270x260: "",
-    image_320x320: "",
-    image_1900x625: "",
-    image_1300x400: "",
-  },
-  status: 1, // 1 for active, 0 for inactive
-  // Opening/closing times and is_closed for each day, e.g. open_time[0] = "08:00", close_time[0] = "17:00"
-  open_time: ["", "", "", "", "", "", ""],
-  close_time: ["", "", "", "", "", "", ""],
-  is_closed0: 0,
-  is_closed1: 0,
-  is_closed2: 0,
-  is_closed3: 0,
-  is_closed4: 0,
-  is_closed5: 0,
-  is_closed6: 0,
+  status: 1,
+  opening_hours: [...DEFAULT_OPENING_HOURS],
+  logo: null,
+  main_banner: null,
+  banner: null,
+  logo_preview: null,
+  main_banner_preview: null,
+  banner_preview: null,
   facebook: "",
   youtube: "",
   twitter: "",
   linkedin: "",
   instagram: "",
-  category: "",
+  store_comments: "",
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone: "",
+  password: "",
+  password_confirmatoin: "",
+  category_id: "",
 };
 
 const StoresBreakdown = () => {
   document.title = "Stores Breakdown | LEKIT Ltd";
-  const dispatch = useDispatch()
-  const { status } = useParams();
-  const [searchTerm, setSearchTerm] = useState("");
+  const dispatch = useDispatch();
+  const { subdomain } = useParams();
+
   const [stores, setStores] = useState([]);
+  // sellers and categories loaded directly in this component
+
   const [openOnly, setOpenOnly] = useState(true);
   const [sellerFilter, setSellerFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
-  const [ordersFilter, setOrdersFilter] = useState("all"); // all | 0-100 | 100-500 | 500+
+  const [ordersFilter, setOrdersFilter] = useState("all");
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState("add"); // add | edit | view
+  const [modalMode, setModalMode] = useState("add");
   const [currentRecord, setCurrentRecord] = useState(null);
   const [formValues, setFormValues] = useState(initialFormState);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+  const [toastType, setToastType] = useState("success");
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [activeTab, setActiveTab] = useState("1");
+
   const [query, setQuery] = useState({
-    status: 'all',
+    subdomain: 'all',
     searchKeyword: ''
-  })
+  });
 
   const ecommerceSelector = createSelector(
-    state => state.ecommerce,
+    state => state.ecommerce || {},
     ecommerce => ({
-      allstores: ecommerce.stores,
+      allstores: ecommerce.stores || [],
+      sellersListForStore: ecommerce.sellersList || [],
+      storesCategories: ecommerce.storesCategories || [],
     })
   );
-  const { allstores } = useSelector(ecommerceSelector);
+  const { allstores, sellersListForStore, storesCategories } = useSelector(ecommerceSelector);
+
+  // Keep a ref to ensure latest value of query
+  const queryRef = useRef(query);
+
+  useEffect(() => {
+    queryRef.current = query;
+  }, [query]);
 
   useEffect(() => {
     setStores(allstores)
-  }, [allstores])
+  }, [allstores]);
 
   useEffect(() => {
-    if (status === 'all') {
-      setQuery({ ...query, status: '' })
-      dispatch(getStoresRequest(query));
-    } else if (status === 'pending') {
-      setQuery({ ...query, status: 'pending' })
-      dispatch(getStoresRequest(query));
-    } else if (status === 'blocked') {
-      setQuery({ ...query, status: 'blocked' })
-      dispatch(getStoresRequest(query));
-    } else if (status === 'add') {
-
-    }
-    dispatch(getStoresRequest(query))
+    dispatch(getSellersListRequest())
+    dispatch(getCategoriesRequest())
   }, [dispatch])
+
+  useEffect(() => {
+    setQuery((prev) => ({
+      ...prev,
+      subdomain: typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all"
+    }))
+  }, [subdomain])
+
+  useEffect(() => {
+    if (query.subdomain === 'all') {
+      dispatch(getStoresRequest({...queryRef.current}));
+    } else if (query.subdomain === 'pending') {
+      dispatch(getStoresRequest({...queryRef.current}));
+    } else if (query.subdomain === 'blocked') {
+      dispatch(getStoresRequest({...queryRef.current}));
+    } else if (query.subdomain === 'active') {
+      dispatch(getStoresRequest({...queryRef.current}));
+    } else if (query.subdomain === 'add') {
+      setModalOpen(true);
+    }
+  }, [dispatch, query.subdomain])
+
+  const resetForm = () => {
+    setFormValues({ ...initialFormState });
+    setErrors({});
+    setTouched({});
+    setPasswordsMatch(true);
+  };
 
   const openAddModal = () => {
     setModalMode("add");
     setCurrentRecord(null);
-    setFormValues({
-      ...initialFormState,
-    });
+    resetForm();
+    setActiveTab("1");
     setModalOpen(true);
   };
 
   const openViewOrEditModal = (mode, record) => {
     setModalMode(mode);
     setCurrentRecord(record);
-    setFormValues({
-      // Top-level user fields
-      id: record.id,
-      email: record.email,
-      country_id: record.country_id,
-      phone: record.phone,
-      first_name: record.first_name,
-      last_name: record.last_name,
-      status: record.status,
-      is_user_banned: record.is_user_banned,
-      newsletter_enable: record.newsletter_enable,
-      lang_code: record.lang_code,
-      is_password_set: record.is_password_set,
-      profile_image: record.profile_image,
-      user_profile_image: record.user_profile_image,
-      full_name: record.full_name,
-      last_recharge: record.last_recharge,
-      // Shipping/billing can be left for address lists if needed
-      // Nested store profile info
-      store_profile_id: record.store_profile?.id ?? "",
-      seller_id: record.store_profile?.seller_id ?? "",
-      user_id: record.store_profile?.user_id ?? "",
-      store_name: record.store_profile?.store_name ?? "",
-      store_code: record.store_profile?.store_code ?? "",
-      store_status: record.store_profile?.status ?? "",
-      address: record.store_profile?.address ?? "",
-      postcode: record.store_profile?.postcode ?? "",
-      city: record.store_profile?.city ?? "",
-      store_phone: record.store_profile?.store_phone ?? "",
-      store_email: record.store_profile?.store_email ?? "",
-      latitude: record.store_profile?.latitude ?? "",
-      longitude: record.store_profile?.longitude ?? "",
-      store_description: record.store_profile?.store_description ?? "",
-      store_comments: record.store_profile?.store_comments ?? "",
-      // Opening and closing times as arrays, and week handling. Map as separate fields for each day if needed.
-      open_time: Array.isArray(record.store_profile?.opening_hours) 
-        ? record.store_profile.opening_hours.map(x => x.open)
-        : [],
-      close_time: Array.isArray(record.store_profile?.opening_hours)
-        ? record.store_profile.opening_hours.map(x => x.close)
-        : [],
-      is_closed: Array.isArray(record.store_profile?.opening_hours)
-        ? record.store_profile.opening_hours.map(x => x.is_closed)
-        : [],
-      // Images
-      logo: record.store_profile?.logo ?? "",
-      main_banner: record.store_profile?.main_banner ?? "",
-      banner: record.store_profile?.banner ?? "",
-      // Social
-      facebook: record.store_profile?.facebook ?? "",
-      youtube: record.store_profile?.youtube ?? "",
-      twitter: record.store_profile?.twitter ?? "",
-      linkedin: record.store_profile?.linkedin ?? "",
-      instagram: record.store_profile?.instagram ?? "",
-      // For backward compatibility and to preserve any additional store props
-      category: record.category,
-      store_id: record.store_profile?.store_id ?? "",
-    });
+    setActiveTab("1");
+    if (record && record.store_profile) {
+      const profile = record.store_profile;
+      const formattedHours = Array.isArray(profile.opening_hours)
+        ? profile.opening_hours
+        : DEFAULT_OPENING_HOURS;
+
+      setFormValues({
+        ...initialFormState,
+        seller_id: profile?.seller_id || "",
+        store_name: profile?.store_name || "",
+        store_code: profile?.store_code || "",
+        address: profile?.address || "",
+        postcode: profile?.postcode || "",
+        city: profile?.city || "",
+        store_phone: profile?.store_phone || "",
+        store_email: profile?.store_email || "",
+        latitude: profile?.latitude || "",
+        longitude: profile?.longitude || "",
+        store_description: profile?.store_description || "",
+        store_comments: profile?.store_comments || "",
+        opening_hours: formattedHours,
+        facebook: profile?.facebook || "",
+        youtube: profile?.youtube || "",
+        twitter: profile?.twitter || "",
+        linkedin: profile?.linkedin || "",
+        instagram: profile?.instagram || "",
+        status: profile?.status === 1 ? 1 : 0,
+        first_name: record.first_name || '',
+        last_name: record.last_name || '',
+        email: record.email || '',
+        phone: record.phone || '',
+      });
+    }
     setModalOpen(true);
   };
 
-  const closeModal = () => setModalOpen(false);
+  const closeModal = () => {
+    setModalOpen(false);
+    resetForm();
+  };
 
-  const handleFormChange = (e) => {
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formValues.seller_id) newErrors.seller_id = "Seller is required";
+    if (!formValues.store_name) newErrors.store_name = "Store Name is required";
+    if (!formValues.store_code) newErrors.store_code = "Store Code is required";
+    if (!formValues.address) newErrors.address = "Address is required";
+    if (!formValues.city) newErrors.city = "City is required";
+    if (!formValues.store_phone) newErrors.store_phone = "Store Telephone is required";
+    if (!formValues.store_email) newErrors.store_email = "Store Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.store_email))
+      newErrors.store_email = "Invalid email format";
+
+    if (!formValues.latitude) newErrors.latitude = "Latitude is required";
+    else if (isNaN(parseFloat(formValues.latitude)))
+      newErrors.latitude = "Latitude must be numeric";
+
+    if (!formValues.longitude) newErrors.longitude = "Longitude is required";
+    else if (isNaN(parseFloat(formValues.longitude)))
+      newErrors.longitude = "Longitude must be numeric";
+
+    if (!formValues.store_description)
+      newErrors.store_description = "Store Description is required";
+
+    // Validate opening hours (array format)
+    if (Array.isArray(formValues.opening_hours)) {
+      formValues.opening_hours.forEach((hours, dayIndex) => {
+        if (hours.is_closed !== "1" && hours.is_closed !== 1) {
+          if (!hours.open) newErrors[`day_${dayIndex}_open`] = `Open time required`;
+          if (!hours.close) newErrors[`day_${dayIndex}_close`] = `Close time required`;
+          if (hours.open && hours.close && hours.open >= hours.close) {
+            newErrors[`day_${dayIndex}_close`] = `Close time must be after open time`;
+          }
+        }
+      });
+    }
+
+    if (!formValues.first_name)
+      newErrors.first_name = "Manager First Name is required";
+    if (!formValues.last_name)
+      newErrors.last_name = "Manager Last Name is required";
+    if (!formValues.email) newErrors.email = "Manager Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email))
+      newErrors.email = "Invalid email format";
+
+    if (modalMode === "add") {
+      if (!formValues.password)
+        newErrors.password = "Password is required";
+      else if (formValues.password.length < 8)
+        newErrors.password = "Password must be at least 8 characters";
+
+      if (!formValues.password_confirmatoin)
+        newErrors.password_confirmatoin = "Confirm Password is required";
+      else if (formValues.password !== formValues.password_confirmatoin) {
+        newErrors.password_confirmatoin = "Passwords do not match";
+        setPasswordsMatch(false);
+      } else {
+        setPasswordsMatch(true);
+      }
+    }
+
+    // if (!formValues.category_id) newErrors.category_id = "Category is required";
+
+    const urlFields = ["facebook", "youtube", "twitter", "linkedin", "instagram"];
+    urlFields.forEach((field) => {
+      if (formValues[field] && !/^https?:\/\/.+/.test(formValues[field])) {
+        newErrors[field] = "Must be valid URL (http:// or https://)";
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (type === "checkbox") {
-      setFormValues((prev) => ({ ...prev, [name]: checked ? 1 : 0 }));
-    } else if (
-      name === "todaysOrders" ||
-      name === "totalOrders" ||
-      name === "totalCustomersOrders" ||
-      name === "productsCount"
-    ) {
-      setFormValues((prev) => ({ ...prev, [name]: parseInt(value, 10) || 0 }));
-    } else {
-      setFormValues((prev) => ({ ...prev, [name]: value }));
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const handleImageUpload = (e, fieldName) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setErrors((prev) => ({
+          ...prev,
+          [fieldName]: "File must be an image",
+        }));
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormValues((prev) => ({
+          ...prev,
+          [fieldName]: file,
+          [`${fieldName}_preview`]: reader.result,
+        }));
+        setErrors((prev) => {
+          const newErrs = { ...prev };
+          delete newErrs[fieldName];
+          return newErrs;
+        });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleSave = () => {
-    if (modalMode === "view") {
-      setModalOpen(false);
+  const handleImageRemove = (fieldName) => {
+    setFormValues((prev) => ({
+      ...prev,
+      [fieldName]: null,
+      [`${fieldName}_preview`]: null,
+    }));
+  };
+
+  const handleOpeningHoursChange = (dayIndex, field, value) => {
+    setFormValues((prev) => {
+      const newHours = [...prev.opening_hours];
+      newHours[dayIndex] = {
+        ...newHours[dayIndex],
+        [field]: value,
+      };
+      return {
+        ...prev,
+        opening_hours: newHours,
+      };
+    });
+  };
+
+  const toggleDayOpen = (dayIndex) => {
+    setFormValues((prev) => {
+      const newHours = [...prev.opening_hours];
+      const isClosed = newHours[dayIndex].is_closed;
+      newHours[dayIndex] = {
+        ...newHours[dayIndex],
+        is_closed: isClosed === "1" || isClosed === 1 ? 0 : 1,
+      };
+      return {
+        ...prev,
+        opening_hours: newHours,
+      };
+    });
+  };
+
+  const copyMondayToAllDays = () => {
+    const mondayHours = formValues.opening_hours[0];
+    setFormValues((prev) => {
+      const newHours = [...prev.opening_hours];
+      for (let i = 1; i < newHours.length; i++) {
+        newHours[i] = { ...mondayHours };
+      }
+      return {
+        ...prev,
+        opening_hours: newHours,
+      };
+    });
+  };
+
+  const hasError = (fieldName) => {
+    return touched[fieldName] && errors[fieldName];
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      setToastMessage("Please fix validation errors");
+      setToastType("danger");
       return;
     }
 
-    if (modalMode === "add") {
+    setIsLoading(true);
 
-      const newStore = {
-        seller_id: formValues.seller_id,
-        store_id: formValues.store_id,
-        user_id: formValues.user_id,
-        first_name: formValues.first_name,
-        last_name: formValues.last_name,
-        email: formValues.email,
-        phone: formValues.phone,
-        password: formValues.password,
-        password_confirmation: formValues.password_confirmation,       
-        store_name: formValues.store_name,
-        store_code: formValues.store_code,
-        address: formValues.address,
-        postcode: formValues.postcode,
-        city: formValues.city,
-        country_id: formValues.country_id,
-        store_phone: formValues.store_phone,
-        store_email: formValues.store_email,
-        latitude: formValues.latitude,
-        longitude: formValues.longitude,
-        store_description: formValues.store_description,
-        store_comments: formValues.store_comments,
-        logo: formValues.logo,
-        main_banner: formValues.main_banner,
-        banner: formValues.banner,
-        facebook: formValues.facebook,
-        youtube: formValues.youtube,
-        twitter: formValues.twitter,
-        linkedin: formValues.linkedin,
-        instagram: formValues.instagram,
-        status: formValues.status || 1,
-        open_time: Array.isArray(formValues.open_time) ? [...formValues.open_time] : [],
-        close_time: Array.isArray(formValues.close_time) ? [...formValues.close_time] : [],
-        category: formValues.category,
-      };
-      // setStores((prev) => [...prev, newStore]);
-      dispatch(addNewStoreRequest(newStore))
-    } else if (modalMode === "edit" && currentRecord) {
-      const updateStore = {
-        id: currentRecord.id,
-        seller_id: formValues.seller_id,
-        store_name: formValues.store_name,
-        store_code: formValues.store_code,
-        address: formValues.address,
-        postcode: formValues.postcode,
-        city: formValues.city,
-        store_phone: formValues.store_phone,
-        store_email: formValues.store_email,
-        latitude: formValues.latitude,
-        longitude: formValues.longitude,
-        store_description: formValues.store_description,
-        status: formValues.status,
-        open_time: Array.isArray(formValues.open_time) ? [...formValues.open_time] : [],
-        close_time: Array.isArray(formValues.close_time) ? [...formValues.close_time] : [],
-        logo: formValues.logo,
-        main_banner: formValues.main_banner,
-        banner: formValues.banner,
-        facebook: formValues.facebook,
-        youtube: formValues.youtube,
-        twitter: formValues.twitter,
-        linkedin: formValues.linkedin,
-        instagram: formValues.instagram,
-        store_comments: formValues.store_comments,
-        first_name: formValues.first_name,
-        last_name: formValues.last_name,
-        email: formValues.email,
-        phone: formValues.phone,
-        category: formValues.category,
-        country_id: formValues.country_id,
-        store_id: formValues.store_id,
+    try {
+      if (modalMode === "add") {
+        const formData = new FormData();
+
+        formData.append('seller_id', formValues.seller_id);
+        formData.append('store_name', formValues.store_name);
+        formData.append('store_code', formValues.store_code);
+        formData.append('address', formValues.address);
+        formData.append('postcode', formValues.postcode);
+        formData.append('city', formValues.city);
+        formData.append('store_phone', formValues.store_phone);
+        formData.append('store_email', formValues.store_email);
+        formData.append('latitude', formValues.latitude);
+        formData.append('longitude', formValues.longitude);
+        formData.append('store_description', formValues.store_description);
+        formData.append('store_comments', formValues.store_comments);
+        formData.append('status', formValues.status === 1 ? 1 : 0);
+
+        // Format opening hours as array
+        if (Array.isArray(formValues.opening_hours)) {
+          formData.append('opening_hours', JSON.stringify(formValues.opening_hours));
+        }
+
+        formData.append('facebook', formValues.facebook || '');
+        formData.append('youtube', formValues.youtube || '');
+        formData.append('twitter', formValues.twitter || '');
+        formData.append('linkedin', formValues.linkedin || '');
+        formData.append('instagram', formValues.instagram || '');
+
+        formData.append('first_name', formValues.first_name);
+        formData.append('last_name', formValues.last_name);
+        formData.append('email', formValues.email);
+        formData.append('phone', formValues.phone || '');
+        formData.append('password', formValues.password);
+        formData.append('category_id', formValues.category_id);
+
+        if (formValues.logo instanceof File) {
+          formData.append('logo', formValues.logo);
+        }
+        if (formValues.main_banner instanceof File) {
+          formData.append('main_banner', formValues.main_banner);
+        }
+        if (formValues.banner instanceof File) {
+          formData.append('banner', formValues.banner);
+        }
+
+        dispatch(addNewStoreRequest(formData));
+      } else if (modalMode === "edit" && currentRecord) {
+        const updateStore = {
+          id: currentRecord.store_profile.id,
+          ...formValues,
+          status: formValues.status === 1 ? 1 : 0,
+        };
+        dispatch(editStoreRequest(updateStore));
       }
-      dispatch(editStoreRequest(updateStore))
+
+      setIsLoading(false);
+      closeModal();
+    } catch (error) {
+      setIsLoading(false);
+      setToastMessage("Error: " + (error.message || "An error occurred"));
+      setToastType("danger");
     }
-    // setModalOpen(false);
   };
 
   const handleRemove = (id) => {
     if (!window.confirm("Remove this store?")) return;
     dispatch(deleteStoreRequest(id))
-    // setStores((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const toggleOpenStatus = (id) => {
-    setStores((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, status: s.store_profile.status === 1 ? 0 : 1 } : s
-      )
-    );
+  const toggleOpenStatus = (row) => {
+    const updatedRow = {
+      ...row,
+      store_profile: {
+        ...row.store_profile,
+        status: row.store_profile.status === 1 ? 0 : 1,
+      },
+    };
+    dispatch(setStoreActiveRequest(updatedRow));
+    dispatch(getStoresRequest({ ...queryRef.current }));
   };
-
-  const ActionIcon = ({ iconClass, title, onClick, colorClass = "text-primary" }) => (
-    <Button
-      color="link"
-      className={`p-1 ${colorClass}`}
-      title={title}
-      onClick={onClick}
-    >
-      <i className={`bx ${iconClass} font-size-18`}></i>
-    </Button>
-  );
 
   return (
     <React.Fragment>
@@ -448,9 +508,17 @@ const StoresBreakdown = () => {
                 <Input
                   type="text"
                   placeholder="SEARCH STORES"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={query.searchKeyword}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setQuery(prev => ({ ...prev, searchKeyword: value }));
+                  }}
                   className="form-control"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      dispatch(getStoresRequest({...queryRef.current}));
+                    }
+                  }}
                 />
               </InputGroup>
             </Col>
@@ -462,21 +530,7 @@ const StoresBreakdown = () => {
           </Row>
 
           {/* Filters */}
-          <Row className="mb-3 gy-2 align-items-end">
-            <Col md={3}>
-              <div className="form-check form-switch">
-                <Input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="filter-open-only"
-                  checked={openOnly}
-                  onChange={(e) => setOpenOnly(e.target.checked)}
-                />
-                <Label className="form-check-label" htmlFor="filter-open-only">
-                  Show Opened Stores (On) / All (Off)
-                </Label>
-              </div>
-            </Col>
+          {/* <Row className="mb-3 gy-2 align-items-end">
             <Col md={3}>
               <FormGroup>
                 <Label>Show Stores by Seller</Label>
@@ -486,11 +540,11 @@ const StoresBreakdown = () => {
                   onChange={(e) => setSellerFilter(e.target.value)}
                 >
                   <option value="all">All sellers</option>
-                  {/* {uniqueSellers.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
+                  {(sellersListForStore || []).map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.seller_profile.shop_name || '-'}
                     </option>
-                  ))} */}
+                  ))}
                 </Input>
               </FormGroup>
             </Col>
@@ -503,11 +557,11 @@ const StoresBreakdown = () => {
                   onChange={(e) => setCityFilter(e.target.value)}
                 >
                   <option value="all">All cities</option>
-                  {/* {uniqueCities.map((city) => (
+                  {uniqueCities.map((city) => (
                     <option key={city} value={city}>
                       {city}
                     </option>
-                  ))} */}
+                  ))}
                 </Input>
               </FormGroup>
             </Col>
@@ -526,7 +580,7 @@ const StoresBreakdown = () => {
                 </Input>
               </FormGroup>
             </Col>
-          </Row>
+          </Row> */}
 
           <Row>
             <Col xs={12}>
@@ -555,15 +609,15 @@ const StoresBreakdown = () => {
                             <td>
                               <div className="d-flex align-items-center">
                                 <img
-                                  src={row.store_profile.logo.original_image || defaultLogo}
+                                  src={`storage/${row.store_profile.logo.original_image}` || defaultLogo}
                                   alt=""
-                                  className="rounded me-2"
+                                  className="rounded me-3"
                                   style={{ width: 32, height: 32, objectFit: "contain" }}
                                   onError={(e) => {
                                     e.target.src = defaultLogo;
                                   }}
                                 />
-                                <div> 
+                                <div>
                                   <p className="mb-1">{row.store_profile?.store_name}</p>
                                   <p className="mb-1">{row.store_profile?.store_phone}</p>
                                 </div>
@@ -575,7 +629,7 @@ const StoresBreakdown = () => {
                                   <img
                                     src={row.profile_image || defaultLogo}
                                     alt=""
-                                    className="rounded me-2"
+                                    className="rounded me-3"
                                     style={{ width: 32, height: 32, objectFit: "contain" }}
                                     onError={(e) => {
                                       e.target.src = defaultLogo;
@@ -590,27 +644,18 @@ const StoresBreakdown = () => {
                               </div>
                             </td>
                             <td>
-                              <p className="mb-1">{`Current Balance: ${row?.balance}`}</p>
-                              <p className="mb-1">{`Last Login: ${row?.last_login}`}</p>
+                              <p className="mb-1">{`Current Balance: ${row?.balance || '-'}`}</p>
+                              <p className="mb-1">{`Last Login: ${row?.last_login || '-'}`}</p>
                             </td>
                             <td>
                               <div className="d-flex flex-column small">
-                                <span
-                                  className={
-                                    row.store_profile.status === 1
-                                      ? "text-success fw-semibold"
-                                      : "text-muted fw-semibold"
-                                  }
-                                >
-                                  {row.store_profile.status === 1 ? "Opened" : "Closed"}
-                                </span>
                                 <div className="form-check form-switch mt-1">
                                   <Input
                                     className="form-check-input"
                                     type="checkbox"
-                                    id={`open-${row.slug}`}
+                                    id={`open-${row.id}`}
                                     checked={row.store_profile.status === 1}
-                                    onChange={() => toggleOpenStatus(row.id)}
+                                    onClick={() => toggleOpenStatus(row)}
                                   />
                                   <Label
                                     className="form-check-label"
@@ -651,6 +696,13 @@ const StoresBreakdown = () => {
                             </td>
                           </tr>
                         ))}
+                        {stores.length === 0 && (
+                          <tr>
+                            <td colSpan="100%" className="text-center">
+                              Not Found
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </Table>
                   </div>
@@ -661,209 +713,753 @@ const StoresBreakdown = () => {
         </Container>
       </div>
 
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="position-fixed" style={{ top: "20px", right: "20px", zIndex: 1050 }}>
+          <Toast isOpen={!!toastMessage}>
+            <ToastHeader
+              icon={toastType === "success" ? "success" : "danger"}
+              toggle={() => setToastMessage(null)}
+            >
+              {toastType === "success" ? "Success" : "Error"}
+            </ToastHeader>
+            <ToastBody>{toastMessage}</ToastBody>
+          </Toast>
+        </div>
+      )}
+
       {/* Add / Edit / View Store Modal */}
-      <Modal isOpen={modalOpen} toggle={closeModal} centered size="lg">
+      <Modal isOpen={modalOpen} toggle={closeModal} size="lg" className="modal-dialog-scrollable">
         <ModalHeader toggle={closeModal}>
-          {modalMode === "view"
-            ? "View Store"
-            : modalMode === "edit"
-            ? "Edit Store"
-            : "Add New Store"}
+          {modalMode === "add" ? "Add New Store" : modalMode === "edit" ? "Edit Store" : "View Store"}
         </ModalHeader>
         <ModalBody>
-          <Form>
-            <Row className="mb-3">
-              <Col md={6}>
+          <Nav tabs className="mb-3">
+            <NavItem>
+              <NavLink
+                className={classnames({ active: activeTab === "1" })}
+                onClick={() => setActiveTab("1")}
+                style={{ cursor: "pointer" }}
+              >
+                Store Details
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
+                className={classnames({ active: activeTab === "2" })}
+                onClick={() => setActiveTab("2")}
+                style={{ cursor: "pointer" }}
+              >
+                Opening Hours
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
+                className={classnames({ active: activeTab === "3" })}
+                onClick={() => setActiveTab("3")}
+                style={{ cursor: "pointer" }}
+              >
+                Media Upload
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
+                className={classnames({ active: activeTab === "4" })}
+                onClick={() => setActiveTab("4")}
+                style={{ cursor: "pointer" }}
+              >
+                Social & Other
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
+                className={classnames({ active: activeTab === "5" })}
+                onClick={() => setActiveTab("5")}
+                style={{ cursor: "pointer" }}
+              >
+                Store Manager
+              </NavLink>
+            </NavItem>
+          </Nav>
+
+          <Form onSubmit={handleSave}>
+            {/* TAB 1: Store Details */}
+            {activeTab === "1" && (
+              <TabContent tabId="1">
                 <FormGroup>
-                  <Label for="field-store_name">Store Name</Label>
+                  <Label for="seller_id">Seller *</Label>
                   <Input
-                    id="field-store_name"
+                    type="select"
+                    name="seller_id"
+                    id="seller_id"
+                    value={formValues.seller_id}
+                    onChange={handleInputChange}
+                    invalid={hasError("seller_id")}
+                  >
+                    <option>Sellect Seller</option>
+                    {(sellersListForStore || []).map((seller) => (
+                      <option key={seller.id} value={seller.id}>
+                        {seller.seller_profile.shop_name || '-'}
+                      </option>
+                    ))}
+                  </Input>
+                  {hasError("seller_id") && (
+                    <FormFeedback>{errors.seller_id}</FormFeedback>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label for="store_name">Store Name *</Label>
+                  <Input
+                    type="text"
                     name="store_name"
-                    type="text"
-                    value={formValues.store_name || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
+                    id="store_name"
+                    value={formValues.store_name}
+                    onChange={handleInputChange}
+                    placeholder="Enter store name"
+                    invalid={hasError("store_name")}
                   />
+                  {hasError("store_name") && (
+                    <FormFeedback>{errors.store_name}</FormFeedback>
+                  )}
                 </FormGroup>
-              </Col>
-              <Col md={6}>
+
                 <FormGroup>
-                  <Label for="field-store_code">Store Code</Label>
+                  <Label for="store_code">Store Code *</Label>
                   <Input
-                    id="field-store_code"
+                    type="text"
                     name="store_code"
-                    type="text"
-                    value={formValues.store_code || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
+                    id="store_code"
+                    value={formValues.store_code}
+                    onChange={handleInputChange}
+                    placeholder="Unique store code"
+                    invalid={hasError("store_code")}
                   />
+                  {hasError("store_code") && (
+                    <FormFeedback>{errors.store_code}</FormFeedback>
+                  )}
                 </FormGroup>
-              </Col>
-            </Row>
 
-            <Row>
-              <Col md={6}>
                 <FormGroup>
-                  <Label for="field-store_phone">Store Phone</Label>
+                  <Label for="address">Address *</Label>
                   <Input
-                    id="field-store_phone"
-                    name="store_phone"
                     type="text"
-                    value={formValues.store_phone || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="field-store_email">Store Email</Label>
-                  <Input
-                    id="field-store_email"
-                    name="store_email"
-                    type="email"
-                    value={formValues.store_email || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
-
-            <Row className="mb-3">
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="field-address">Address</Label>
-                  <Input
-                    id="field-address"
                     name="address"
-                    type="text"
-                    value={formValues.address || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
+                    id="address"
+                    value={formValues.address}
+                    onChange={handleInputChange}
+                    placeholder="Full address"
+                    invalid={hasError("address")}
                   />
+                  {hasError("address") && (
+                    <FormFeedback>{errors.address}</FormFeedback>
+                  )}
                 </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="field-city">City</Label>
-                  <Input
-                    id="field-city"
-                    name="city"
-                    type="text"
-                    value={formValues.city || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
 
-            <Row className="mb-3">
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="field-postcode">Postcode</Label>
-                  <Input
-                    id="field-postcode"
-                    name="postcode"
-                    type="text"
-                    value={formValues.postcode || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="field-slug">Slug</Label>
-                  <Input
-                    id="field-slug"
-                    name="slug"
-                    type="text"
-                    value={formValues.slug || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
+                <Row>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="postcode">Post Code</Label>
+                      <Input
+                        type="text"
+                        name="postcode"
+                        id="postcode"
+                        value={formValues.postcode}
+                        onChange={handleInputChange}
+                        placeholder="Postcode"
+                      />
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="city">City *</Label>
+                      <Input
+                        type="text"
+                        name="city"
+                        id="city"
+                        value={formValues.city}
+                        onChange={handleInputChange}
+                        placeholder="City"
+                        invalid={hasError("city")}
+                      />
+                      {hasError("city") && (
+                        <FormFeedback>{errors.city}</FormFeedback>
+                      )}
+                    </FormGroup>
+                  </Col>
+                </Row>
 
-            <Row className="mb-3">
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="field-latitude">Latitude</Label>
-                  <Input
-                    id="field-latitude"
-                    name="latitude"
-                    type="text"
-                    value={formValues.latitude || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="field-longitude">Longitude</Label>
-                  <Input
-                    id="field-longitude"
-                    name="longitude"
-                    type="text"
-                    value={formValues.longitude || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
+                <Row>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="store_phone">Store Telephone *</Label>
+                      <Input
+                        type="text"
+                        name="store_phone"
+                        id="store_phone"
+                        value={formValues.store_phone}
+                        onChange={handleInputChange}
+                        placeholder="Phone number"
+                        invalid={hasError("store_phone")}
+                      />
+                      {hasError("store_phone") && (
+                        <FormFeedback>{errors.store_phone}</FormFeedback>
+                      )}
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="store_email">Store Email *</Label>
+                      <Input
+                        type="email"
+                        name="store_email"
+                        id="store_email"
+                        value={formValues.store_email}
+                        onChange={handleInputChange}
+                        placeholder="Email"
+                        invalid={hasError("store_email")}
+                      />
+                      {hasError("store_email") && (
+                        <FormFeedback>{errors.store_email}</FormFeedback>
+                      )}
+                    </FormGroup>
+                  </Col>
+                </Row>
 
-            <Row className="mb-3">
-              <Col md={12}>
+                <Row>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="latitude">Latitude *</Label>
+                      <Input
+                        type="text"
+                        name="latitude"
+                        id="latitude"
+                        value={formValues.latitude}
+                        onChange={handleInputChange}
+                        placeholder="0.00"
+                        invalid={hasError("latitude")}
+                      />
+                      {hasError("latitude") && (
+                        <FormFeedback>{errors.latitude}</FormFeedback>
+                      )}
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="longitude">Longitude *</Label>
+                      <Input
+                        type="text"
+                        name="longitude"
+                        id="longitude"
+                        value={formValues.longitude}
+                        onChange={handleInputChange}
+                        placeholder="0.00"
+                        invalid={hasError("longitude")}
+                      />
+                      {hasError("longitude") && (
+                        <FormFeedback>{errors.longitude}</FormFeedback>
+                      )}
+                    </FormGroup>
+                  </Col>
+                </Row>
+
                 <FormGroup>
-                  <Label for="field-store_description">Store Description</Label>
+                  <Label for="store_description">Store Description *</Label>
                   <Input
-                    id="field-store_description"
-                    name="store_description"
                     type="textarea"
-                    value={formValues.store_description || ""}
-                    onChange={handleFormChange}
-                    readOnly={modalMode === "view"}
-                    rows="4"
+                    name="store_description"
+                    id="store_description"
+                    value={formValues.store_description}
+                    onChange={handleInputChange}
+                    placeholder="Describe your store"
+                    rows="3"
+                    invalid={hasError("store_description")}
+                  />
+                  {hasError("store_description") && (
+                    <FormFeedback>{errors.store_description}</FormFeedback>
+                  )}
+                </FormGroup>
+
+                <Row className="mb-1">
+                  {modalMode !== "view" && (
+                    <Col md={6} className="d-flex align-items-end pb-3">
+                      <FormGroup check className="form-switch">
+                        <Input
+                          type="checkbox"
+                          name="status"
+                          id="field-published"
+                          checked={formValues.status === 1}
+                          onClick={(e) => handleInputChange({
+                            target: { name: 'status', value: e.target.checked ? 0 : 1, type: 'checkbox' }
+                          })}
+                        />
+                        <Label check for="field-published">
+                          Active / Inactive
+                        </Label>
+                      </FormGroup>
+                    </Col>
+                  )}
+                </Row>
+              </TabContent>
+            )}
+
+            {/* TAB 2: Opening Hours */}
+            {activeTab === "2" && (
+              <TabContent tabId="2">
+                <Button
+                  type="button"
+                  color="secondary"
+                  size="sm"
+                  className="mb-3"
+                  onClick={copyMondayToAllDays}
+                >
+                  Copy Monday to All Days
+                </Button>
+
+                {DAYS.map((day, dayIndex) => (
+                  <div key={dayIndex} className="border-bottom pb-3 mb-3">
+                    <Row className="align-items-center">
+                      <Col md={2}>
+                        <strong>{day}</strong>
+                      </Col>
+                      <Col md={10}>
+                        <FormGroup check className="form-switch">
+                          <Input
+                            type="checkbox"
+                            id={`${dayIndex}-closed`}
+                            checked={formValues.opening_hours[dayIndex]?.is_closed === "1" || formValues.opening_hours[dayIndex]?.is_closed === 1}
+                            onClick={() => toggleDayOpen(dayIndex)}
+                          />
+                          <Label check htmlFor={`${dayIndex}-closed`}>
+                            Closed
+                          </Label>
+                        </FormGroup>
+                      </Col>
+                    </Row>
+
+                    {formValues.opening_hours[dayIndex]?.is_closed !== "1" && formValues.opening_hours[dayIndex]?.is_closed !== 1 && (
+                      <Row className="mt-2">
+                        <Col md={6}>
+                          <FormGroup>
+                            <Label for={`${dayIndex}-open`}>
+                              Opening Time {hasError(`day_${dayIndex}_open`) && "*"}
+                            </Label>
+                            <Input
+                              type="text"
+                              id={`${dayIndex}-open`}
+                              value={formValues.opening_hours[dayIndex]?.open || ""}
+                              onChange={(e) =>
+                                handleOpeningHoursChange(dayIndex, "open", e.target.value)
+                              }
+                              placeholder="09:00 AM"
+                              invalid={hasError(`day_${dayIndex}_open`)}
+                            />
+                            {hasError(`day_${dayIndex}_open`) && (
+                              <FormFeedback>{errors[`day_${dayIndex}_open`]}</FormFeedback>
+                            )}
+                          </FormGroup>
+                        </Col>
+                        <Col md={6}>
+                          <FormGroup>
+                            <Label for={`${dayIndex}-close`}>
+                              Closing Time {hasError(`day_${dayIndex}_close`) && "*"}
+                            </Label>
+                            <Input
+                              type="text"
+                              id={`${dayIndex}-close`}
+                              value={formValues.opening_hours[dayIndex]?.close || ""}
+                              onChange={(e) =>
+                                handleOpeningHoursChange(dayIndex, "close", e.target.value)
+                              }
+                              placeholder="06:00 PM"
+                              invalid={hasError(`day_${dayIndex}_close`)}
+                            />
+                            {hasError(`day_${dayIndex}_close`) && (
+                              <FormFeedback>{errors[`day_${dayIndex}_close`]}</FormFeedback>
+                            )}
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                    )}
+                  </div>
+                ))}
+              </TabContent>
+            )}
+
+            {/* TAB 3: Media Upload */}
+            {activeTab === "3" && (
+              <TabContent tabId="3">
+                <FormGroup>
+                  <Label>Store Logo</Label>
+                  <div className="border rounded p-3 text-center bg-light mb-3">
+                    {formValues.logo_preview ? (
+                      <div>
+                        <img
+                          src={formValues.logo_preview}
+                          alt="Logo preview"
+                          style={{ maxHeight: "150px", marginBottom: "10px" }}
+                        />
+                        <div>
+                          <Button
+                            type="button"
+                            color="danger"
+                            size="sm"
+                            onClick={() => handleImageRemove("logo")}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <p>No logo selected</p>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e, "logo")}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {hasError("logo") && (
+                    <FormFeedback className="d-block">{errors.logo}</FormFeedback>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>Main Banner</Label>
+                  <div className="border rounded p-3 text-center bg-light mb-3">
+                    {formValues.main_banner_preview ? (
+                      <div>
+                        <img
+                          src={formValues.main_banner_preview}
+                          alt="Main banner preview"
+                          style={{ maxHeight: "150px", marginBottom: "10px" }}
+                        />
+                        <div>
+                          <Button
+                            type="button"
+                            color="danger"
+                            size="sm"
+                            onClick={() => handleImageRemove("main_banner")}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <p>No banner selected</p>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e, "main_banner")}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {hasError("main_banner") && (
+                    <FormFeedback className="d-block">
+                      {errors.main_banner}
+                    </FormFeedback>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>Banner</Label>
+                  <div className="border rounded p-3 text-center bg-light mb-3">
+                    {formValues.banner_preview ? (
+                      <div>
+                        <img
+                          src={formValues.banner_preview}
+                          alt="Banner preview"
+                          style={{ maxHeight: "150px", marginBottom: "10px" }}
+                        />
+                        <div>
+                          <Button
+                            type="button"
+                            color="danger"
+                            size="sm"
+                            onClick={() => handleImageRemove("banner")}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <p>No banner selected</p>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e, "banner")}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {hasError("banner") && (
+                    <FormFeedback className="d-block">{errors.banner}</FormFeedback>
+                  )}
+                </FormGroup>
+              </TabContent>
+            )}
+
+            {/* TAB 4: Social Links & Comments */}
+            {activeTab === "4" && (
+              <TabContent tabId="4">
+                <FormGroup>
+                  <Label for="facebook">Facebook URL</Label>
+                  <Input
+                    type="text"
+                    name="facebook"
+                    id="facebook"
+                    value={formValues.facebook}
+                    onChange={handleInputChange}
+                    placeholder="https://facebook.com/..."
+                    invalid={hasError("facebook")}
+                  />
+                  {hasError("facebook") && (
+                    <FormFeedback>{errors.facebook}</FormFeedback>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label for="youtube">YouTube URL</Label>
+                  <Input
+                    type="text"
+                    name="youtube"
+                    id="youtube"
+                    value={formValues.youtube}
+                    onChange={handleInputChange}
+                    placeholder="https://youtube.com/..."
+                    invalid={hasError("youtube")}
+                  />
+                  {hasError("youtube") && (
+                    <FormFeedback>{errors.youtube}</FormFeedback>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label for="twitter">Twitter URL</Label>
+                  <Input
+                    type="text"
+                    name="twitter"
+                    id="twitter"
+                    value={formValues.twitter}
+                    onChange={handleInputChange}
+                    placeholder="https://twitter.com/..."
+                    invalid={hasError("twitter")}
+                  />
+                  {hasError("twitter") && (
+                    <FormFeedback>{errors.twitter}</FormFeedback>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label for="linkedin">LinkedIn URL</Label>
+                  <Input
+                    type="text"
+                    name="linkedin"
+                    id="linkedin"
+                    value={formValues.linkedin}
+                    onChange={handleInputChange}
+                    placeholder="https://linkedin.com/..."
+                    invalid={hasError("linkedin")}
+                  />
+                  {hasError("linkedin") && (
+                    <FormFeedback>{errors.linkedin}</FormFeedback>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label for="instagram">Instagram URL</Label>
+                  <Input
+                    type="text"
+                    name="instagram"
+                    id="instagram"
+                    value={formValues.instagram}
+                    onChange={handleInputChange}
+                    placeholder="https://instagram.com/..."
+                    invalid={hasError("instagram")}
+                  />
+                  {hasError("instagram") && (
+                    <FormFeedback>{errors.instagram}</FormFeedback>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label for="store_comments">Comments</Label>
+                  <Input
+                    type="textarea"
+                    name="store_comments"
+                    id="store_comments"
+                    value={formValues.store_comments}
+                    onChange={handleInputChange}
+                    placeholder="Additional comments"
+                    rows="3"
                   />
                 </FormGroup>
+              </TabContent>
+            )}
+
+            {/* TAB 5: Store Manager */}
+            {activeTab === "5" && (
+              <TabContent tabId="5">
+                <Row>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="first_name">First Name *</Label>
+                      <Input
+                        type="text"
+                        name="first_name"
+                        id="first_name"
+                        value={formValues.first_name}
+                        onChange={handleInputChange}
+                        placeholder="Manager's first name"
+                        invalid={hasError("first_name")}
+                      />
+                      {hasError("first_name") && (
+                        <FormFeedback>
+                          {errors.first_name}
+                        </FormFeedback>
+                      )}
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label for="last_name">Last Name *</Label>
+                      <Input
+                        type="text"
+                        name="last_name"
+                        id="last_name"
+                        value={formValues.last_name}
+                        onChange={handleInputChange}
+                        placeholder="Manager's last name"
+                        invalid={hasError("last_name")}
+                      />
+                      {hasError("last_name") && (
+                        <FormFeedback>{errors.last_name}</FormFeedback>
+                      )}
+                    </FormGroup>
+                  </Col>
+                </Row>
+
+                <FormGroup>
+                  <Label for="email">Email *</Label>
+                  <Input
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={formValues.email}
+                    onChange={handleInputChange}
+                    placeholder="manager@email.com"
+                    invalid={hasError("email")}
+                  />
+                  {hasError("email") && (
+                    <FormFeedback>{errors.email}</FormFeedback>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label for="phone">Phone</Label>
+                  <Input
+                    type="text"
+                    name="phone"
+                    id="phone"
+                    value={formValues.phone}
+                    onChange={handleInputChange}
+                    placeholder="Phone number"
+                  />
+                </FormGroup>
+
+                {modalMode === "add" && (
+                  <>
+                    <FormGroup>
+                      <Label for="password">Password *</Label>
+                      <Input
+                        type="password"
+                        name="password"
+                        id="password"
+                        value={formValues.password}
+                        onChange={handleInputChange}
+                        placeholder="Minimum 8 characters"
+                        invalid={hasError("password")}
+                      />
+                      {hasError("password") && (
+                        <FormFeedback>
+                          {errors.password}
+                        </FormFeedback>
+                      )}
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Label for="password_confirmatoin">Confirm Password *</Label>
+                      <Input
+                        type="password"
+                        name="password_confirmatoin"
+                        id="password_confirmatoin"
+                        value={formValues.password_confirmatoin}
+                        onChange={handleInputChange}
+                        placeholder="Confirm password"
+                        invalid={hasError("password_confirmatoin")}
+                      />
+                      {hasError("password_confirmatoin") && (
+                        <FormFeedback>
+                          {errors.password_confirmatoin}
+                        </FormFeedback>
+                      )}
+                      {!passwordsMatch && modalMode === "add" && (
+                        <FormText color="danger">
+                          Passwords do not match
+                        </FormText>
+                      )}
+                    </FormGroup>
+                  </>
+                )}
+
+                <FormGroup>
+                  <Label for="category_id">Category *</Label>
+                  <Input
+                    type="select"
+                    name="category_id"
+                    id="category_id"
+                    value={formValues.category_id}
+                    onChange={handleInputChange}
+                    invalid={hasError("category_id")}
+                  >
+                    <option>Select Category</option>
+                    {storesCategories.length > 0
+                      ? storesCategories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.title || '-'}
+                        </option>
+                      ))
+                      : ''}
+                  </Input>
+                  {hasError("category_id") && (
+                    <FormFeedback>{errors.category_id}</FormFeedback>
+                  )}
+                </FormGroup>
+              </TabContent>
+            )}
+            <Row>
+              <Col md={6} className="d-flex gap-2">
+                <Button color="secondary" onClick={closeModal}>
+                  Cancel
+                </Button>
+                {modalMode !== "view" && (
+                  <Button
+                    color="primary"
+                    type="submit"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Saving..." : "Save"}
+                  </Button>
+                )}
               </Col>
             </Row>
-
-            {modalMode !== "view" && (
-              <Row>
-                <Col md={6} className="d-flex align-items-end pb-3">
-                  <FormGroup check className="form-switch">
-                    <Input
-                      type="checkbox"
-                      name="status"
-                      id="field-status"
-                      checked={formValues.status === 1}
-                      onChange={handleFormChange}
-                    />
-                    <Label check htmlFor="field-status">
-                      Active/Inactive
-                    </Label>
-                  </FormGroup>
-                </Col>
-              </Row>
-            )}
           </Form>
         </ModalBody>
-        <ModalFooter>
-          <Button color="secondary" onClick={closeModal}>
-            Close
-          </Button>
-          {modalMode !== "view" && (
-            <Button color="primary" onClick={handleSave}>
-              Save
-            </Button>
-          )}
-        </ModalFooter>
       </Modal>
     </React.Fragment>
   );

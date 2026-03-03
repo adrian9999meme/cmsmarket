@@ -6,14 +6,17 @@ export const GET_CURRENT_USER_API = API_VERSION + 'profile';
 
 // sellers
 export const GET_SELLERS_API = API_VERSION + 'sellers/fetch';
+export const HOME_STORE_CATEGORIES_API = API_VERSION + 'home/store-categories';
 export const ADD_NEW_SELLER_API = API_VERSION + 'sellers/create';
 export const EDIT_SELLER_API = API_VERSION + 'sellers/edit/';
+export const SET_ACTIVE_SELLER_API = API_VERSION + 'sellers/setactive/';
 export const DELETE_SELLER_API = API_VERSION + 'sellers/delete/';
 
 // stores
 export const GET_STORES_API = API_VERSION + 'stores/fetch';
 export const ADD_NEW_STORE_API = API_VERSION + 'stores/create';
 export const EDIT_STORE_API = API_VERSION + 'stores/edit/';
+export const SET_STORE_ACTIVE_API = API_VERSION + 'stores/setactive/';
 export const DELETE_STORE_API = API_VERSION + 'stores/delete/';
 
 // customers

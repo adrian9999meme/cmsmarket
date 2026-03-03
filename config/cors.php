@@ -22,7 +22,9 @@ return [
         'login',
     ],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*'],
+    'allowed_origins' => env('APP_ENV') === 'production'
+        ? ['https://lekit.uk', 'https://cms96501.lekit.uk']
+        : ['http://localhost:8000'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],

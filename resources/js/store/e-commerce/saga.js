@@ -28,6 +28,7 @@ import {
   GET_SELLER_REQUEST,
   GET_SELLER_SUCCESS,
   GET_SELLER_FAIL,
+  GET_SELLER_LIST_REQUEST,
   EDIT_SELLER_REQUEST,
   EDIT_SELLER_SUCCESS,
   EDIT_SELLER_FAIL,
@@ -46,7 +47,12 @@ import {
   DELETE_STORE_REQUEST,
   DELETE_STORE_SUCCESS,
   DELETE_STORE_FAIL,
+  GET_CATEGORIES,
+  GET_CATEGORIES_REQUEST,
+  SET_STORE_ACTIVE_REQUEST,
   SET_ACTIVE_CUSTOMER,
+  SET_ACTIVE_SELLER_REQUEST,
+  GET_BLOCKED_CUSTOMERS_SUCCESS,
 } from "./actionTypes";
 
 import {
@@ -108,9 +114,14 @@ import {
   deleteStoreRequest,
   deleteStoreSuccess,
   deleteStoreFail,
+  getCategoriesSuccess,
+  getCategoriesFail,
+  getSellersListFail,
+  getBlockedCustomersSuccess,
+  getSellersListSuccess,
 } from "./actions";
 
-import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API } from "../endpoints";
+import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API, EDIT_STORE_API, DELETE_STORE_API, HOME_STORE_CATEGORIES_API } from "../endpoints";
 
 //Include Both Helper File with needed methods
 // import {
@@ -170,11 +181,15 @@ function* fetchCartData() {
   }
 }
 
-function* fetchCustomers({ payload: { status, searchKeyword } }) {
+function* fetchCustomers({ payload: { subdomain, searchKeyword } }) {
   try {
-    const response = yield api.get(`${GET_CUSTOMERS_API}?status=${status}&keyword=${searchKeyword}`);
+    const response = yield api.get(`${GET_CUSTOMERS_API}?subdomain=${subdomain}&keyword=${searchKeyword}`);
     if (response.data?.success) {
-      yield put(getCustomersSuccess(response.data?.data?.data));
+      if (subdomain && subdomain === 'blocked') {
+        yield put(getBlockedCustomersSuccess(response.data?.data))
+      } else {
+        yield put(getCustomersSuccess(response.data?.data));
+      }
       toast.success("Customers Fetch Successfully", { autoClose: 2000 });
     }
   } catch (error) {
@@ -339,16 +354,44 @@ function* onAddNewSeller({ payload: seller }) {
   }
 }
 
-function* fetchSellers({ payload: { status, searchKeyword } }) {
+function* fetchSellers({ payload: { subdomain, searchKeyword } }) {
   try {
-    const response = yield api.get(`${GET_SELLERS_API}?status=${status}&keyword=${searchKeyword}`);
+    const response = yield api.get(`${GET_SELLERS_API}?subdomain=${subdomain}&keyword=${searchKeyword}`);
     if (response.data?.success) {
-      yield put(getSellersSuccess(response.data?.data?.data));
+      yield put(getSellersSuccess(response.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
     }
   } catch (error) {
     yield put(getSellersFail(error));
     toast.error(error.data?.message, { autoClose: 1000 });
+  }
+}
+
+function* fetchCategories() {
+  try {
+    const response = yield api.get(`${HOME_STORE_CATEGORIES_API}`);
+    if (response.data?.categories) {
+      yield put(getCategoriesSuccess(response.data.categories));
+      toast.success("Categories fetched", { autoClose: 1000 });
+    }
+  } catch (error) {
+    yield put(getCategoriesFail(error));
+    toast.error("Failed to load categories", { autoClose: 1000 });
+  }
+}
+
+function* fetchSellersList() {
+  try {
+    const response = yield api.get(GET_SELLERS_API);
+    // API returns paginated data under response.data.data (and items under .data)
+    const sellers = response?.data?.data?.data ?? response?.data?.data ?? [];
+    if (Array.isArray(sellers) && sellers.length >= 0) {
+      yield put(getSellersListSuccess(sellers));
+      toast.success("Sellers list fetched", { autoClose: 1000 });
+    }
+  } catch (error) {
+    yield put(getSellersListFail(error));
+    toast.error("Failed to load sellers list", { autoClose: 1000 });
   }
 }
 
@@ -365,6 +408,21 @@ function* onEditSeller({ payload: seller }) {
   }
 }
 
+function* onSetActiveSeller({ payload: seller }) {
+  try {
+    // Assuming SET_ACTIVE_SELLER_API expects PATCH or PUT
+    const response = yield api.put(`${SET_ACTIVE_SELLER_API}${seller.id}`, seller);
+    if (response.data?.success) {
+      yield put(editSellerSuccess(response.data?.data));
+      toast.success(response.data?.message || "Seller status updated successfully", { autoClose: 1000 });
+    }
+  } catch (error) {
+    yield put(editSellerFail(error));
+    toast.error(error.data?.message || "Failed to update seller status", { autoClose: 1000 });
+  }
+}
+
+
 function* onDeleteSeller({ payload: id }) {
   try {
     const response = yield api.delete(`${DELETE_SELLER_API}${id}`);
@@ -380,22 +438,41 @@ function* onDeleteSeller({ payload: id }) {
 
 function* onAddNewStore({ payload: store }) {
   try {
-    const response = yield api.post(ADD_NEW_STORE_API, store);
+    // if store is FormData, axios should use multipart/form-data header
+    let response;
+    if (store instanceof FormData) {
+      // remove default json header for this request so axios can set boundary
+      response = yield api.post(ADD_NEW_STORE_API, store, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    } else {
+      response = yield api.post(ADD_NEW_STORE_API, store);
+    }
+
     if (response.data?.success) {
       yield put(addNewStoreSuccess(response.data?.data));
-      toast.success(response.data?.message, { autoClose: 1000 })
+      toast.success(response.data?.message, { autoClose: 1000 });
     }
   } catch (error) {
     yield put(addNewStoreFail(error));
-    toast.error(error.data?.message, { autoClose: 1000 });
+    const resp = error.response || {};
+    // if Laravel validation failed, resp.data.errors contains field messages
+    if (resp.status === 422 && resp.data && resp.data.errors) {
+      Object.values(resp.data.errors).flat().forEach((msg) => {
+        toast.error(msg, { autoClose: 3000 });
+      });
+    } else {
+      toast.error(resp.data?.message || "Store creation failed", { autoClose: 1000 });
+    }
+    console.error("Add store error", resp);
   }
 }
 
-function* fetchStores({ payload: { status, searchKeyword } }) {
+function* fetchStores({ payload: { subdomain, searchKeyword } }) {
   try {
-    const response = yield api.get(`${GET_STORES_API}?status=${status}&keyword=${searchKeyword}`);
+    const response = yield api.get(`${GET_STORES_API}?subdomain=${subdomain}&keyword=${searchKeyword}`);
     if (response.data?.success) {
-      yield put(getStoresSuccess(response.data?.data?.data));
+      yield put(getStoresSuccess(response.data?.data));
       toast.success(response.data?.message, { autoClose: 1000 })
     }
   } catch (error) {
@@ -406,7 +483,7 @@ function* fetchStores({ payload: { status, searchKeyword } }) {
 
 function* onEditStore({ payload: store }) {
   try {
-    const response = yield axios.put(`/api/store/edit/${store.id}`, store);
+    const response = yield api.put(`${EDIT_STORE_API}${store.id}`, store);
     if (response.data?.success) {
       yield put(editStoreSuccess(response.data?.data));
       toast.success("Store Updated Successfully", { autoClose: 1000 })
@@ -419,7 +496,7 @@ function* onEditStore({ payload: store }) {
 
 function* onDeleteStore({ payload: id }) {
   try {
-    const response = yield axios.delete(`/api/store/delete/${id}`);
+    const response = yield api.delete(`${DELETE_STORE_API}${id}`);
     if (response.data?.success) {
       yield put(deleteStoreSuccess(response.data?.data));
       toast.success("Store Deleted Successfully", { autoClose: 1000 })
@@ -427,6 +504,20 @@ function* onDeleteStore({ payload: id }) {
   } catch (error) {
     yield put(deleteStoreFail(error));
     toast.error("Store Delete Failed", { autoClose: 1000 });
+  }
+}
+
+function* onSetActiveStore({ payload: store }) {
+  try {
+    const response = yield api.put(`${SET_STORE_ACTIVE_API}${store.store_profile.id}`, store);
+    if (response.data?.success) {
+      const stores = response.data?.data?.data ?? response.data?.data ?? [];
+      yield put(editStoreSuccess(stores));
+      toast.success(response.data?.message || "Store status updated successfully", { autoClose: 1000 });
+    }
+  } catch (error) {
+    yield put(getStoresFail(error));
+    toast.error(error?.response?.data?.message || "Failed to update store status", { autoClose: 1000 });
   }
 }
 
@@ -450,13 +541,17 @@ function* ecommerceSaga() {
   yield takeEvery(ON_ADD_REPLY, onAddReply);
   yield takeEvery(ON_ADD_COMMENT, onAddComment);
   yield takeEvery(ADD_SELLER_REQUEST, onAddNewSeller);
+  yield takeEvery(GET_SELLER_LIST_REQUEST, fetchSellersList);
   yield takeEvery(GET_SELLER_REQUEST, fetchSellers);
   yield takeEvery(EDIT_SELLER_REQUEST, onEditSeller);
+  yield takeEvery(SET_ACTIVE_SELLER_REQUEST, onSetActiveSeller);
   yield takeEvery(DELETE_SELLER_REQUEST, onDeleteSeller);
   yield takeEvery(ADD_STORE_REQUEST, onAddNewStore);
   yield takeEvery(GET_STORE_REQUEST, fetchStores);
   yield takeEvery(EDIT_STORE_REQUEST, onEditStore);
+  yield takeEvery(SET_STORE_ACTIVE_REQUEST, onSetActiveStore);
   yield takeEvery(DELETE_STORE_REQUEST, onDeleteStore);
+  yield takeEvery(GET_CATEGORIES_REQUEST, fetchCategories);
 }
 
 export default ecommerceSaga;

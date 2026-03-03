@@ -48,6 +48,10 @@ class UserRepository implements UserInterface
         return User::find($id);
     }
 
+    public function getBlocked(){
+        return User::where('is_user_banned', 1)->get();
+    }
+
     public function store($request)
     {
 
@@ -134,6 +138,7 @@ class UserRepository implements UserInterface
         $user->save();
         return true;
     }
+
     public function emailVerify($user_id)
     {
         DB::beginTransaction();

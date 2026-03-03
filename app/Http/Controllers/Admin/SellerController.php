@@ -36,51 +36,59 @@ class SellerController extends Controller
 
 
     protected $sellers;
+    protected $sellerProfile;
 
-    public function __construct(SellerInterface $sellers)
+    public function __construct(SellerInterface $sellers, SellerProfileInterface $sellerProfile)
     {
         if (settingHelper('seller_system') != 1) {
             abort(403);
         }
         $this->sellers = $sellers;
+        $this->sellerProfile = $sellerProfile;
     }
 
     public function index(Request $request)
     {
         try {
-            // Get status and keyword from the request (with defaults if not present)
-            $status = $request->get('status', null);
-            $searchKeyword = $request->get('keyword', '');
+            $query = User::query();
 
-            // Call repository with additional filters for status and keyword
-            $users = $this->sellers->paginate($request, get_pagination('pagination'));
+            $subdomain = strtolower(trim($request->get('subdomain', 'all')));
+            $searchKeyword = trim($request->get('keyword', ''));
 
-            // If GET_SELLERS_API expects filtering by status and keyword, apply them in the repository
-            if (!is_null($status) && $status !== '') {
-                if ($status === 'pending') {
-                    $users = $users->where('is_user_banned', 0);
-                } elseif ($status === 'blocked') {
-                    $users = $users->where('is_user_banned', 1);
-                }
-                // If status is passed but not "pending" or "blocked", do not apply any additional filter
+            $query->with('sellerProfile')
+                ->where('user_type', 'seller')
+                ->latest();
+
+            // Status filter
+            if ($subdomain === "pending") {
+                $query->where('is_user_banned', 0)
+                        ->where('status', 0);
+            } elseif ($subdomain === "blocked") {
+                $query->where('is_user_banned', 1);
+            } elseif ($subdomain === "active") {
+                $query->where('is_user_banned', 0)
+                        ->where('status', 1);
             }
+
+            // Search filter
             if (!empty($searchKeyword)) {
-                $users = $users->where(function ($query) use ($searchKeyword) {
-                    $query->where('shop_name', 'like', "%{$searchKeyword}%")
-                        ->orWhere('company_name', 'like', "%{$searchKeyword}%")
-                        ->orWhere('company_email', 'like', "%{$searchKeyword}%");
+                $query->where(function ($q) use ($searchKeyword) {
+                    $q->where('first_name', 'like', "%{$searchKeyword}%")
+                        ->orWhere('last_name', 'like', "%{$searchKeyword}%")
+                        ->orWhere('email', 'like', "%{$searchKeyword}%")
+                        ->orWhereHas('sellerProfile', function ($sub) use ($searchKeyword) {
+                            $sub->where('shop_name', 'like', "%{$searchKeyword}%");
+                            $sub->where('address', 'like', "%{$searchKeyword}%");
+                        });
                 });
             }
 
-            // If $users is an Eloquent\Builder or Query, paginate after filtering
-            if ($users instanceof \Illuminate\Database\Eloquent\Builder || $users instanceof \Illuminate\Database\Query\Builder) {
-                $users = $users->paginate(get_pagination('pagination'));
-            }
+            $sellers = $query->get();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Retrieved sellers successfully',
-                'data' => $users
+                'message' => 'Retrieved customers successfully',
+                'data' => $sellers
             ]);
         } catch (\Exception $e) {
             Toastr::error($e->getMessage());
@@ -96,7 +104,7 @@ class SellerController extends Controller
                 'first_name' => 'required|max:255',
                 'last_name' => 'required|max:255',
                 'email' => 'required|max:255|unique:users,email',
-                'phone' => 'nullable|max:20',
+                'phone' => 'required|nullable|max:20',
                 'password' => 'required|min:5|max:30|confirmed',
                 // seller
                 'company_name' => 'required|max:255',
@@ -105,9 +113,9 @@ class SellerController extends Controller
                 'city' => 'required|max:255',
                 'phone_no' => 'required|max:20',
                 'company_email' => 'required|email|max:255|unique:sellers',
-                'license_no' => 'nullable|max:255',
-                'company_website' => 'nullable|url|max:255',
-                'company_type' => 'nullable|max:255',
+                'license_no' => 'required|nullable|max:255',
+                'company_website' => 'required|nullable|url|max:255',
+                'company_type' => 'required|nullable|max:255',
                 'number_employees' => 'nullable|integer|min:1',
                 'status' => 'nullable|integer|in:0,1',
             ]);
@@ -196,6 +204,56 @@ class SellerController extends Controller
         ], 200);
     }
 
+    public function setActive(Request $request, $id) {
+        if (isDemoServer()) {
+            Toastr::info(__('This function is disabled in demo server.'));
+            return redirect()->back();
+        }
+
+        DB::beginTransaction();
+        try {
+            $seller = $this->sellers->get($id);
+
+            if (!$seller) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Seller not found')
+                ], 404);
+            }
+
+            // Properly update status with $request->input('status')
+            $status = $request->input('status');
+            if (!in_array($status, ['active', 'inactive', 0, 1, '0', '1'])) {
+                // You can customize status validation as needed
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Invalid status provided.')
+                ], 422);
+            }
+
+            $seller->status = $status;
+            $seller->save();
+
+            DB::commit();
+            $sellers = $this->sellers->paginate($request, get_pagination('pagination'));
+            $newData = $sellers->where('id', $id)->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Seller Set Active successfully'),
+                'data' => $newData
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function store(UserStoreRequest $request)
     {
         DB::beginTransaction();
@@ -233,26 +291,79 @@ class SellerController extends Controller
         }
     }
 
-    public function update(UserUpdateRequest $request, $id)
+    public function update(Request $request, $id)
     {
+        if (isDemoServer()):
+            Toastr::info(__('This function is disabled in demo server.'));
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('This function is disabled in demo server.'),
+                ], 403);
+            }
+            return redirect()->back();
+        endif;
+
+        $this->validate($request, [
+            'company_name' => 'required',
+            'address' => 'required',
+            'postcode' => 'required',
+            'city' => 'required',
+            'phone_no' => 'required',
+            'company_email' => 'required',
+            'license_no' => 'required',
+            'company_website' => 'required',
+            'company_type' => 'required',
+        ]);
+
+        /**
+         * Determine the owning user id.
+         * - For admin web form: no route {id}, we use $request->id (user id).
+         * - For API: route {id} is the store_profile id, we map it to user_id.
+         */
+        if ($id !== null) {
+            $sellerProfile = \App\Models\SellerProfile::find($id);
+            $userId = $sellerProfile ? $sellerProfile->user_id : $request->user_id;
+        } else {
+            $userId = $request->id;
+        }
+
         DB::beginTransaction();
         try {
-            $updatedSeller = $this->sellers->update($request);
+            // Ensure repository and store profile layer get consistent ids
+            $request->merge(['id' => $userId, 'user_id' => $userId]);
+
+            $this->sellers->update($request);
             cache()->forget('exchange_rate');
             DB::commit();
-            $users = $this->sellers->paginate($request, get_pagination('pagination'));
-            $newData = $users->where('id', $id)->first();
-            return response()->json([
-                'success' => true,
-                'message' => __('Data Updated Successfully'),
-                'data' => $newData
-            ], 200);
+
+            // If this is an API call, return JSON with updated store data
+            if ($request->expectsJson()) {
+                $sellers = $this->sellers->paginate($request, get_pagination('pagination'));
+                $newData = $sellers->where('id', $userId)->first();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => __('Store Updated Successfully'),
+                    'data' => $newData,
+                ], 200);
+            }
+
+            // Otherwise behave like the original web controller
+            Toastr::success(__('Data Updated Successfully'));
+            return redirect($request->r);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 500);
+            }
+
+            Toastr::error($e->getMessage());
+            return redirect()->back();
         }
     }
 

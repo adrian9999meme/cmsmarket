@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Cart;
+use App\Models\User;
 use App\Traits\ApiReturnFormatTrait;
 use App\Traits\ImageTrait;
 use App\Traits\SendMailTrait;
@@ -35,42 +36,44 @@ class UserController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get status and keyword from the request (with defaults if not present)
-            $status = $request->get('status', null);
-            $searchKeyword = $request->get('keyword', '');
+            $query = User::query();
 
-            // Call repository with additional filters for status and keyword
-            $customers = $this->users->paginate($request, get_pagination('pagination'));
+            $subdomain = strtolower(trim($request->get('subdomain', 'all')));
+            $searchKeyword = trim($request->get('keyword', ''));
 
-            // If GET_SELLERS_API expects filtering by status and keyword, apply them in the repository
-            // if (!is_null($status) && $status !== '') {
-            //     if ($status === 'pending') {
-            //         $users = $users->where('is_user_banned', 0);
-            //     } elseif ($status === 'blocked') {
-            //         $users = $users->where('is_user_banned', 1);
-            //     }
-            //     // If status is passed but not "pending" or "blocked", do not apply any additional filter
-            // }
+            $query->where('user_type', 'customer');
+
+            // Filter by status
+            if ($subdomain === "pending") {
+                $query->where('is_user_banned', 0);
+            } elseif ($subdomain === "blocked") {
+                $query->where('is_user_banned', 1);
+            }
+
+            // Search filter
             if (!empty($searchKeyword)) {
-                $customers = $customers->where(function ($query) use ($searchKeyword) {
-                    $query->where('user_type', 'customer')
+                $query->where(function ($q) use ($searchKeyword) {
+                    $q->where('first_name', 'like', "%{$searchKeyword}%")
+                        ->orWhere('last_name', 'like', "%{$searchKeyword}%")
                         ->orWhere('email', 'like', "%{$searchKeyword}%");
                 });
             }
 
-            // If $users is an Eloquent\Builder or Query, paginate after filtering
-            if ($customers instanceof \Illuminate\Database\Eloquent\Builder || $customers instanceof \Illuminate\Database\Query\Builder) {
-                $customers = $customers->paginate(get_pagination('pagination'));
-            }
+            // You can add pagination or just get all users as needed
+            $customers = $query->get();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Retrieved sellers successfully',
+                'message' => 'Retrieved customers successfully',
                 'data' => $customers
             ]);
         } catch (\Exception $e) {
             Toastr::error($e->getMessage());
-            return back();
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
         }
     }
 

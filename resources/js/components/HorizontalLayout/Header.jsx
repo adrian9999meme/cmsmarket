@@ -92,11 +92,9 @@ const Header = props => {
             <button
               type="button"
               className="btn btn-sm px-3 font-size-16 d-lg-none header-item"
-              data-toggle="collapse"
               onClick={() => {
                 props.toggleLeftmenu(!props.leftMenu);
               }}
-              data-target="#topnav-menu-content"
             >
               <i className="fa fa-fw fa-bars" />
             </button>

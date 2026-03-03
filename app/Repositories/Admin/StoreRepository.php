@@ -71,21 +71,30 @@ class StoreRepository implements StoreInterface
 
     public function store($request)
     {
+        // Create a new manager user
         $user = new User();
         $user->first_name       = $request->first_name;
         $user->last_name        = $request->last_name;
         $user->email            = $request->email;
-        $user->phone            = $request->phone;
-        $user->currency_code    = $request->currency_code;
+        $user->phone            = $request->phone ?? '';
+        $user->currency_code    = $request->currency_code ?? 'USD';
         $user->user_type        = 'manager';
         $user->password         = bcrypt($request->password);
         $user->permissions      = [];
         $user->images           = [];
         $user->save();
 
-        $request['user_id'] = $user->id;
-        $this->storeProfile->store($request);
+        // Pass the user_id to the store profile creation
+        $request->merge(['user_id' => $user->id]);
 
+        // Create the store profile
+        $storeProfile = $this->storeProfile->store($request);
+
+        if (!$storeProfile) {
+            throw new \Exception(__('Store Profile could not be created'));
+        }
+
+        // Handle email activation
         $activation = Activation::create($user);
         if(settingHelper('disable_email_confirmation') == 1)
         {
@@ -94,28 +103,39 @@ class StoreRepository implements StoreInterface
         else{
             try {
                 $this->sendmail($request->email, 'Registration', $user, 'email.auth.activate-account-email',url('/') . '/activation/' . $request->email . '/' . $activation->code);
-
             } catch (\Exception $e) {
-                Toastr::error(__('Please check your email configuration'));
-                return false;
+                // Log the error but don't fail - user is already created
+                \Log::error('Email sending failed for store manager: ' . $e->getMessage());
             }
         }
 
-        return true;
+        // Return the newly created manager with its store profile loaded
+        return $user->load('storeProfile');
     }
 
     public function update($request)
     {
         $user = $this->get($request->id);
 
-        $user->first_name       = $request->first_name;
-        $user->last_name        = $request->last_name;
-        $user->phone            = $request->phone;
-        $user->email            = $request->email;
-        $user->currency_code    = $request->currency_code;
-        if ($request->password != ""):
-                $user->password = bcrypt($request->password);
-        endif;
+        // Only update user fields that are actually present in the request
+        if ($request->has('first_name')) {
+            $user->first_name = $request->first_name;
+        }
+        if ($request->has('last_name')) {
+            $user->last_name = $request->last_name;
+        }
+        if ($request->has('phone')) {
+            $user->phone = $request->phone;
+        }
+        if ($request->has('email')) {
+            $user->email = $request->email;
+        }
+        if ($request->has('currency_code')) {
+            $user->currency_code = $request->currency_code;
+        }
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
         $user->save();
         $request['user_id']     = $request->id;
 

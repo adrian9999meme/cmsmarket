@@ -92,7 +92,10 @@ class AuthController extends Controller
             $data['role']           = $user->user_type ?? null;
             Cart::where('user_id', getWalkInCustomer()->id)->where('trx_id',$request->trx_id)->update(['user_id' => $user->id]);
 
-            return $this->responseWithSuccess(__('Login Successfully'),$data,200);
+            $response = $this->responseWithSuccess(__('Login Successfully'),$data,200);
+            // set cookie for cross-subdomain auth (valid for 30 days)
+            return $response->cookie('token', $token, 60*24*30, '/', '.lekit.uk', true, true, false, 'None');
+
 
         } catch (\Exception $e){
             return $this->responseWithError($e->getMessage(),[],500);

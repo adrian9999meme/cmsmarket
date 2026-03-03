@@ -41,26 +41,34 @@ class StoreProfileRepository implements StoreProfileInterface
     }
     public function store($request): bool
     {
+        // Handle logo upload
+        $image_response_logo = [];
         if (!blank($request->file('logo'))) {
             $requestImage           = $request->file('logo');
             $image_response_logo    = $this->saveImage($requestImage, 'store_logo');
         }
+
+        // Handle banner upload
+        $image_response_banner = [];
         if (!blank($request->file('banner'))) {
             $requestImage           = $request->file('banner');
             $image_response_banner  = $this->saveImage($requestImage, 'store_banner');
         }
+
+        // Handle main banner upload
+        $image_response_main_banner = [];
         if (!blank($request->file('main_banner'))) {
             $requestImage           = $request->file('main_banner');
             $image_response_main_banner  = $this->saveImage($requestImage, 'store_main_banner');
         }
-                
+
         $store                     = new StoreProfile();
         $store->seller_id          = $request->seller_id;
         $store->store_name         = $request->store_name;
         $store->user_id            = $request->user_id;
-        $store->slug               = $this->getSlug($request->store_name, $request->slug);
+        $store->slug               = $this->getSlug($request->store_name, $request->slug ?? null);
         $store->store_code         = $request->store_code;
-        $store->postcode           = $request->postcode;
+        $store->postcode           = $request->postcode ?? '';
         $store->city               = $request->city;
         $store->store_phone        = $request->store_phone;
         $store->address            = $request->address;
@@ -68,72 +76,65 @@ class StoreProfileRepository implements StoreProfileInterface
         $store->latitude           = $request->latitude;
         $store->longitude          = $request->longitude;
         $store->store_description  = $request->store_description;
-        $store->facebook           = $request->facebook;
-        $store->linkedin           = $request->linkedin;
-        $store->twitter            = $request->twitter;
-        $store->youtube            = $request->youtube;
-        $store->instagram          = $request->instagram;
-        $store->store_comments     = $request->store_comments;
+        $store->facebook           = $request->facebook ?? '';
+        $store->linkedin           = $request->linkedin ?? '';
+        $store->twitter            = $request->twitter ?? '';
+        $store->youtube            = $request->youtube ?? '';
+        $store->instagram          = $request->instagram ?? '';
+        $store->store_comments     = $request->store_comments ?? '';
         $store->logo               = $image_response_logo['images'] ?? [];
         $store->banner             = $image_response_banner['images'] ?? [];
         $store->main_banner        = $image_response_main_banner['images'] ?? [];
 
-        $is_closed = [];
-        if ($request->has('is_closed0')):
-            array_push($is_closed, 1);
-        else:
-            array_push($is_closed, 0);
-        endif;
-        if ($request->has('is_closed1')):
-            array_push($is_closed, 1);
-        else:
-            array_push($is_closed, 0);
-        endif;
-        if ($request->has('is_closed2')):
-            array_push($is_closed, 1);
-        else:
-            array_push($is_closed, 0);
-        endif;
-        if ($request->has('is_closed3')):
-            array_push($is_closed, 1);
-        else:
-            array_push($is_closed, 0);
-        endif;
-        if ($request->has('is_closed4')):
-            array_push($is_closed, 1);
-        else:
-            array_push($is_closed, 0);
-        endif;
-        if ($request->has('is_closed5')):
-            array_push($is_closed, 1);
-        else:
-            array_push($is_closed, 0);
-        endif;
-        if ($request->has('is_closed6')):
-            array_push($is_closed, 1);
-        else:
-            array_push($is_closed, 0);
-        endif;
-
-        $open_time = $request->open_time;
-        $close_time = $request->close_time;
-        $opening_hours = [];
-        for($i=0; $i<count($open_time); $i++){
-            $opening_hours[] = Array('open'=>$open_time[$i], 'close'=>$close_time[$i], 'is_closed'=>$is_closed[$i]);
+            // Handle opening hours - API format (if present, use it)
+        // The front-end submits a JSON-encoded string when using FormData, so
+        // decode if necessary. Older admin forms submit open_time/close_time arrays.
+        $opening_hours_input = $request->opening_hours;
+        if (is_string($opening_hours_input)) {
+            $decoded = json_decode($opening_hours_input, true);
+            if (is_array($decoded)) {
+                $store->opening_hours = $decoded;
+            } else {
+                $opening_hours_input = null; // will fall back to alternate handling
+            }
         }
-        $store->opening_hours = $opening_hours;
-        
-        if ($request->has('status')):
-            $store->status  = 1;
-        else:
-            $store->status  = 0;
-        endif;
-        
+
+        if (is_array($opening_hours_input)) {
+            $store->opening_hours = $opening_hours_input;
+        } else {
+            // Fallback to building from form fields (old admin form format)
+            $opening_hours = [];
+            $open_time  = $request->open_time ?? [];
+            $close_time = $request->close_time ?? [];
+
+            if (is_array($open_time) && is_array($close_time) && count($open_time) === count($close_time)) {
+                for ($i = 0; $i < count($open_time); $i++) {
+                    $is_closed = $request->has('is_closed' . $i) ? 1 : 0;
+                    $opening_hours[] = [
+                        'open'      => $open_time[$i],
+                        'close'     => $close_time[$i],
+                        'is_closed' => $is_closed,
+                    ];
+                }
+            }
+            $store->opening_hours = $opening_hours;
+        }
+
+        // Handle status
+        $store->status  = ($request->status == 1 || $request->has('status')) ? 1 : 0;
+
         $store->save();
-        $storeTmp = StoreProfile::where('seller_id', $request->seller_id)->first();
-        $storesCategory=new StoresCategory();
-        $storesCategory->store_id=$storeTmp->id;
-        $storesCategory->category_id=$request->category != '' ? $request->category : null;
+
+        // Handle store category
+        if ($request->category_id || $request->category) {
+            $category_id = $request->category_id ?? $request->category;
+            StoresCategory::updateOrCreate(
+                ['store_id' => $store->id],
+                ['category_id' => $category_id]
+            );
+        }
+
+        return true;
         $storesCategory->save();
         return true;
     }
@@ -161,7 +162,7 @@ class StoreProfileRepository implements StoreProfileInterface
         $store->youtube            = $request->youtube;
         $store->instagram          = $request->instagram;
         $store->store_comments     = $request->store_comments;
-        
+
         $is_closed = [];
         if ($request->has('is_closed0')):
             array_push($is_closed, 1);
@@ -199,12 +200,28 @@ class StoreProfileRepository implements StoreProfileInterface
             array_push($is_closed, 0);
         endif;
 
-        $open_time = $request->open_time;
+        // Build opening hours on update:
+        // - If open_time/close_time arrays are provided, rebuild from them.
+        // - Else if opening_hours is provided (API), use it as-is.
+        // - Else keep existing opening_hours.
+        $opening_hours = $store->opening_hours ?? [];
+
+        $open_time  = $request->open_time;
         $close_time = $request->close_time;
-        $opening_hours = [];
-        for($i=0; $i<count($open_time); $i++){
-            $opening_hours[] = Array('open'=>$open_time[$i], 'close'=>$close_time[$i], 'is_closed'=>$is_closed[$i]);
+
+        if (is_array($open_time) && is_array($close_time) && count($open_time) === count($close_time)) {
+            $opening_hours = [];
+            for ($i = 0; $i < count($open_time); $i++) {
+                $opening_hours[] = [
+                    'open'      => $open_time[$i],
+                    'close'     => $close_time[$i],
+                    'is_closed' => $is_closed[$i] ?? 0,
+                ];
+            }
+        } elseif (is_array($request->opening_hours)) {
+            $opening_hours = $request->opening_hours;
         }
+
         $store->opening_hours = $opening_hours;
 
         if ($request->file('logo') != ''):
@@ -235,16 +252,20 @@ class StoreProfileRepository implements StoreProfileInterface
         $store->save();
 
         // Here we assign store category and store.
-        $cat = StoresCategory::where('store_id', $store->id)->get();
-        if(count($cat) == 0) {
-            StoresCategory::create([
-                'store_id' => $store->id, 'category_id' => $request->category
-            ]);
-        } else {
-            StoresCategory::where('store_id', $store->id)->update([
-                'store_id' => $store->id, 
-                'category_id' => $request->category
-            ]);
+        // For API updates, category may be omitted; in that case, keep existing category.
+        if ($request->has('category') && $request->category !== '' && $request->category !== null) {
+            $cat = StoresCategory::where('store_id', $store->id)->get();
+            if (count($cat) == 0) {
+                StoresCategory::create([
+                    'store_id'   => $store->id,
+                    'category_id'=> $request->category,
+                ]);
+            } else {
+                StoresCategory::where('store_id', $store->id)->update([
+                    'store_id'   => $store->id,
+                    'category_id'=> $request->category,
+                ]);
+            }
         }
 
         // $storesCategory=new StoresCategory();
