@@ -12,6 +12,9 @@ import resetPassword from "./auth/resetpwd/reducer";
 //E-commerce
 import ecommerce from "./e-commerce/reducer";
 
+// drivers
+import drivers from "./drivers/reducer"
+
 //Calendar
 import calendar from "./calendar/reducer";
 
@@ -62,6 +65,7 @@ const rootReducer = combineReducers({
   ForgetPassword,
   resetPassword,
   ecommerce,
+  drivers,
   calendar,
   chat,
   mails,

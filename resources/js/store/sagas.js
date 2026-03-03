@@ -7,6 +7,7 @@ import ForgetSaga from "./auth/forgetpwd/saga";
 import resetPasswordSaga from "./auth/resetpwd/saga";
 import LayoutSaga from "./layout/saga";
 import ecommerceSaga from "./e-commerce/saga";
+import driverSaga from "./drivers/saga";
 import calendarSaga from "./calendar/saga";
 import chatSaga from "./chat/saga";
 import cryptoSaga from "./crypto/saga";
@@ -31,6 +32,7 @@ export default function* rootSaga() {
     fork(resetPasswordSaga),
     fork(LayoutSaga),
     fork(ecommerceSaga),
+    fork(driverSaga),
     fork(calendarSaga),
     fork(chatSaga),
     fork(mailsSaga),

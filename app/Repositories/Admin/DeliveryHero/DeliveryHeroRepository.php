@@ -34,21 +34,20 @@ class DeliveryHeroRepository implements DeliveryHeroInterface
     }
     public function paginate($request, $limit)
     {
-        return User::where('user_type','delivery_hero')
-            ->when($request->q != null, function ($query) use ($request){
+        return User::with('deliveryHero')->where('user_type','delivery_hero')
+            ->when(function ($query) use ($request){
                 $query->where(function ($q) use ($request){
-                    $q->where('email', 'LIKE', '%'.$request->q.'%');
-                    $q->orWhere('phone', 'LIKE', '%'.$request->q.'%');
-                    $q->orWhere(DB::raw("CONCAT(`first_name`, ' ', `last_name`)"), 'LIKE', "%".$request->q."%");
+                    $q->where('email', 'LIKE', '%'.$request->keyword.'%');
+                    $q->orWhere('phone', 'LIKE', '%'.$request->keyword.'%');
+                    $q->orWhere(DB::raw("CONCAT(`first_name`, ' ', `last_name`)"), 'LIKE', "%".$request->keyword."%");
                 });
             })
-            ->when($request->ph != null, function ($query) use ($request){
+            ->when(function ($query) use ($request){
                 $query->whereHas('deliveryHero', function ($q) use ($request){
-                    $q->where('pickup_hub_id', $request->ph);
+                    $q->where('pickup_hub_id', $request->pickupHub);
                 });
             })
             ->latest()->paginate($limit);
-
     }
 
     public function get($id)

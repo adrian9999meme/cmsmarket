@@ -121,7 +121,7 @@ import {
   getSellersListSuccess,
 } from "./actions";
 
-import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API, EDIT_STORE_API, DELETE_STORE_API, HOME_STORE_CATEGORIES_API } from "../endpoints";
+import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API, EDIT_STORE_API, DELETE_STORE_API, HOME_STORE_CATEGORIES_API, GET_ORDERS_API } from "../endpoints";
 
 //Include Both Helper File with needed methods
 // import {
@@ -163,10 +163,13 @@ function* fetchProductDetail({ productId }) {
   }
 }
 
-function* fetchOrders() {
+function* fetchOrders({ payload: query }) {
   try {
-    const response = yield call(getOrders);
-    yield put(getOrdersSuccess(response));
+    const response = yield api.get(GET_ORDERS_API, { params: query });
+    console.log("response", response.data)
+    if (response.data?.success) {
+      yield put(getOrdersSuccess(response.data?.data?.data));
+    }
   } catch (error) {
     yield put(getOrdersFail(error));
   }

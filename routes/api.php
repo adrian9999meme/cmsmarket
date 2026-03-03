@@ -5,6 +5,9 @@ use App\Http\Controllers\Admin\StoreController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Admin\SellerController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\Product\ProductController;   
+use App\Http\Controllers\Admin\DeliveryHero\DeliveryHeroController as DriverController;
 
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\Api\V100\APIController;
@@ -14,8 +17,8 @@ use App\Http\Controllers\Api\V100\CartController;
 use App\Http\Controllers\Api\V100\CategoryController;
 use App\Http\Controllers\Api\V100\HomeController;
 use App\Http\Controllers\Api\V100\NotificationController;
-use App\Http\Controllers\Api\V100\OrderController;
-use App\Http\Controllers\Api\V100\ProductController;
+// use App\Http\Controllers\Api\V100\OrderController;
+// use App\Http\Controllers\Api\V100\ProductController;
 use App\Http\Controllers\Api\V100\ReviewController;
 use App\Http\Controllers\Api\V100\RewardSystemController;
 use App\Http\Controllers\Api\V100\ShippingController;
@@ -91,6 +94,15 @@ Route::prefix('v1')->group(function () {
             Route::put('customers/edit/{id}', [\App\Http\Controllers\Admin\UserController::class, 'update']);
             Route::put('customers/setactive/{id}', [\App\Http\Controllers\Admin\UserController::class, 'setActive']);
             Route::delete('customers/delete/{id}', [\App\Http\Controllers\Admin\UserController::class, 'delete']);
+            // orders
+            Route::get('orders/fetch', [OrderController::class, 'index']);
+            // products
+            Route::get('products/fetch', [ProductController::class, 'index']);
+            // drivers
+            Route::get('drivers/fetch', [DriverController::class, 'index']);
+            Route::post('drivers/add', [DriverController::class, 'create']);
+            Route::put('drivers/edit/{id}', [DriverController::class, 'update']);
+            // Route::delete('drivers/delete/{id}', [DriverController::class, 'delete']);
 
         });
         Route::post('logout', [AuthController::class, 'logout']);

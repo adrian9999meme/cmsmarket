@@ -273,18 +273,18 @@ const SidebarContent = props => {
               </a>
               <ul className="sub-menu">
                 <li>
+                  <Link to="/orders/all">
+                    <i className="bx bx-list-ul"></i> {props.t("All Orders")}
+                  </Link>
+                </li>
+                <li>
                   <Link to="/orders/live">
                     <i className="bx bx-bolt-circle"></i> {props.t("Live Orders")}
                   </Link>
                 </li>
                 <li>
                   <Link to="/orders/today">
-                    <i className="bx bx-calendar-star"></i> {props.t("Today's Orders")}
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/orders/all">
-                    <i className="bx bx-list-ul"></i> {props.t("All Orders")}
+                    <i className="bx bx-calendar-check"></i> {props.t("Today's Orders")}
                   </Link>
                 </li>
                 <li>
@@ -307,13 +307,13 @@ const SidebarContent = props => {
               </a>
               <ul className="sub-menu">
                 <li>
-                  <Link to="/drivers/online">
-                    <i className="bx bx-wifi"></i> {props.t("Drivers Online")}
+                  <Link to="/drivers/all">
+                    <i className="bx bx-id-card"></i> {props.t("All Drivers")}
                   </Link>
                 </li>
                 <li>
-                  <Link to="/drivers/all">
-                    <i className="bx bx-id-card"></i> {props.t("All Drivers")}
+                  <Link to="/drivers/online">
+                    <i className="bx bx-wifi"></i> {props.t("Drivers Online")}
                   </Link>
                 </li>
                 <li>

@@ -123,7 +123,7 @@ const Navbar = props => {
                   </a>
                   <ul className="dropdown-menu" aria-labelledby="ordersDropdown">
                     <li><Link className="dropdown-item" to="/orders/live"><i className="bx bx-bolt-circle me-2" />{props.t("Live Orders")}</Link></li>
-                    <li><Link className="dropdown-item" to="/orders/today"><i className="bx bx-calendar-star me-2" />{props.t("Today's Orders")}</Link></li>
+                    <li><Link className="dropdown-item" to="/orders/today"><i className="bx bx-calendar-check me-2" />{props.t("Today's Orders")}</Link></li>
                     <li><Link className="dropdown-item" to="/orders/all"><i className="bx bx-list-ul me-2" />{props.t("All Orders")}</Link></li>
                     <li><Link className="dropdown-item" to="/orders/unresolved"><i className="bx bx-error me-2" />{props.t("Unresolved")}</Link></li>
                     <li><Link className="dropdown-item" to="/orders/cancelled"><i className="bx bx-block me-2" />{props.t("Cancelled")}</Link></li>
@@ -234,7 +234,7 @@ const Navbar = props => {
                     <i className="bx bx-credit-card me-2" />{props.t("Payments")}
                   </a>
                   <ul className="dropdown-menu" aria-labelledby="paymentsDropdown">
-                    <li><Link className="dropdown-item" to="/payments/today"><i className="bx bx-calendar-star me-2" />{props.t("Today's payments")}</Link></li>
+                    <li><Link className="dropdown-item" to="/payments/today"><i className="bx bx-calendar-check me-2" />{props.t("Today's payments")}</Link></li>
                     <li><Link className="dropdown-item" to="/payments/customers"><i className="bx bx-user me-2" />{props.t("Customer Payments")}</Link></li>
                     <li><Link className="dropdown-item" to="/payments/cancelled"><i className="bx bx-block me-2" />{props.t("Cancelled / Refunded")}</Link></li>
                     <li><Link className="dropdown-item" to="/payments/customer-invoices"><i className="bx bx-file me-2" />{props.t("Customer Invoices")}</Link></li>
