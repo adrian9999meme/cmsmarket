@@ -26,3 +26,5 @@ export const EDIT_CUSTOMER_API = API_VERSION + 'customers/edit/';
 export const DELETE_CUSTOMER_API = API_VERSION + 'customers/delete/';
 export const SET_ACTIVE_CUSTOMER_API = API_VERSION + 'customers/setactive/';
 
+// orders
+export const GET_ORDERS_API = API_VERSION + 'orders/fetch'

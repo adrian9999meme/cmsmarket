@@ -19,69 +19,88 @@ class OrderController extends Controller
     protected $user;
     protected $seller;
 
-    public function __construct(OrderInterface $order, LanguageInterface $lang, UserInterface $user,SellerInterface $seller){
+    public function __construct(OrderInterface $order, LanguageInterface $lang, UserInterface $user, SellerInterface $seller)
+    {
         $this->order    = $order;
         $this->lang     = $lang;
         $this->user     = $user;
         $this->seller   = $seller;
     }
 
-    public function index(Request $request){
-        try{
-            $orders             = $this->order->paginate($request, get_pagination('pagination'));
-            $selected_seller    = isset($request->sl) ? $this->seller->getSeller($request->sl) : null;
-            return view('admin.orders.orders',compact('orders','selected_seller'));
+    public function index(Request $request)
+    {
+        try {
+
+            // Get paginated orders with filters
+            $orders = $this->order->paginate(
+                $request,
+                get_pagination('pagination')
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Orders fetched successfully.',
+                'data'    => $orders
+            ], 200);
         } catch (\Exception $e) {
-            Toastr::error($e->getMessage());
-            return back();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch orders.',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
-    public function sellerOrders(Request $request){
-        try{
-            if(settingHelper('seller_system') != 1):
+    public function sellerOrders(Request $request)
+    {
+        try {
+            if (settingHelper('seller_system') != 1):
                 Toastr::error(__('Seller module is inactive.'));
                 return back();
             endif;
             $orders             = $this->order->sellerOrder($request, get_pagination('pagination'));
             $selected_seller    = isset($request->sl) ? $this->seller->getSeller($request->sl) : null;
-            return view('admin.orders.seller-order',compact('orders','selected_seller'));
+            return view('admin.orders.seller-order', compact('orders', 'selected_seller'));
         } catch (\Exception $e) {
             Toastr::error($e->getMessage());
             return back();
         }
     }
 
-    public function adminOrder(Request $request){
-        try{
+    public function adminOrder(Request $request)
+    {
+        try {
             $orders             = $this->order->adminOrder($request, get_pagination('pagination'));
-            return view('admin.orders.admin-orders',compact('orders'));
+            return view('admin.orders.admin-orders', compact('orders'));
         } catch (\Exception $e) {
             Toastr::error($e->getMessage());
             return back();
         }
     }
 
-    public function pickupHubOrder(Request $request){
-        try{
+    public function pickupHubOrder(Request $request)
+    {
+        try {
             $orders             = $this->order->pickupHubOrder($request, get_pagination('pagination'));
             $selected_seller    = isset($request->sl) ? $this->seller->getSeller($request->sl) : null;
-            return view('admin.orders.pickup-hub-orders',compact('orders','selected_seller'));
+            return view('admin.orders.pickup-hub-orders', compact('orders', 'selected_seller'));
         } catch (\Exception $e) {
             Toastr::error($e->getMessage());
             return back();
         }
     }
 
-    public function view($id){
-        try{
+    public function view($id)
+    {
+        try {
             $order              = $this->order->get($id);
             /*if(settingHelper('seller_system') != 1 && $order->seller_id != 1):
                 Toastr::error(__('Seller module is inactive.'));
                 return back();
             endif;*/
-            $delivery_heroes    = $this->user->allTypeUser()->whereHas('deliveryHero')->where('user_type','delivery_hero')->where('status',1)->where('is_user_banned',0)->get();
-            return view('admin.orders.order-details', compact('order','delivery_heroes'));
+            $delivery_heroes    = $this->user->allTypeUser()->whereHas('deliveryHero')->where('user_type', 'delivery_hero')->where('status', 1)->where('is_user_banned', 0)->get();
+            return view('admin.orders.order-details', compact('order', 'delivery_heroes'));
         } catch (\Exception $e) {
             Toastr::error($e->getMessage());
             return back();
@@ -102,7 +121,8 @@ class OrderController extends Controller
         }
     }
 
-    public function assignDeliveryHero(Request $request){
+    public function assignDeliveryHero(Request $request)
+    {
 
         DB::beginTransaction();
         try {
@@ -148,7 +168,8 @@ class OrderController extends Controller
         endif;
     }
 
-    public function paymentStatusChange(Request $request){
+    public function paymentStatusChange(Request $request)
+    {
         $order = $this->order->get($request['id']);
         if ($order->delivery_status != 'delivered'):
             if ($order->payment_status == 'refunded_to_wallet' && $request['payment_status'] == 'Unpaid'):
@@ -179,10 +200,11 @@ class OrderController extends Controller
         else:
             Toastr::error(__('Delivered order can not get updated'));
             return back();
-            endif;
+        endif;
     }
 
-    public function approveOfflinePayment(Request $request){
+    public function approveOfflinePayment(Request $request)
+    {
         $order = $this->order->get($request['id']);
 
         $request['payment_status'] = 'offline_payment';
