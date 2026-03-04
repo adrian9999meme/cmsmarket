@@ -184,20 +184,16 @@ function* fetchCartData() {
   }
 }
 
-function* fetchCustomers({ payload: { subdomain, searchKeyword } }) {
+function* fetchCustomers({ payload: query }) {
   try {
-    const response = yield api.get(`${GET_CUSTOMERS_API}?subdomain=${subdomain}&keyword=${searchKeyword}`);
+    const response = yield api.get(GET_CUSTOMERS_API, { params: query });
     if (response.data?.success) {
-      if (subdomain && subdomain === 'blocked') {
-        yield put(getBlockedCustomersSuccess(response.data?.data))
-      } else {
-        yield put(getCustomersSuccess(response.data?.data));
-      }
       toast.success("Customers Fetch Successfully", { autoClose: 2000 });
+      yield put(getCustomersSuccess(response.data?.data));
     }
   } catch (error) {
-    yield put(getCustomersFail(error));
     toast.error("Customers Eetch Failed", { autoClose: 2000 });
+    yield put(getCustomersFail(error));
   }
 }
 

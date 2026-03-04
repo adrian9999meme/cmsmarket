@@ -69,7 +69,6 @@ const INIT_STATE = {
   orders: [],
   cartData: {},
   customers: [],
-  blockedCustomers: [],
   shops: [],
   productComments: [],
   sellers: [],
@@ -177,12 +176,6 @@ const Ecommerce = (state = INIT_STATE, action) => {
       return {
         ...state,
         customers: action.payload,
-      };
-
-    case GET_BLOCKED_CUSTOMERS_SUCCESS:
-      return {
-        ...state,
-        blockedCustomers: action.payload,
       };
 
     case GET_CUSTOMERS_FAIL:

@@ -37,7 +37,7 @@ const CustomersBreakdown = () => {
   const [customers, setCustomers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // add | edit | view
-  const [modalType, setModalType] = useState("customers"); // customers | trade
+  const [customerType, setCustomerType] = useState("regular"); // regular | trade
   const [currentRecord, setCurrentRecord] = useState(null);
   const [query, setQuery] = useState({
     subdomain: typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all",
@@ -49,10 +49,9 @@ const CustomersBreakdown = () => {
     state => state.ecommerce,
     ecommerce => ({
       allcustomers: ecommerce.customers,
-      blockedCustomers: ecommerce.blockedCustomers
     })
   );
-  const { allcustomers, blockedCustomers } = useSelector(ecommerceSelector);
+  const { allcustomers } = useSelector(ecommerceSelector);
 
   // Keep a ref to ensure latest value of query
   const queryRef = useRef(query);
@@ -67,35 +66,24 @@ const CustomersBreakdown = () => {
       ...prev,
       subdomain: typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all"
     }));
+    subdomain === "trades-men" ? setCustomerType("trade") : setCustomerType("regular")
   }, [subdomain]);
 
   // Sync customers list from store to local state depending on current subdomain
   useEffect(() => {
-    if (query.subdomain === "all" || query.subdomain === "add") {
-      setCustomers(Array.isArray(allcustomers) ? allcustomers : []);
-    } else if (query.subdomain === "blocked") {
-      setCustomers(Array.isArray(blockedCustomers) ? blockedCustomers : []);
-    } else {
-      setCustomers([]);
-    }
+    setCustomers(Array.isArray(allcustomers) ? allcustomers : []);
     if (query.subdomain === "add") {
       setModalOpen(true);
     }
-  }, [query.subdomain, allcustomers, blockedCustomers]);
+  }, [query.subdomain, allcustomers]);
 
   // Fetch customers when subdomain or search changes
   useEffect(() => {
-    // Only fetch for 'all' or 'blocked'; the API expects subdomain. Always pass up-to-date query.
-    if (
-      (query.subdomain === "all" && (!Array.isArray(allcustomers) || allcustomers.length === 0)) ||
-      (query.subdomain === "blocked" && (!Array.isArray(blockedCustomers) || blockedCustomers.length === 0))
-    ) {
-      dispatch(getCustomers({
-        ...queryRef.current
-      }));
-    }
-    // Do not fetch for unknown subdomains or when store already has data
-  }, [query.subdomain, allcustomers, blockedCustomers, dispatch]);
+    dispatch(getCustomers({
+      ...queryRef.current,
+      customer_type: customerType
+    }));
+  }, [query.subdomain, dispatch]);
 
   const initialFormState = {
     id: null,
@@ -135,7 +123,10 @@ const CustomersBreakdown = () => {
     user_profile_image: "",
     user_type: "",
     password: "",
-    password_confirmation: ""
+    password_confirmation: "",
+    vat_number: '',
+    registration_number: '',
+    company_name: ''
   };
   const [formValues, setFormValues] = useState(initialFormState);
 
@@ -144,7 +135,7 @@ const CustomersBreakdown = () => {
     if (!customerToUpdate) return;
     const updatedCustomer = {
       ...customerToUpdate,
-      status: customerToUpdate.status === 1 ? 0 : 1
+      status: customerToUpdate.user?.status === 1 ? 0 : 1
     };
     dispatch(setActiveCustomer(updatedCustomer));
   };
@@ -161,6 +152,7 @@ const CustomersBreakdown = () => {
     setCurrentRecord(record);
     setFormValues({
       ...initialFormState,
+      ...(record?.user || {}),
       ...(record || {}),
     });
     setModalOpen(true);
@@ -194,6 +186,9 @@ const CustomersBreakdown = () => {
         address: formValues.address || "",
         password: formValues.password || "",
         password_confirmation: formValues.password_confirmation || "",
+        vat_number: formValues.vat_number || "",
+        registration_number: formValues.registration_number || "",
+        company_name: formValues.company_name || "",
       };
       dispatch(addNewCustomer(newCustomer));
     } else if (modalMode === "edit" && currentRecord) {
@@ -214,6 +209,9 @@ const CustomersBreakdown = () => {
         address: formValues.address || "",
         password: formValues.password || "",
         password_confirmation: formValues.password_confirmation || "",
+        vat_number: formValues.vat_number || "",
+        registration_number: formValues.registration_number || "",
+        company_name: formValues.company_name || "",
       };
       dispatch(updateCustomer(editCustomer));
     }
@@ -256,7 +254,7 @@ const CustomersBreakdown = () => {
                   className="form-control"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      dispatch(getCustomers({...queryRef.current}))
+                      dispatch(getCustomers({ ...queryRef.current, customer_type: customerType }))
                     }
                   }}
                 />
@@ -281,6 +279,13 @@ const CustomersBreakdown = () => {
                           <th>Phone</th>
                           <th>Current Balance</th>
                           <th>Last Login</th>
+                          {customerType === 'trade' &&
+                            <>
+                              <th>VAT Number</th>
+                              <th>Registration Number</th>
+                              <th>Company Name</th>
+                            </>
+                          }
                           <th>Status</th>
                           <th>Options</th>
                         </tr>
@@ -292,41 +297,48 @@ const CustomersBreakdown = () => {
                               <div className="d-flex gap-2 align-items-center">
                                 <div>
                                   <img
-                                    src={row.profile_image || defaultCustomerImg}
+                                    src={row.user?.profile_image || defaultCustomerImg}
                                     className="rounded me-2"
                                     alt=""
                                     style={{ width: 36, height: 36, objectFit: "contain" }}
                                   />
                                 </div>
                                 <div>
-                                  <p className="mb-1">{row.full_name}</p>
-                                  <p className="mb-1">{row.email}</p>
+                                  <p className="mb-1">{row.user?.full_name}</p>
+                                  <p className="mb-1">{row.user?.email}</p>
                                 </div>
                               </div>
                             </td>
                             <td>
-                              <div>
-                                <strong>{row.phone}</strong>
+                              <div className="text-center">
+                                <strong>{row.user?.phone || '-'}</strong>
                               </div>
                             </td>
-                            <td>{row.balance}</td>
-                            <td>{row.last_login}</td>
+                            <td className="text-center">{row.user?.balance || '-'}</td>
+                            <td className="text-center">{row.user?.last_login || '-'}</td>
+                            {customerType === 'trade' &&
+                              <>
+                                <td className="text-center">{row.vat_number || '-'}</td>
+                                <td className="text-center">{row.registration_number || '-'}</td>
+                                <td className="text-center">{row.company_name || '-'}</td>
+                              </>
+                            }
                             <td>
                               <div className="form-check form-switch">
                                 <Input
                                   className="form-check-input"
                                   type="checkbox"
                                   id={`trade-${row.id}`}
-                                  checked={row.status === 1}
+                                  checked={row.user?.status === 1}
                                   onClick={() => toggleStatus(row.id)}
                                 />
                                 <label className="form-check-label" htmlFor={`trade-${row.id}`}>
-                                  {row.status ? "Active" : "Blocked"}
+                                  {row.user?.status ? "Active" : "Blocked"}
                                 </label>
                               </div>
                             </td>
                             <td>
-                              <div className="d-flex justify-content-start gap-1 flex-wrap">
+                              <div className="d-flex justify-content-center gap-1 flex-wrap">
                                 <Button
                                   color="link"
                                   className={`p-1`}
@@ -355,13 +367,13 @@ const CustomersBreakdown = () => {
                             </td>
                           </tr>
                         ))}
-                      {customers.length === 0 && (
-                        <tr>
-                          <td colSpan="100%" className="text-center">
-                            Not Found
-                          </td>
-                        </tr>
-                      )}
+                        {customers.length === 0 && (
+                          <tr>
+                            <td colSpan="100%" className="text-center">
+                              Not Found
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </Table>
                   </div>
@@ -437,6 +449,55 @@ const CustomersBreakdown = () => {
                     </FormGroup>
                   </Col>
                 </Row>
+
+                {customerType === "trade" && (
+                  <>
+                    <Row className="mb-3">
+                      <Col md={6}>
+                        <FormGroup>
+                          <Label for="field-email">VAT Number</Label>
+                          <Input
+                            id="field-email"
+                            name="vat_number"
+                            type="text"
+                            value={formValues.vat_number}
+                            onChange={handleFormChange}
+                            readOnly={modalMode === "view"}
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col md={6}>
+                        <FormGroup>
+                          <Label for="field-tel">Registration Number</Label>
+                          <Input
+                            id="field-tel"
+                            name="registration_number"
+                            type="text"
+                            value={formValues.registration_number}
+                            onChange={handleFormChange}
+                            readOnly={modalMode === "view"}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <Row className="mb-3">
+                      <Col>
+                        <FormGroup>
+                          <Label for="field-company-name">Company Name</Label>
+                          <Input
+                            id="field-company-name"
+                            name="company_name"
+                            type="text"
+                            value={formValues.company_name}
+                            onChange={handleFormChange}
+                            readOnly={modalMode === "view"}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  </>
+                )}
+
                 {modalMode !== "view" && (
                   <>
                     <Row className="mb-3">

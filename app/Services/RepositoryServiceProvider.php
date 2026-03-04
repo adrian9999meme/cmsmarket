@@ -62,6 +62,12 @@ class RepositoryServiceProvider extends ServiceProvider{
             'App\Repositories\Admin\SellerRepository'
         );
 
+        //Customer management
+        $this->app->bind(
+            'App\Repositories\Interfaces\Admin\CustomerInterface',
+            'App\Repositories\Admin\CustomerRepository'
+        );
+
         //Store management
         $this->app->bind(
             'App\Repositories\Interfaces\Admin\StoreInterface',

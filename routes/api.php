@@ -89,11 +89,11 @@ Route::prefix('v1')->group(function () {
             Route::put('stores/setactive/{id}', [StoreController::class, 'setActive']);
             Route::delete('stores/delete/{id}', [StoreController::class, 'delete']);
             // customers
-            Route::get('customers/fetch', [\App\Http\Controllers\Admin\UserController::class, 'index']);
-            Route::post('customers/create', [\App\Http\Controllers\Admin\UserController::class, 'create']);
-            Route::put('customers/edit/{id}', [\App\Http\Controllers\Admin\UserController::class, 'update']);
-            Route::put('customers/setactive/{id}', [\App\Http\Controllers\Admin\UserController::class, 'setActive']);
-            Route::delete('customers/delete/{id}', [\App\Http\Controllers\Admin\UserController::class, 'delete']);
+            Route::get('customers/fetch', [\App\Http\Controllers\Admin\CustomerController::class, 'index']);
+            Route::post('customers/create', [\App\Http\Controllers\Admin\CustomerController::class, 'create']);
+            Route::put('customers/edit/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'update']);
+            Route::put('customers/setactive/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'setActive']);
+            Route::delete('customers/delete/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'delete']);
             // orders
             Route::get('orders/fetch', [OrderController::class, 'index']);
             // products
