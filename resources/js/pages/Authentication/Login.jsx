@@ -8,9 +8,6 @@ import { Link } from "react-router-dom";
 // Formik validation
 import * as Yup from "yup";
 import { useFormik } from "formik";
-//Toast
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 // actions
 import { loginUser, setToken } from "../../store/actions";
@@ -123,7 +120,6 @@ const Login = props => {
                         return false;
                       }}
                     >
-                      <ToastContainer closeButton={false} limit={1} />
 
                       <div className="mb-3">
                         <Label className="form-label">Email</Label>

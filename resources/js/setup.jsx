@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route } from "react-router-dom";
 import { createSelector } from "reselect";
+//Toast
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { layoutTypes } from "./constants/layout";
 import { publicRoutes, authProtectedRoutes } from "./routes/allRoutes";
@@ -85,6 +88,14 @@ const Index = () => {
                 </Route>
                 <Route path="*" element={<Pages404 />} />
             </Routes>
+            {/* Toast */}
+            <ToastContainer
+                position="top-right"
+                autoClose={2000}
+                newestOnTop
+                closeOnClick
+                pauseOnHover
+            />
         </React.Fragment>
     );
 };
