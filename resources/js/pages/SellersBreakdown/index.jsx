@@ -82,17 +82,9 @@ const SellersBreakdown = () => {
   }, [query]);
 
   useEffect(() => {
-    let subdomainValue =
-      subdomain === "all"
-        ? ""
-        : subdomain === "pending"
-          ? "pending"
-          : subdomain === "blocked"
-            ? "blocked"
-            : "";
     setQuery((prev) => ({
       ...prev,
-      subdomain: subdomainValue,
+      subdomain: subdomain === 'all' ? '' : subdomain,
     }));
   }, [subdomain])
   // Fetch sellers when status or query changes
