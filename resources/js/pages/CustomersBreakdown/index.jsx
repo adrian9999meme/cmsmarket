@@ -24,8 +24,52 @@ import {
   NavLink,
 } from "reactstrap";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
-import { addNewCustomer, deleteCustomer, getCustomers, setActiveCustomer, updateCustomer } from "../../store/actions";
+import { addNewCustomer, deleteCustomer, getCustomers, setActiveCustomer, setTradeApproved, setTradeRejected, updateCustomer } from "../../store/actions";
 import defaultCustomerImg from '../../../images/default/user.jpg'
+
+const initialFormState = {
+  id: null,
+  balance: null,
+  billing_address: [],
+  country_id: null,
+  created_at: "",
+  currency_code: null,
+  date_of_birth: null,
+  email: "",
+  firebase_auth_id: null,
+  first_name: "",
+  full_name: "",
+  gender: "",
+  image_id: null,
+  images: [],
+  is_deleted: 0,
+  is_password_set: 0,
+  is_user_banned: 0,
+  lang_code: "",
+  last_ip: null,
+  last_login: "",
+  last_name: "",
+  last_password_change: null,
+  last_recharge: 0,
+  newsletter_enable: 0,
+  otp: null,
+  permissions: [],
+  phone: "",
+  pickup_hub_id: null,
+  profile_image: "",
+  role_id: null,
+  shipping_address: [],
+  socials: [],
+  status: 0,
+  updated_at: "",
+  user_profile_image: "",
+  user_type: "",
+  password: "",
+  password_confirmation: "",
+  vat_number: '',
+  registration_number: '',
+  company_name: ''
+};
 
 const CustomersBreakdown = () => {
   document.title = "Customers Breakdown | LEKIT Ltd";
@@ -40,7 +84,7 @@ const CustomersBreakdown = () => {
   const [customerType, setCustomerType] = useState("regular"); // regular | trade
   const [currentRecord, setCurrentRecord] = useState(null);
   const [query, setQuery] = useState({
-    subdomain: typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all",
+    subdomain: "all",
     searchKeyword: ""
   });
 
@@ -85,49 +129,6 @@ const CustomersBreakdown = () => {
     }));
   }, [query.subdomain, dispatch]);
 
-  const initialFormState = {
-    id: null,
-    balance: null,
-    billing_address: [],
-    country_id: null,
-    created_at: "",
-    currency_code: null,
-    date_of_birth: null,
-    email: "",
-    firebase_auth_id: null,
-    first_name: "",
-    full_name: "",
-    gender: "",
-    image_id: null,
-    images: [],
-    is_deleted: 0,
-    is_password_set: 0,
-    is_user_banned: 0,
-    lang_code: "",
-    last_ip: null,
-    last_login: "",
-    last_name: "",
-    last_password_change: null,
-    last_recharge: 0,
-    newsletter_enable: 0,
-    otp: null,
-    permissions: [],
-    phone: "",
-    pickup_hub_id: null,
-    profile_image: "",
-    role_id: null,
-    shipping_address: [],
-    socials: [],
-    status: 0,
-    updated_at: "",
-    user_profile_image: "",
-    user_type: "",
-    password: "",
-    password_confirmation: "",
-    vat_number: '',
-    registration_number: '',
-    company_name: ''
-  };
   const [formValues, setFormValues] = useState(initialFormState);
 
   const toggleStatus = (id) => {
@@ -281,9 +282,11 @@ const CustomersBreakdown = () => {
                           <th>Last Login</th>
                           {customerType === 'trade' &&
                             <>
+                              <th>Company Name</th>
                               <th>VAT Number</th>
                               <th>Registration Number</th>
-                              <th>Company Name</th>
+                              <th>Trade Status</th>
+                              <th>Trade Options</th>
                             </>
                           }
                           <th>Status</th>
@@ -318,9 +321,34 @@ const CustomersBreakdown = () => {
                             <td className="text-center">{row.user?.last_login || '-'}</td>
                             {customerType === 'trade' &&
                               <>
+                                <td className="text-center">{row.company_name || '-'}</td>
                                 <td className="text-center">{row.vat_number || '-'}</td>
                                 <td className="text-center">{row.registration_number || '-'}</td>
-                                <td className="text-center">{row.company_name || '-'}</td>
+                                <td className="text-center text-white">
+                                  <span className={`rounded-pill px-2 ${!!row.trade_status && row.trade_status === 'approved' ? 'bg-success' : row.trade_status === 'pending' ? 'bg-primary' : 'bg-danger'}`}>
+                                    {row.trade_status || '-'}
+                                  </span>
+                                </td>
+                                <td className="text-center">
+                                  <div className="d-flex justify-content-center gap-3">
+                                    <Button
+                                      color="link"
+                                      className="p-1"
+                                      title="Trade Approved"
+                                      onClick={() => dispatch(setTradeApproved(row))}
+                                    >
+                                      <i className="bx bx-check-circle text-success font-size-24"></i>
+                                    </Button>
+                                    <Button
+                                      color="link"
+                                      className="p-1"
+                                      title="Trade Rejected"
+                                      onClick={() => dispatch(setTradeRejected(row))}
+                                    >
+                                      <i className="bx bx-x-circle text-danger font-size-24"></i>
+                                    </Button>
+                                  </div>
+                                </td>
                               </>
                             }
                             <td>

@@ -94,6 +94,9 @@ Route::prefix('v1')->group(function () {
             Route::put('customers/edit/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'update']);
             Route::put('customers/setactive/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'setActive']);
             Route::delete('customers/delete/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'delete']);
+            // trade approvals
+            Route::put('customers/trade-approve/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'approveTrade']);
+            Route::put('customers/trade-reject/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'rejectTrade']);
             // orders
             Route::get('orders/fetch', [OrderController::class, 'index']);
             // products

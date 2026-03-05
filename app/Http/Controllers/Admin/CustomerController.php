@@ -301,16 +301,20 @@ class CustomerController extends Controller
 
             DB::commit();
 
+            $trade = $this->customers->get($id);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Trade customer approved successfully'
+                'message' => 'Trade customer approved successfully',
+                'data' => $trade
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'data' => $e->getTrace()
             ], 500);
         }
     }
@@ -334,16 +338,20 @@ class CustomerController extends Controller
 
             DB::commit();
 
+            $trade = $this->customers->get($id);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Trade customer rejected successfully'
+                'message' => 'Trade customer rejected successfully',
+                'data' => $trade
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'data' => $e->getTrace()
             ], 500);
         }
     }
