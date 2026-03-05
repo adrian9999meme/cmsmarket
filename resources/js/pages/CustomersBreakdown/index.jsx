@@ -77,7 +77,6 @@ const CustomersBreakdown = () => {
   const dispatch = useDispatch();
   const { subdomain = "all" } = useParams();
 
-  const [activeTab, setActiveTab] = useState("customers");
   const [customers, setCustomers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // add | edit | view
@@ -110,7 +109,7 @@ const CustomersBreakdown = () => {
       ...prev,
       subdomain: typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all"
     }));
-    subdomain === "trades-men" ? setCustomerType("trade") : setCustomerType("regular")
+    subdomain === "trade" ? setCustomerType("trade") : setCustomerType("regular")
   }, [subdomain]);
 
   // Sync customers list from store to local state depending on current subdomain

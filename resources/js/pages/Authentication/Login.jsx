@@ -8,9 +8,6 @@ import { Link } from "react-router-dom";
 // Formik validation
 import * as Yup from "yup";
 import { useFormik } from "formik";
-//Toast
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 // actions
 import { loginUser, setToken } from "../../store/actions";
@@ -28,31 +25,22 @@ const Login = props => {
   const [userLogin, setUserLogin] = useState({ email: '', password: '' });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const registerSelector = createSelector(
-    state => state.Account,
-    account => ({
-      user: account.user
-    })
-  );
-  const {
-    user
-  } = useSelector(registerSelector);
 
-
-  useEffect(() => {
-    if (user) {
-      setUserLogin({
-        email: user.email || email,
-        password: user.password || password
-      });
-    }
-  }, [user, email, password]);
+  const [rememberable, setRememberable] = useState(false)
 
   // auto login
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const last_login_user = localStorage.getItem('last-login');
+
     if (token) {
       dispatch(setToken(token))
+    } else {
+      if (last_login_user) {
+        const user = JSON.parse(last_login_user);
+        setEmail(user.email);
+        setPassword(user.password);
+      }
     }
   }, [])
 
@@ -60,6 +48,15 @@ const Login = props => {
     setEmail(demoUser.email);
     setPassword(demoUser.password);
   };
+
+  const handleRememberable = () => {
+    if (rememberable) {
+      localStorage.setItem('last-login', JSON.stringify({
+        email: email,
+        password: password,
+      }));
+    }
+  }
 
   const validation = useFormik({
     // enableReinitialize : use this  flag when initial values needs to be changed
@@ -75,6 +72,7 @@ const Login = props => {
     }),
     onSubmit: (values) => {
       dispatch(loginUser(values, props.router.navigate));
+      handleRememberable();
     }
   });
 
@@ -122,7 +120,6 @@ const Login = props => {
                         return false;
                       }}
                     >
-                      <ToastContainer closeButton={false} limit={1} />
 
                       <div className="mb-3">
                         <Label className="form-label">Email</Label>
@@ -130,6 +127,7 @@ const Login = props => {
                           name="email"
                           className="form-control"
                           placeholder="Enter email"
+                          autoComplete="email"
                           type="email"
                           onChange={validation.handleChange}
                           onBlur={validation.handleBlur}
@@ -149,6 +147,7 @@ const Login = props => {
                           name="password"
                           value={validation.values.password || ""}
                           type="password"
+                          autoComplete="current-password"
                           placeholder="Enter Password"
                           onChange={validation.handleChange}
                           onBlur={validation.handleBlur}
@@ -166,6 +165,8 @@ const Login = props => {
                           type="checkbox"
                           className="form-check-input"
                           id="customControlInline"
+                          checked={rememberable}
+                          onChange={(e) => setRememberable(e.target.checked)}
                         />
                         <label
                           className="form-check-label"

@@ -59,64 +59,6 @@ class OrderRepository implements OrderInterface
 
     public function paginate($request, $limit)
     {
-        // $start_date = $end_date = null;
-
-        // if ($request->dt != null):
-        //     $dates          = explode(" - ", $request->dt);
-        //     $start_date     = Carbon::createFromFormat('m-d-Y g:ia', $dates[0]);
-        //     $end_date       = Carbon::createFromFormat('m-d-Y g:ia', $dates[1]);
-        // endif;
-        // $orders = Order::with('orderDetails.product')->withCount('orderDetails')
-        //     ->when($request->ds != null, function ($query) use ($request) {
-        //         $query->where('delivery_status', $request->ds);
-        //     })
-        //     ->when($request->dt != null, function ($query) use ($start_date, $end_date) {
-        //         $query->whereDate('orders.created_at', '>=', $start_date)
-        //             ->whereDate('orders.created_at', '<=', $end_date);
-        //     })
-        //     ->when($request->sl != null, function ($query) use ($request) {
-        //         $seller = sellerProfile::find($request->sl);
-        //         $query->where('orders.seller_id', $seller->user_id);
-        //     })
-        //     ->when($request->q != null, function ($query) use ($request) {
-        //         $query->where('code', 'like', '%' . $request->q . '%');
-        //         $query->orwhereHas('user', function ($q) use ($request) {
-        //             $q->where('first_name', 'like', '%' . $request->q . '%');
-        //             $q->orwhere('last_name', 'like', '%' . $request->q . '%');
-        //             $q->orWhere(DB::raw("CONCAT(`first_name`, ' ', `last_name`)"), 'LIKE', "%" . $request->q . "%");
-        //             $q->orwhere('phone', 'like', '%' . $request->q . '%');
-        //         });
-        //     })
-        //     /*->when(settingHelper('seller_system') != 1, function ($q) {
-        //         $q->where('seller_id',1);
-        //     })*/;
-
-        // $sorting = $request->s;
-        // switch ($sorting) {
-        //     case 'latest_on_top':
-        //         $orders->orderByDesc('id');
-        //         break;
-        //     case 'oldest_on_top':
-        //         $orders->orderBy('id');
-        //         break;
-        //     case 'price_high':
-        //         $orders->orderByDesc('total_amount');
-        //         break;
-        //     case 'price_low':
-        //         $orders->orderBy('total_amount');
-        //         break;
-        //     case 'total_product_high':
-        //         $orders->orderByDesc('order_details_count');
-        //         break;
-        //     case 'total_product_low':
-        //         $orders->orderBy('order_details_count');
-        //         break;
-        //     default:
-        //         $orders->orderBy('id', 'desc');
-        //         break;
-        // }
-        // return $orders->paginate($limit);
-
         $startDate = null;
         $endDate   = null;
 
