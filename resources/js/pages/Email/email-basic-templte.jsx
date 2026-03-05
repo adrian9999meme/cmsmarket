@@ -280,7 +280,7 @@ const EmailBasicTemplte = () => {
                                         }}
                                         valign="top"
                                       >
-                                        <b>Skote</b>
+                                        <b>Lekit</b>
                                         <p>Support Team</p>
                                       </td>
                                     </tr>
@@ -308,7 +308,7 @@ const EmailBasicTemplte = () => {
                                         }}
                                         valign="top"
                                       >
-                                        © {new Date().getFullYear()} Skote
+                                        © {new Date().getFullYear()} Lekit
                                         </td>
                                     </tr>
                                   </tbody>

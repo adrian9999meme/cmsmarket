@@ -19,7 +19,7 @@ import SassUtilitiesAPI from "./SassUtilitiesAPI";
 const UiButtons = () => {
 
   //meta title
-  document.title = "Buttons | Skote - Vite React Admin & Dashboard Template";
+  document.title = "Buttons | Lekit - Vite React Admin & Dashboard Template";
 
   return (
     <React.Fragment>

@@ -13,7 +13,7 @@ const theme = {
     }
   }
 }
-TuiChart.registerTheme("skoteTheme", theme)
+TuiChart.registerTheme("LekitTheme", theme)
 
 const HeatmapChartToast = props => {
   const data = {
@@ -61,7 +61,7 @@ const HeatmapChartToast = props => {
       width: props.chartWidth,
       height: 450,
     },
-    theme: "skoteTheme",
+    theme: "LekitTheme",
     yAxis: {
       title: "City",
     },

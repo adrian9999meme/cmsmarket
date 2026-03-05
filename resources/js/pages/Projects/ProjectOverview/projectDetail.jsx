@@ -12,7 +12,7 @@ const ProjectDetail = ({ project }) => {
           <img src={img1} alt="" className="avatar-sm me-4" />
 
           <div className="flex-grow-1 overflow-hidden">
-            <h5 className="text-truncate font-size-15">Skote Dashboard UI</h5>
+            <h5 className="text-truncate font-size-15">Lekit Dashboard UI</h5>
             <p className="text-muted">Separate existence is a myth. For science, music, sport, etc.</p>
           </div>
         </div>

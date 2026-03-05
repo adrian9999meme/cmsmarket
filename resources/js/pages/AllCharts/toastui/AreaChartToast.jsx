@@ -45,7 +45,7 @@ const theme = {
     colors: ["#f46a6a", "#34c38f", "#556ee6"]
   }
 }
-TuiChart.registerTheme("skoteTheme", theme)
+TuiChart.registerTheme("LekitTheme", theme)
 
 const AreaChartToast = props => {
   const data = {

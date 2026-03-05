@@ -71,7 +71,7 @@ const JobData = ({ jobGrid }) => {
                                                 <Link to="/job-details" className="text-dark">{item.title}</Link> <small className="text-muted fw-normal">(0-2 Yrs Exp.)</small></h5>
                                             <ul className="list-inline mb-0">
                                                 <li className="list-inline-item">
-                                                    <p className="text-muted fs-14 mb-1">Skote Technology Pvt.Ltd</p>
+                                                    <p className="text-muted fs-14 mb-1">Lekit Technology Pvt.Ltd</p>
                                                 </li>{" "}
                                                 <li className="list-inline-item">
                                                     <p className="text-muted fs-14 mb-0"><i className="mdi mdi-map-marker"></i> {item.location}</p>
