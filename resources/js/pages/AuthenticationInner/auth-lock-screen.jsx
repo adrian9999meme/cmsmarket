@@ -38,7 +38,9 @@ const LockScreen = (props) => {
 
   useEffect(() => {
     dispatch(logoutUserSuccess())
-  }, [])
+    setEmail(email)
+    setName(`${first_name} ${last_name}`)
+  }, [dispatch, email])
 
   const validation = useFormik({
     // enableReinitialize : use this flag when initial values needs to be changed
