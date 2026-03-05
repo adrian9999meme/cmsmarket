@@ -25,6 +25,8 @@ export const ADD_NEW_CUSTOMER_API = API_VERSION + 'customers/create';
 export const EDIT_CUSTOMER_API = API_VERSION + 'customers/edit/';
 export const DELETE_CUSTOMER_API = API_VERSION + 'customers/delete/';
 export const SET_ACTIVE_CUSTOMER_API = API_VERSION + 'customers/setactive/';
+export const SET_TRADE_APPROVED_API = API_VERSION + 'customers/trade-approve/';
+export const SET_TRADE_REJECTED_API = API_VERSION + 'customers/trade-reject/';
 
 // orders
 export const GET_ORDERS_API = API_VERSION + 'orders/fetch'

@@ -53,6 +53,9 @@ import {
   SET_ACTIVE_CUSTOMER,
   SET_ACTIVE_SELLER_REQUEST,
   GET_BLOCKED_CUSTOMERS_SUCCESS,
+  SET_CUSTOMER_APPROVED,
+  SET_TRADE_APPROVED,
+  SET_TRADE_REJECTED,
 } from "./actionTypes";
 
 import {
@@ -121,7 +124,7 @@ import {
   getSellersListSuccess,
 } from "./actions";
 
-import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API, EDIT_STORE_API, DELETE_STORE_API, HOME_STORE_CATEGORIES_API, GET_ORDERS_API } from "../endpoints";
+import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API, EDIT_STORE_API, DELETE_STORE_API, HOME_STORE_CATEGORIES_API, GET_ORDERS_API, SET_TRADE_APPROVED_API, SET_TRADE_REJECTED_API } from "../endpoints";
 
 //Include Both Helper File with needed methods
 // import {
@@ -184,20 +187,16 @@ function* fetchCartData() {
   }
 }
 
-function* fetchCustomers({ payload: { subdomain, searchKeyword } }) {
+function* fetchCustomers({ payload: query }) {
   try {
-    const response = yield api.get(`${GET_CUSTOMERS_API}?subdomain=${subdomain}&keyword=${searchKeyword}`);
+    const response = yield api.get(GET_CUSTOMERS_API, { params: query });
     if (response.data?.success) {
-      if (subdomain && subdomain === 'blocked') {
-        yield put(getBlockedCustomersSuccess(response.data?.data))
-      } else {
-        yield put(getCustomersSuccess(response.data?.data));
-      }
       toast.success("Customers Fetch Successfully", { autoClose: 2000 });
+      yield put(getCustomersSuccess(response.data?.data));
     }
   } catch (error) {
-    yield put(getCustomersFail(error));
     toast.error("Customers Eetch Failed", { autoClose: 2000 });
+    yield put(getCustomersFail(error));
   }
 }
 
@@ -224,6 +223,32 @@ function* onSetActiveCustomer({ payload: customer }) {
   } catch (error) {
     yield put(updateCustomerFail(error));
     toast.error("Customer Update Failed", { autoClose: 2000 });
+  }
+}
+
+function* onTradeApproved({ payload: customer }) {
+  try {
+    const response = yield api.put(`${SET_TRADE_APPROVED_API}${customer.id}`, customer);
+    if (response.data?.success) {
+      yield put(updateCustomerSuccess(response.data?.data));
+      toast.success("Trade Approved Successfully", { autoClose: 2000 });
+    }
+  } catch (error) {
+    yield put(updateCustomerFail(error));
+    toast.error("Trade Approved Failed", { autoClose: 2000 });
+  }
+}
+
+function* onTradeRejected({ payload: customer }) {
+  try {
+    const response = yield api.put(`${SET_TRADE_REJECTED_API}${customer.id}`, customer);
+    if (response.data?.success) {
+      yield put(updateCustomerSuccess(response.data?.data));
+      toast.success("Trade Rejected Successfully", { autoClose: 2000 });
+    }
+  } catch (error) {
+    yield put(updateCustomerFail(error));
+    toast.error("Trade Rejected Failed", { autoClose: 2000 });
   }
 }
 
@@ -534,6 +559,8 @@ function* ecommerceSaga() {
   yield takeEvery(UPDATE_CUSTOMER, onUpdateCustomer);
   yield takeEvery(DELETE_CUSTOMER, onDeleteCustomer);
   yield takeEvery(SET_ACTIVE_CUSTOMER, onSetActiveCustomer);
+  yield takeEvery(SET_TRADE_APPROVED, onTradeApproved);
+  yield takeEvery(SET_TRADE_REJECTED, onTradeRejected);
   yield takeEvery(GET_SHOPS, fetchShops);
   yield takeEvery(ADD_NEW_ORDER, onAddNewOrder);
   yield takeEvery(UPDATE_ORDER, onUpdateOrder);

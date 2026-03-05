@@ -89,6 +89,8 @@ import {
   GET_SELLER_LIST_FAIL,
   GET_CATEGORIES_REQUEST,
   GET_CATEGORIES_FAIL,
+  SET_TRADE_APPROVED,
+  SET_TRADE_REJECTED,
 } from "./actionTypes";
 
 export const getProducts = () => ({
@@ -237,6 +239,16 @@ export const updateCustomer = customer => ({
 export const setActiveCustomer = customer => ({
   type: SET_ACTIVE_CUSTOMER,
   payload: customer,
+});
+
+export const setTradeApproved = trade => ({
+  type: SET_TRADE_APPROVED,
+  payload: trade,
+});
+
+export const setTradeRejected = trade => ({
+  type: SET_TRADE_REJECTED,
+  payload: trade,
 });
 
 export const updateCustomerSuccess = customer => ({

@@ -17,6 +17,8 @@ interface UserInterface{
 
     public function update($data);
 
+    public function delete($id);
+
     public function ban($id);
 
     public function emailVerify($user_id);

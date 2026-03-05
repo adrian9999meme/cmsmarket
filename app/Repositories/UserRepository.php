@@ -93,7 +93,7 @@ class UserRepository implements UserInterface
 
             Toastr::success(__('Created Successfully'));
             DB::commit();
-            return true;
+            return $user;
 
         } catch (\Exception $e) {
 
@@ -129,6 +129,12 @@ class UserRepository implements UserInterface
         $user->save();
 
         return $user;
+    }
+
+    public function delete($id) {
+        $user = $this->get($id);
+        $this->deleteImage($user->images);
+        $user->delete();
     }
 
     public function ban($id)

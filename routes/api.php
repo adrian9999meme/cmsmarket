@@ -6,7 +6,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Admin\SellerController;
 use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\Product\ProductController;   
+use App\Http\Controllers\Admin\Product\ProductController;
 use App\Http\Controllers\Admin\DeliveryHero\DeliveryHeroController as DriverController;
 
 use App\Http\Controllers\Admin\WalletController;
@@ -89,11 +89,22 @@ Route::prefix('v1')->group(function () {
             Route::put('stores/setactive/{id}', [StoreController::class, 'setActive']);
             Route::delete('stores/delete/{id}', [StoreController::class, 'delete']);
             // customers
-            Route::get('customers/fetch', [\App\Http\Controllers\Admin\UserController::class, 'index']);
-            Route::post('customers/create', [\App\Http\Controllers\Admin\UserController::class, 'create']);
-            Route::put('customers/edit/{id}', [\App\Http\Controllers\Admin\UserController::class, 'update']);
-            Route::put('customers/setactive/{id}', [\App\Http\Controllers\Admin\UserController::class, 'setActive']);
-            Route::delete('customers/delete/{id}', [\App\Http\Controllers\Admin\UserController::class, 'delete']);
+            Route::get('customers/fetch', [\App\Http\Controllers\Admin\CustomerController::class, 'index']);
+            Route::post('customers/create', [\App\Http\Controllers\Admin\CustomerController::class, 'create']);
+            Route::put('customers/edit/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'update']);
+            Route::put('customers/setactive/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'setActive']);
+            Route::delete('customers/delete/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'delete']);
+            // trade approvals
+            Route::put('customers/trade-approve/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'approveTrade']);
+            Route::put('customers/trade-reject/{id}', [\App\Http\Controllers\Admin\CustomerController::class, 'rejectTrade']);
+            // trade discount requests
+            Route::get('trade-discount-requests', [TradeDiscountRequestController::class, 'index']);
+            Route::get('trade-discount-requests/{id}', [TradeDiscountRequestController::class, 'show']);
+            Route::post('trade-discount-requests', [TradeDiscountRequestController::class, 'store']);
+            Route::put('trade-discount-requests/{id}', [TradeDiscountRequestController::class, 'update']);
+            Route::post('trade-discount-requests/{id}/approve', [TradeDiscountRequestController::class, 'approve']);
+            Route::post('trade-discount-requests/{id}/reject', [TradeDiscountRequestController::class, 'reject']);
+            Route::delete('trade-discount-requests/{id}', [TradeDiscountRequestController::class, 'destroy']);
             // orders
             Route::get('orders/fetch', [OrderController::class, 'index']);
             // products
@@ -138,29 +149,29 @@ Route::prefix('v1')->group(function () {
 
 
 
-        //shipping address
-        Route::resource('shipping-addresses', ShippingController::class)->only('store', 'edit', 'destroy');
-        Route::post('shipping-addresses/{id}', [ShippingController::class, 'update']);
+    //shipping address
+    Route::resource('shipping-addresses', ShippingController::class)->only('store', 'edit', 'destroy');
+    Route::post('shipping-addresses/{id}', [ShippingController::class, 'update']);
 
-        //wishlist
-        Route::get('favourite-products', [WishlistController::class, 'index']);
-        Route::get('favourite/{product_id}', [WishlistController::class, 'addOrRemove']);
+    //wishlist
+    Route::get('favourite-products', [WishlistController::class, 'index']);
+    Route::get('favourite/{product_id}', [WishlistController::class, 'addOrRemove']);
 
-        Route::get('followed-shop', [ShopController::class, 'followedShop']);
-        Route::get('followed-shop/{seller_id}', [ShopController::class, 'followUnfollowShop']);
+    Route::get('followed-shop', [ShopController::class, 'followedShop']);
+    Route::get('followed-shop/{seller_id}', [ShopController::class, 'followUnfollowShop']);
 
-        Route::get('my-wallet', [UserController::class, 'myWallet']);
-        Route::get('my-reward', [RewardSystemController::class, 'myReward']);
-        Route::post('convert-reward', [RewardSystemController::class, 'convertReward']);
-        Route::get('digital-product-order-list', [RewardSystemController::class, 'digitalProductOrders']);
-        Route::get('recharge', [UserController::class, 'apiRecharge']);
+    Route::get('my-wallet', [UserController::class, 'myWallet']);
+    Route::get('my-reward', [RewardSystemController::class, 'myReward']);
+    Route::post('convert-reward', [RewardSystemController::class, 'convertReward']);
+    Route::get('digital-product-order-list', [RewardSystemController::class, 'digitalProductOrders']);
+    Route::get('recharge', [UserController::class, 'apiRecharge']);
 
-        //chat system
-        Route::get('sellers', [\App\Http\Controllers\Api\V100\ChatSystemController::class, 'sellers']);
-        Route::get('messages', [\App\Http\Controllers\Api\V100\ChatSystemController::class, 'messages']);
-        Route::post('send-message', [\App\Http\Controllers\Api\V100\ChatSystemController::class, 'sendMessage']);
+    //chat system
+    Route::get('sellers', [\App\Http\Controllers\Api\V100\ChatSystemController::class, 'sellers']);
+    Route::get('messages', [\App\Http\Controllers\Api\V100\ChatSystemController::class, 'messages']);
+    Route::post('send-message', [\App\Http\Controllers\Api\V100\ChatSystemController::class, 'sendMessage']);
 
-        Route::get('home/sellers', [\App\Http\Controllers\Site\FrontendController::class, 'sellers']);
+    Route::get('home/sellers', [\App\Http\Controllers\Site\FrontendController::class, 'sellers']);
 
     Route::get('configs', [APIController::class, 'config']);
     Route::get('home-screen', [HomeController::class, 'homePageData']);
@@ -242,7 +253,6 @@ Route::prefix('v1')->group(function () {
 
     Route::get('video-shopping', [VideoShoppingController::class, 'allVideos']);
     Route::get('video-shops-details/{slug}', [VideoShoppingController::class, 'videoShoppingDetails']);
-
 });
 Route::match(['post', 'get'], 'complete-order', [OrderController::class, 'completeOrder'])->name('api.complete.order');
 Route::match(['get', 'post'], 'complete-recharge', [WalletController::class, 'walletStore'])->name('api.wallet.complete.recharge');
