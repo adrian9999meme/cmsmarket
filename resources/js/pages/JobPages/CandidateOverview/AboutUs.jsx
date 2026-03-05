@@ -199,7 +199,7 @@ const AboutUs = () => {
                                     </div>
                         
                                     <div className="flex-grow-1 overflow-hidden">
-                                        <h5 className="text-truncate font-size-15"><Link to="#" className="text-dark">Skote Dashboard UI</Link></h5>
+                                        <h5 className="text-truncate font-size-15"><Link to="#" className="text-dark">Lekit Dashboard UI</Link></h5>
                                         <p className="text-muted mb-4">Separate existence is a myth</p>
                                         <div className="avatar-group">
                                             <div className="avatar-group-item">

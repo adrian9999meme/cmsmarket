@@ -57,7 +57,7 @@ const Recoverpw2 = () => {
                     <div className="my-auto">
                       <div>
                         <h5 className="text-primary"> Reset Password</h5>
-                        <p className="text-muted">Reset Password with Skote.</p>
+                        <p className="text-muted">Reset Password with Lekit.</p>
                       </div>
 
                       <div className="mt-4">
@@ -118,7 +118,7 @@ const Recoverpw2 = () => {
                     </div>
                     <div className="mt-4 mt-md-5 text-center">
                       <p className="mb-0">
-                        © {new Date().getFullYear()} Skote. Crafted with{" "}
+                        © {new Date().getFullYear()} Lekit. Crafted with{" "}
                         <i className="mdi mdi-heart text-danger"></i> by
                         Themesbrand
                       </p>

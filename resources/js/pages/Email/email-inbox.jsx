@@ -313,7 +313,7 @@ const EmailInbox = () => {
                                                 <img
                                                     className="d-flex me-3 rounded-circle"
                                                     src={item.imageSrc}
-                                                    alt="skote"
+                                                    alt="Lekit"
                                                     height="36"
                                                 />
                                             </div>

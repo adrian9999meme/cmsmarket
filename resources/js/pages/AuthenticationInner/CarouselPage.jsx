@@ -40,7 +40,7 @@ const CarouselPage = () => {
                                     Abs1981
                                   </h4>
                                   <p className="font-size-14 mb-0">
-                                    - Skote User
+                                    - Lekit User
                                   </p>
                                 </div>
                               </div>
@@ -61,7 +61,7 @@ const CarouselPage = () => {
                                     Abs1981
                                   </h4>
                                   <p className="font-size-14 mb-0">
-                                    - Skote User
+                                    - Lekit User
                                   </p>
                                 </div>
                               </div>

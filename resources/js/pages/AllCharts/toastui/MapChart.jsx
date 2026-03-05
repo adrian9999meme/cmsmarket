@@ -27,7 +27,7 @@ var theme = {
     borderColor: "#F4511E",
   },
 }
-TuiChart.registerTheme("skoteTheme", theme)
+TuiChart.registerTheme("LekitTheme", theme)
 
 const MapChartToast = () => {
   const data = {

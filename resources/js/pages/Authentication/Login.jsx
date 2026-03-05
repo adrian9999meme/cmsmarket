@@ -238,8 +238,7 @@ const Login = props => {
                   </Link>{" "}
                 </p>
                 <p>
-                  © {new Date().getFullYear()} Skote. Crafted with{" "}
-                  <i className="mdi mdi-heart text-danger" /> by Themesbrand
+                  © {new Date().getFullYear()} Lekit Ltd{" "} Revolution in hardware products delivery
                 </p>
               </div>
             </Col>
