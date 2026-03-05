@@ -74,6 +74,12 @@ class RepositoryServiceProvider extends ServiceProvider{
             'App\Repositories\Admin\StoreRepository'
         );
 
+        //Trade Discount Request management
+        $this->app->bind(
+            'App\Repositories\Interfaces\Admin\TradeDiscountRequestInterface',
+            'App\Repositories\Admin\TradeDiscountRequestRepository'
+        );
+
         //color
         $this->app->bind(
             'App\Repositories\Interfaces\Admin\Product\ColorInterface',

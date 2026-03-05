@@ -65,15 +65,20 @@ class Customer extends Model
 
     public function getIsTradeApprovedAttribute(): bool
     {
-        return $this->customer_type === 'trade' 
+        return $this->customer_type === 'trade'
             && $this->trade_status === 'approved';
     }
 
     public function getTradeApprovedDateAttribute(): ?string
     {
-        return $this->trade_approved_at 
+        return $this->trade_approved_at
             ? $this->trade_approved_at->format('d M Y')
             : null;
+    }
+
+    public function tradeDiscountRequests()
+    {
+        return $this->hasMany(TradeDiscountRequest::class);
     }
 
     /*
@@ -90,13 +95,13 @@ class Customer extends Model
     public function scopeTradeApproved($query)
     {
         return $query->where('customer_type', 'trade')
-                     ->where('trade_status', 'approved');
+            ->where('trade_status', 'approved');
     }
 
     public function scopePendingTrade($query)
     {
         return $query->where('customer_type', 'trade')
-                     ->where('trade_status', 'pending');
+            ->where('trade_status', 'pending');
     }
 
     /*
