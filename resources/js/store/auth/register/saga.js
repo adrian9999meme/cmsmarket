@@ -1,39 +1,44 @@
-import { takeEvery, fork, put, all, call } from "redux-saga/effects"
+import { takeEvery, fork, put, all } from "redux-saga/effects";
 
 //Account Redux states
-import { REGISTER_USER } from "./actionTypes"
-import { registerUserSuccessful, registerUserFailed } from "./actions"
+import { REGISTER_USER } from "./actionTypes";
+import { registerUserSuccessful, registerUserFailed } from "./actions";
 
 //Toast
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-// Is user register successfull then direct plot user in redux.
+import api from "../../api";
+import { REGISTER_API } from "../../endpoints";
+
 function* registerUser({ payload: { user, history } }) {
   try {
-    // request signup
-    const response = yield axios.post('api/auth/register', user);
+    const payload = {
+      ...user,
+      registration_type: user.registration_type || "customer",
+    };
+    const response = yield api.post(REGISTER_API, payload);
     const data = response?.data;
     const status = response?.status;
-    // if registration is succeed
-    if (data.success === true && status === 201) {
+
+    if (data.success === true && (status === 200 || status === 201)) {
       const logged_user = {
         login: true,
         user_id: data.data?.id,
-        name: data.data?.name,
-        email: data.data?.email,
+        name: data.data?.name || `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+        email: data.data?.email || user.email,
       };
-      yield put(registerUserSuccessful(logged_user))  
-      history('/login');
+      yield put(registerUserSuccessful(logged_user));
+      if (history) history("/login");
     }
-    // toast message for request
-    toast.success(data.message || "Registration succeed", {
+
+    toast.success(data.message || "Registration successful", {
       position: "top-right",
       autoClose: 3000,
-      onClose: resolve, // Resolve the Promise when the toast is closed
     });
   } catch (error) {
-    toast.error(error.response?.data?.message || "Registration failed", {
+    const msg = error.response?.data?.message || error.response?.data?.error || "Registration failed";
+    toast.error(msg, {
       position: "top-right",
       autoClose: 3000,
     });

@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 import SellerFilter from "./SellerFilter";
 import DeliveryStatusFilter from "./DeliveryStatusFilter";
@@ -6,19 +7,24 @@ import DateRangeFilter from "./DateRangeFilter";
 import SortFilter from "./SortFilter";
 import SearchFilter from "./SearchFilter";
 
-const OrdersFilters = ({ filters, onChange, onReset, onSearch }) => {
+const OrdersFilters = ({ filters, onChange, onReset, onSearch, sellers = [] }) => {
+    const sellerSystemEnabled = !!useSelector((state) => state.config?.appConfig?.seller_system);
+
     return (
         <div className="card mb-4 shadow-sm">
             <div className="card-body">
 
                 {/* ROW 1 */}
                 <div className="row g-3 mb-3">
-                    <div className="col-md-4">
-                        <SellerFilter
-                            value={filters.sellerId}
-                            onChange={onChange}
-                        />
-                    </div>
+                    {sellerSystemEnabled && (
+                        <div className="col-md-4">
+                            <SellerFilter
+                                value={filters.sellerId}
+                                onChange={onChange}
+                                sellers={sellers}
+                            />
+                        </div>
+                    )}
 
                     <div className="col-md-4">
                         <DeliveryStatusFilter

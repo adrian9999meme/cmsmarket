@@ -111,6 +111,10 @@ class AuthController extends Controller
 
     public function register(Request $request, SellerProfileInterface $seller)
     {
+        if (settingHelper('seller_system') != 1) {
+            return $this->responseWithError(__('Seller registration is not available'), [], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'email'         => 'required|unique:users,email|email',
             'first_name'    => 'required|min:2',

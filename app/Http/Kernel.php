@@ -91,6 +91,7 @@ class Kernel extends HttpKernel
         'loginCheck' => LoginCheckMiddleware::class,
         'logoutCheck' => LogoutCheckMiddleware::class,
         'adminCheck' => IsAdminMiddleware::class,
+        'sellerOrAdminStore' => \App\Http\Middleware\SellerOrAdminStoreMiddleware::class,
         'customerCheck' => IsCustomerMiddleware::class,
         'sellerCheck' => IsSellerMiddleware::class,
         'AdminSellerCheck' => IsAdminSellerMiddleware::class,

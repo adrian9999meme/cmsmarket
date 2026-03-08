@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { createSelector } from "reselect";
 import {
   Container,
@@ -102,7 +102,15 @@ const initialFormState = {
 const StoresBreakdown = () => {
   document.title = "Stores Breakdown | LEKIT Ltd";
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { subdomain } = useParams();
+  const appConfig = useSelector((state) => state.config?.appConfig);
+
+  useEffect(() => {
+    if (appConfig && !appConfig.seller_system) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [appConfig, navigate]);
 
   const [stores, setStores] = useState([]);
   // sellers and categories loaded directly in this component
@@ -131,13 +139,16 @@ const StoresBreakdown = () => {
 
   const ecommerceSelector = createSelector(
     state => state.ecommerce || {},
-    ecommerce => ({
+    state => state.Login?.user,
+    (ecommerce, user) => ({
       allstores: ecommerce.stores || [],
       sellersListForStore: ecommerce.sellersList || [],
       storesCategories: ecommerce.storesCategories || [],
+      currentUser: user,
+      isSeller: user?.role === "seller",
     })
   );
-  const { allstores, sellersListForStore, storesCategories } = useSelector(ecommerceSelector);
+  const { allstores, sellersListForStore, storesCategories, currentUser, isSeller } = useSelector(ecommerceSelector);
 
   // Keep a ref to ensure latest value of query
   const queryRef = useRef(query);
@@ -151,9 +162,11 @@ const StoresBreakdown = () => {
   }, [allstores]);
 
   useEffect(() => {
-    dispatch(getSellersListRequest())
-    dispatch(getCategoriesRequest())
-  }, [dispatch])
+    if (!isSeller) {
+      dispatch(getSellersListRequest());
+    }
+    dispatch(getCategoriesRequest());
+  }, [dispatch, isSeller])
 
   useEffect(() => {
     setQuery((prev) => ({
@@ -165,7 +178,7 @@ const StoresBreakdown = () => {
   useEffect(() => {
     if (query.subdomain === 'all') {
       dispatch(getStoresRequest({...queryRef.current}));
-    } else if (query.subdomain === 'pending') {
+    } else if (query.subdomain === 'trade-pending') {
       dispatch(getStoresRequest({...queryRef.current}));
     } else if (query.subdomain === 'blocked') {
       dispatch(getStoresRequest({...queryRef.current}));
@@ -186,7 +199,11 @@ const StoresBreakdown = () => {
   const openAddModal = () => {
     setModalMode("add");
     setCurrentRecord(null);
-    resetForm();
+    const initial = { ...initialFormState };
+    if (isSeller && currentUser?.id) {
+      initial.seller_id = String(currentUser.id);
+    }
+    setFormValues(initial);
     setActiveTab("1");
     setModalOpen(true);
   };
@@ -239,7 +256,7 @@ const StoresBreakdown = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formValues.seller_id) newErrors.seller_id = "Seller is required";
+    if (!isSeller && !formValues.seller_id) newErrors.seller_id = "Seller is required";
     if (!formValues.store_name) newErrors.store_name = "Store Name is required";
     if (!formValues.store_code) newErrors.store_code = "Store Code is required";
     if (!formValues.address) newErrors.address = "Address is required";
@@ -786,27 +803,29 @@ const StoresBreakdown = () => {
             {/* TAB 1: Store Details */}
             {activeTab === "1" && (
               <TabContent tabId="1">
-                <FormGroup>
-                  <Label for="seller_id">Seller *</Label>
-                  <Input
-                    type="select"
-                    name="seller_id"
-                    id="seller_id"
-                    value={formValues.seller_id}
-                    onChange={handleInputChange}
-                    invalid={hasError("seller_id")}
-                  >
-                    <option>Sellect Seller</option>
-                    {(sellersListForStore || []).map((seller) => (
-                      <option key={seller.id} value={seller.id}>
-                        {seller.seller_profile.shop_name || '-'}
-                      </option>
-                    ))}
-                  </Input>
-                  {hasError("seller_id") && (
-                    <FormFeedback>{errors.seller_id}</FormFeedback>
-                  )}
-                </FormGroup>
+                {!isSeller && (
+                  <FormGroup>
+                    <Label for="seller_id">Seller *</Label>
+                    <Input
+                      type="select"
+                      name="seller_id"
+                      id="seller_id"
+                      value={formValues.seller_id}
+                      onChange={handleInputChange}
+                      invalid={hasError("seller_id")}
+                    >
+                      <option>Select Seller</option>
+                      {(sellersListForStore || []).map((seller) => (
+                        <option key={seller.id} value={seller.id}>
+                          {seller.seller_profile?.shop_name || '-'}
+                        </option>
+                      ))}
+                    </Input>
+                    {hasError("seller_id") && (
+                      <FormFeedback>{errors.seller_id}</FormFeedback>
+                    )}
+                  </FormGroup>
+                )}
 
                 <FormGroup>
                   <Label for="store_name">Store Name *</Label>

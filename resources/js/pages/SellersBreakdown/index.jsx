@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createSelector } from "reselect";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
   Row,
@@ -55,7 +55,15 @@ const SellersBreakdown = () => {
   document.title = "Sellers Breakdown | LEKIT Ltd";
 
   const { subdomain } = useParams();
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const appConfig = useSelector((state) => state.config?.appConfig);
+
+  useEffect(() => {
+    if (appConfig && !appConfig.seller_system) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [appConfig, navigate]);
   const [sellers, setSellers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // add | edit | view

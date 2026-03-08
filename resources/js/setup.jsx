@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { layoutTypes } from "./constants/layout";
 import { publicRoutes, authProtectedRoutes } from "./routes/allRoutes";
-import { getCurrentUser } from "./store/actions";
+import { getCurrentUser, fetchConfig } from "./store/actions";
 
 import VerticalLayout from "./components/VerticalLayout/";
 import HorizontalLayout from "./components/HorizontalLayout/";
@@ -49,8 +49,8 @@ const Index = () => {
         const token = localStorage.getItem("token");
 
         if (token) {
-            // optionally fetch current user
             dispatch(getCurrentUser(token));
+            dispatch(fetchConfig());
         }
     }, []);
 

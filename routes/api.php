@@ -82,12 +82,6 @@ Route::prefix('v1')->group(function () {
             Route::put('sellers/edit/{id}', [SellerController::class, 'update']);
             Route::put('sellers/setactive/{id}', [SellerController::class, 'setActive']);
             Route::delete('sellers/delete/{id}', [SellerController::class, 'delete']);
-            // stores
-            Route::get('stores/fetch', [StoreController::class, 'index']);
-            Route::post('stores/create', [StoreController::class, 'apiStore']);
-            Route::put('stores/edit/{id}', [StoreController::class, 'update']);
-            Route::put('stores/setactive/{id}', [StoreController::class, 'setActive']);
-            Route::delete('stores/delete/{id}', [StoreController::class, 'delete']);
             // customers
             Route::get('customers/fetch', [\App\Http\Controllers\Admin\CustomerController::class, 'index']);
             Route::post('customers/create', [\App\Http\Controllers\Admin\CustomerController::class, 'create']);
@@ -116,6 +110,16 @@ Route::prefix('v1')->group(function () {
             // Route::delete('drivers/delete/{id}', [DriverController::class, 'delete']);
 
         });
+
+        // stores (admin + seller; seller can only manage their own stores)
+        Route::middleware(['sellerOrAdminStore'])->group(function () {
+            Route::get('stores/fetch', [StoreController::class, 'index']);
+            Route::post('stores/create', [StoreController::class, 'apiStore']);
+            Route::put('stores/edit/{id}', [StoreController::class, 'update']);
+            Route::put('stores/setactive/{id}', [StoreController::class, 'setActive']);
+            Route::delete('stores/delete/{id}', [StoreController::class, 'delete']);
+        });
+
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('update-profile', [UserController::class, 'updateProfile']);
         Route::post('change-password', [UserController::class, 'changePassword']);

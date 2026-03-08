@@ -9,6 +9,7 @@ import api from "../../api";
 import { GET_CURRENT_USER, LOGIN_USER, LOGOUT_USER } from "./actionTypes";
 import { apiError, logoutUserSuccess, setToken, setUser } from "./actions";
 import { GET_CURRENT_USER_API, LOGIN_API } from "../../endpoints";
+import { fetchConfig } from "../../config/actions";
 
 // NOTE:
 // For MVP we do NOT call any backend or database.
@@ -45,6 +46,8 @@ function* loginUser({ payload: { user, history } }) {
     yield put(setToken(authorized_user.token))
     // set user
     yield put(setUser(authorized_user))
+    // fetch app config (e.g. seller_system) for menu and UI
+    yield put(fetchConfig())
 
     // navigate to dashboard
     history('/dashboard');

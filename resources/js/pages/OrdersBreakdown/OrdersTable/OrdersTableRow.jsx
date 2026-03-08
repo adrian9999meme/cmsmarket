@@ -1,6 +1,6 @@
 import React from "react";
 
-const OrderTableRow = ({ order, index, onView }) => {
+const OrderTableRow = ({ order, index, onView, sellerSystemEnabled = false }) => {
     return (
         <tr className="align-middle">
             {/* Index */}
@@ -15,12 +15,14 @@ const OrderTableRow = ({ order, index, onView }) => {
                 </span>
             </td>
 
-            {/* Seller */}
-            <td>
-                <div className="fw-medium">
-                    {order.seller_name}
-                </div>
-            </td>
+            {/* Seller - only when seller_system is enabled */}
+            {sellerSystemEnabled && (
+                <td>
+                    <div className="fw-medium">
+                        {order.seller_name}
+                    </div>
+                </td>
+            )}
 
             {/* Customer */}
             <td>
