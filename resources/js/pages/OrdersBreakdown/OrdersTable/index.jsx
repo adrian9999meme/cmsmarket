@@ -6,20 +6,21 @@ import LoadingState from "./LoadingState";
 import EmptyState from "../EmptyState";
 import { ORDERS_COLUMNS } from "../ordersConstant";
 
-const OrdersTable = ({ orders = [], loading, onView }) => {
-  console.log("orders:", orders)
+const OrdersTable = ({ orders = [], loading, onView, sellerSystemEnabled = false }) => {
+  const columns = sellerSystemEnabled
+    ? ORDERS_COLUMNS
+    : ORDERS_COLUMNS.filter((col) => col.key !== "seller");
+  const colSpan = columns.length;
+
   return (
     <div className="table-responsive">
       <table className="table table-bordered align-middle mb-0">
-        
-        {/* Header */}
-        <OrdersTableHeader columns={ORDERS_COLUMNS} />
-
+        <OrdersTableHeader columns={columns} />
         <tbody>
           {loading ? (
-            <LoadingState colSpan={9} />
+            <LoadingState colSpan={colSpan} />
           ) : orders?.length === 0 ? (
-            <EmptyState colSpan={9} />
+            <EmptyState colSpan={colSpan} />
           ) : (
             orders?.map((order, index) => (
               <OrderTableRow
@@ -27,6 +28,7 @@ const OrdersTable = ({ orders = [], loading, onView }) => {
                 order={order}
                 index={index}
                 onView={onView}
+                sellerSystemEnabled={sellerSystemEnabled}
               />
             ))
           )}

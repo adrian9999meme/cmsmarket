@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { createSelector } from "reselect";
 import {
   Container,
@@ -102,7 +102,15 @@ const initialFormState = {
 const StoresBreakdown = () => {
   document.title = "Stores Breakdown | LEKIT Ltd";
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { subdomain } = useParams();
+  const appConfig = useSelector((state) => state.config?.appConfig);
+
+  useEffect(() => {
+    if (appConfig && !appConfig.seller_system) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [appConfig, navigate]);
 
   const [stores, setStores] = useState([]);
   // sellers and categories loaded directly in this component

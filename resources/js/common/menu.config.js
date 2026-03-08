@@ -96,6 +96,7 @@ export const menuConfig = [
     {
         title: "Sellers",
         icon: "bx bx-user-voice",
+        requiresSellerSystem: true,
         roles: [
             ROLES.ADMIN
         ],
@@ -136,6 +137,7 @@ export const menuConfig = [
     {
         title: "Stores",
         icon: "bx bx-store",
+        requiresSellerSystem: true,
         roles: [
             ROLES.ADMIN
         ],

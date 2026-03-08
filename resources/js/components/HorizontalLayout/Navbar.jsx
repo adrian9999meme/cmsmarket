@@ -21,19 +21,21 @@ const Navbar = props => {
 
   const userSelector = createSelector(
     state => state.Login,
-    login => ({
-      user: login.user
+    state => state.config?.appConfig,
+    (login, appConfig) => ({
+      user: login.user,
+      appConfig: appConfig || {}
     })
   );
-  const {
-    user
-  } = useSelector(userSelector);
+  const { user, appConfig } = useSelector(userSelector);
 
   const [menu, setMenu] = useState([]);
 
   useEffect(() => {
-    setMenu(filterMenuByRole(menuConfig, user.role));
-  }, [user.role])
+    if (user?.role) {
+      setMenu(filterMenuByRole(menuConfig, user.role, appConfig));
+    }
+  }, [user?.role, appConfig])
 
   const [openMenu, setOpenMenu] = useState(null);
 

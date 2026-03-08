@@ -31,11 +31,14 @@ const OrdersBreakdown = () => {
 
   const ecommerceSelector = createSelector(
     state => state.ecommerce,
-    ecommerce => ({
+    state => state.config?.appConfig,
+    (ecommerce, appConfig) => ({
       allOrders: ecommerce.orders,
+      sellerSystemEnabled: !!appConfig?.seller_system,
+      sellers: ecommerce.sellers || [],
     })
   );
-  const { allOrders } = useSelector(ecommerceSelector);
+  const { allOrders, sellerSystemEnabled, sellers } = useSelector(ecommerceSelector);
 
   useEffect(() => {
     setOrders(allOrders);
@@ -97,7 +100,8 @@ const OrdersBreakdown = () => {
           filters={query}
           onChange={handleFilterChange}
           onReset={handleReset}
-          onSearch={(searchKeyword) => getOrders({ ...queryRef.current, keyword: searchKeyword })}
+          onSearch={(searchKeyword) => dispatch(getOrders({ ...queryRef.current, keyword: searchKeyword }))}
+          sellers={sellers}
         />
 
         {/* Table */}
@@ -105,6 +109,7 @@ const OrdersBreakdown = () => {
           orders={orders}
           loading={loading}
           onView={handleViewOrder}
+          sellerSystemEnabled={sellerSystemEnabled}
         />
 
       </div>

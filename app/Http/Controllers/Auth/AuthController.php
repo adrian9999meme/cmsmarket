@@ -7,6 +7,8 @@ use App\Models\Cart;
 use App\Models\PasswordRequest;
 use App\Models\RegistrationRequest;
 use App\Models\User;
+use App\Http\Controllers\Api\Seller\V100\AuthController as SellerAuthController;
+use App\Repositories\Interfaces\Admin\CustomerInterface;
 use App\Traits\ApiReturnFormatTrait;
 use App\Traits\ImageTrait;
 use App\Traits\SendMailTrait;
@@ -102,7 +104,41 @@ class AuthController extends Controller
         }
     }
 
-    public function register(Request $request): \Illuminate\Http\JsonResponse
+    /**
+     * Role-based registration (used by /api/v1/auth/register).
+     * Auth/ handles auth; customer/trade use CustomerInterface; seller delegates to Api\Seller.
+     */
+    public function register(Request $request, CustomerInterface $customerRepo): \Illuminate\Http\JsonResponse
+    {
+        $registrationType = $request->input('registration_type', 'customer');
+        $allowedTypes = ['customer', 'trade', 'seller'];
+
+        if (!in_array($registrationType, $allowedTypes)) {
+            return $this->responseWithError(__('Invalid registration type'), [], 422);
+        }
+
+        if ($registrationType === 'seller') {
+            if (settingHelper('seller_system') != 1) {
+                return $this->responseWithError(__('Seller registration is not available'), [], 403);
+            }
+            $request->merge([
+                'company_name' => $request->shop_name ?? $request->company_name,
+                'company_phone' => $request->phone ?? $request->company_phone,
+            ]);
+            return app()->call([app(SellerAuthController::class), 'register'], ['request' => $request]);
+        }
+
+        return match ($registrationType) {
+            'customer' => $this->registerCustomer($request, $customerRepo),
+            'trade' => $this->registerTradeCustomer($request, $customerRepo),
+            default => $this->responseWithError(__('Invalid registration type'), [], 422),
+        };
+    }
+
+    /**
+     * Register regular customer. Creates User + Customer (customer_type=regular).
+     */
+    protected function registerCustomer(Request $request, CustomerInterface $customerRepo): \Illuminate\Http\JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -112,31 +148,94 @@ class AuthController extends Controller
                 'password' => 'required|min:5|max:30|confirmed',
             ]);
             if ($validator->fails()) {
-                if($validator->messages()->get('email')){
+                if ($validator->messages()->get('email')) {
                     return $this->responseWithError($validator->messages()->get('email')[0], $validator->errors(), 422);
-                }else{
-                    return $this->responseWithError(__('Required field missing'), $validator->errors(), 422);
                 }
+                return $this->responseWithError(__('Required field missing'), $validator->errors(), 422);
             }
-            $request['user_type']   = 'customer';
+
+            $request['user_type'] = 'customer';
             $request['permissions'] = [];
 
-            if (settingHelper('disable_email_confirmation') == 1)
-            {
-                $user = Sentinel::registerAndActivate($request->all());
-                $msg = __('Registration Successfully');
-                Cart::where('user_id', getWalkInCustomer()->id)->where('trx_id',$request->trx_id)->update(['user_id' => $user->id]);
+            DB::beginTransaction();
+            try {
+                if (settingHelper('disable_email_confirmation') == 1) {
+                    $user = Sentinel::registerAndActivate($request->all());
+                    $msg = __('Registration Successfully');
+                    Cart::where('user_id', getWalkInCustomer()->id)->where('trx_id', $request->trx_id)->update(['user_id' => $user->id]);
+                } else {
+                    $user = Sentinel::register($request->all());
+                    $activation = Activation::create($user);
+                    $this->sendmail($request->email, 'Registration', $user, 'email.auth.activate-account-email', url('/') . '/activation/' . $request->email . '/' . $activation->code);
+                    $msg = __('Check your mail to verify your account');
+                }
+
+                $request->merge(['user_id' => $user->id, 'customer_type' => 'regular']);
+                $customerRepo->store($request);
+
+                DB::commit();
+                return $this->responseWithSuccess($msg, [], 200);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
             }
-            else{
-                $user = Sentinel::register($request->all());
-                $activation = Activation::create($user);
-                $this->sendmail($request->email, 'Registration', $user, 'email.auth.activate-account-email',url('/') . '/activation/' . $request->email . '/' . $activation->code);
-                $msg = __('Check your mail to verify your account');
+        } catch (\Exception $e) {
+            return $this->responseWithError($e->getMessage(), [], 500);
+        }
+    }
+
+    /**
+     * Register trade customer. Creates User + Customer (customer_type=trade, trade_status=pending).
+     */
+    protected function registerTradeCustomer(Request $request, CustomerInterface $customerRepo): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'required|max:255',
+                'last_name' => 'required|max:255',
+                'email' => 'required|max:255|unique:users,email',
+                'password' => 'required|min:5|max:30|confirmed',
+                'company_name' => 'required|max:255',
+                'vat_number' => 'nullable|max:100',
+                'registration_number' => 'nullable|max:100',
+            ]);
+            if ($validator->fails()) {
+                if ($validator->messages()->get('email')) {
+                    return $this->responseWithError($validator->messages()->get('email')[0], $validator->errors(), 422);
+                }
+                return $this->responseWithError(__('Required field missing'), $validator->errors(), 422);
             }
 
-            return $this->responseWithSuccess($msg,[],200);
+            $request['user_type'] = 'customer';
+            $request['permissions'] = [];
+
+            DB::beginTransaction();
+            try {
+                if (settingHelper('disable_email_confirmation') == 1) {
+                    $user = Sentinel::registerAndActivate($request->all());
+                    $msg = __('Registration submitted. Your trade account is pending admin approval.');
+                    Cart::where('user_id', getWalkInCustomer()->id)->where('trx_id', $request->trx_id)->update(['user_id' => $user->id]);
+                } else {
+                    $user = Sentinel::register($request->all());
+                    $activation = Activation::create($user);
+                    $this->sendmail($request->email, 'Registration', $user, 'email.auth.activate-account-email', url('/') . '/activation/' . $request->email . '/' . $activation->code);
+                    $msg = __('Check your mail to verify your account. After verification, your trade account will be pending admin approval.');
+                }
+
+                $request->merge([
+                    'user_id' => $user->id,
+                    'customer_type' => 'trade',
+                ]);
+                $customerRepo->store($request);
+
+                DB::commit();
+                return $this->responseWithSuccess($msg, [], 200);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
         } catch (\Exception $e) {
-            return $this->responseWithError($e->getMessage(),[],500);
+            return $this->responseWithError($e->getMessage(), [], 500);
         }
     }
 

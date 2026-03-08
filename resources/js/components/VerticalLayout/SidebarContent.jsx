@@ -94,25 +94,27 @@ const SidebarContent = () => {
 
   const userSelector = createSelector(
     state => state.Login,
-    login => ({
-      user: login.user
+    state => state.config?.appConfig,
+    (login, appConfig) => ({
+      user: login.user,
+      appConfig: appConfig || {}
     })
   );
 
-  const { user } = useSelector(userSelector);
+  const { user, appConfig } = useSelector(userSelector);
 
   const menuRef = useRef(null);
 
   const [menu, setMenu] = useState([]);
 
   /*
-  Load menu based on role
+  Load menu based on role and app config (e.g. seller_system)
   */
   useEffect(() => {
     if (user?.role) {
-      setMenu(filterMenuByRole(menuConfig, user.role));
+      setMenu(filterMenuByRole(menuConfig, user.role, appConfig));
     }
-  }, [user]);
+  }, [user, appConfig]);
 
   /*
   Initialize MetisMenu AFTER menu renders
