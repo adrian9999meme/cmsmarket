@@ -22,6 +22,8 @@ use Brian2694\Toastr\Facades\Toastr;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Sentinel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class StoreController extends Controller
 {
@@ -42,6 +44,15 @@ class StoreController extends Controller
     public function index(Request $request)
     {
         try {
+            $user = Sentinel::check() ? Sentinel::getUser() : null;
+            if (!$user && request()->bearerToken()) {
+                try {
+                    $user = JWTAuth::parseToken()->authenticate();
+                } catch (\Exception $e) {
+                    $user = null;
+                }
+            }
+
             $query = User::query();
 
             $subdomain = strtolower(trim($request->get('subdomain', 'all')));
@@ -50,6 +61,13 @@ class StoreController extends Controller
             $query->with('storeProfile')
                 ->where('user_type', 'manager')
                 ->latest();
+
+            // When user is seller, only show stores belonging to them
+            if ($user && $user->user_type === 'seller') {
+                $query->whereHas('storeProfile', function ($q) use ($user) {
+                    $q->where('seller_id', $user->id);
+                });
+            }
 
             // Status filter
             if ($subdomain === "pending") {
@@ -98,6 +116,22 @@ class StoreController extends Controller
         $user = User::whereHas('storeProfile', function ($q) use ($id) {
             $q->where('id', $id);
         })->with('storeProfile')->first();
+
+        // When current user is seller, verify they own this store
+        $authUser = Sentinel::check() ? Sentinel::getUser() : null;
+        if (!$authUser && request()->bearerToken()) {
+            try {
+                $authUser = JWTAuth::parseToken()->authenticate();
+            } catch (\Exception $e) {
+                $authUser = null;
+            }
+        }
+        if ($authUser && $authUser->user_type === 'seller' && $user && $user->storeProfile && $user->storeProfile->seller_id != $authUser->id) {
+            return response()->json([
+                'success' => false,
+                'message' => __('You can only update your own stores.'),
+            ], 403);
+        }
 
         if ($user && $user->storeProfile) {
             // Update the status
@@ -183,9 +217,29 @@ class StoreController extends Controller
             ], 403);
         endif;
 
+        $user = Sentinel::check() ? Sentinel::getUser() : null;
+        if (!$user && request()->bearerToken()) {
+            try {
+                $user = JWTAuth::parseToken()->authenticate();
+            } catch (\Exception $e) {
+                $user = null;
+            }
+        }
+
+        // When user is seller, force seller_id to their own id
+        if ($user && $user->user_type === 'seller') {
+            if (!$user->sellerProfile) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('You must have a seller profile before creating a store.'),
+                ], 403);
+            }
+            $request->merge(['seller_id' => $user->id]);
+        }
+
         // combined validation rules cover the manager (user) data as well as
         // the store profile information that the front‑end is submitting.
-        $this->validate($request, [
+        $rules = [
             // store profile rules (same as earlier)
             'seller_id' => 'required',
             'store_name' => 'required|unique:stores',
@@ -203,7 +257,8 @@ class StoreController extends Controller
             'phone'      => 'required|unique:users|min:4|max:20',
             'email'      => 'required|unique:users|email|max:50',
             'password'   => 'required|min:6|max:32',
-        ]);
+        ];
+        $this->validate($request, $rules);
 
         DB::beginTransaction();
         try {
@@ -288,6 +343,22 @@ class StoreController extends Controller
         if ($id !== null) {
             $storeProfile = \App\Models\StoreProfile::find($id);
             $userId = $storeProfile ? $storeProfile->user_id : $request->user_id;
+
+            // When user is seller, verify they own this store
+            $authUser = Sentinel::check() ? Sentinel::getUser() : null;
+            if (!$authUser && request()->bearerToken()) {
+                try {
+                    $authUser = JWTAuth::parseToken()->authenticate();
+                } catch (\Exception $e) {
+                    $authUser = null;
+                }
+            }
+            if ($authUser && $authUser->user_type === 'seller' && $storeProfile && $storeProfile->seller_id != $authUser->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('You can only update your own stores.'),
+                ], 403);
+            }
         } else {
             $userId = $request->id;
         }
@@ -361,6 +432,25 @@ class StoreController extends Controller
 
             if (!$storeUser || $storeUser->user_type !== 'manager') {
                 throw new \Exception(__('Store not found or could not be deleted'));
+            }
+
+            // When user is seller, verify they own this store
+            $authUser = Sentinel::check() ? Sentinel::getUser() : null;
+            if (!$authUser && request()->bearerToken()) {
+                try {
+                    $authUser = JWTAuth::parseToken()->authenticate();
+                } catch (\Exception $e) {
+                    $authUser = null;
+                }
+            }
+            if ($authUser && $authUser->user_type === 'seller') {
+                $storeProfile = $storeUser->storeProfile ?? \App\Models\StoreProfile::where('user_id', $storeUserId)->first();
+                if (!$storeProfile || $storeProfile->seller_id != $authUser->id) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('You can only delete your own stores.'),
+                    ], 403);
+                }
             }
 
             $deleteResult = $storeUser->delete();

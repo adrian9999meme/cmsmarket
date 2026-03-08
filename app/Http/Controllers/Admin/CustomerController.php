@@ -35,6 +35,10 @@ class CustomerController extends Controller
             // get data by customer_type like trade, customer
             if ($type === "trade") {
                 $query->where('customer_type', 'trade');
+                // trade-pending: return only pending trade approvals
+                if ($subdomain === "trade-pending" || $subdomain === "pending") {
+                    $query->where('trade_status', 'pending');
+                }
             } else if ($type === "regular") {
                 $query->where('customer_type', 'regular');
 

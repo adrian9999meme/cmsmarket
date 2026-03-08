@@ -169,7 +169,7 @@ const Navbar = props => {
                                 onClick={() => setOpenMenu(null)}
                               >
 
-                                <i className={`${child.icon} me-2`}></i>
+                                <i className={`${child.icon || "bx bx-circle"} me-2`}></i>
 
                                 {props.t(child.title)}
 

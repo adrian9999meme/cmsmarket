@@ -109,7 +109,7 @@ const CustomersBreakdown = () => {
       ...prev,
       subdomain: typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all"
     }));
-    subdomain === "trade" ? setCustomerType("trade") : setCustomerType("regular")
+    subdomain === "trade" || subdomain === "trade-pending" ? setCustomerType("trade") : setCustomerType("regular")
   }, [subdomain]);
 
   // Sync customers list from store to local state depending on current subdomain
@@ -122,11 +122,14 @@ const CustomersBreakdown = () => {
 
   // Fetch customers when subdomain or search changes
   useEffect(() => {
+    const effectiveSubdomain = typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all";
+    const effectiveCustomerType = (effectiveSubdomain === "trade" || effectiveSubdomain === "trade-pending") ? "trade" : "regular";
     dispatch(getCustomers({
-      ...queryRef.current,
-      customer_type: customerType
+      subdomain: effectiveSubdomain,
+      searchKeyword: queryRef.current.searchKeyword || "",
+      customer_type: effectiveCustomerType
     }));
-  }, [query.subdomain, dispatch]);
+  }, [subdomain, dispatch]);
 
   const [formValues, setFormValues] = useState(initialFormState);
 
@@ -254,7 +257,9 @@ const CustomersBreakdown = () => {
                   className="form-control"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      dispatch(getCustomers({ ...queryRef.current, customer_type: customerType }))
+                      const effectiveSubdomain = typeof subdomain === "string" ? subdomain.trim().toLowerCase() : "all";
+                      const effectiveCustomerType = (effectiveSubdomain === "trade" || effectiveSubdomain === "trade-pending") ? "trade" : "regular";
+                      dispatch(getCustomers({ ...queryRef.current, subdomain: effectiveSubdomain, customer_type: effectiveCustomerType }));
                     }
                   }}
                 />

@@ -1,7 +1,10 @@
 export const ROLES = {
     ADMIN: "admin",
-    STORE: "store",
-    TRADE_CUSTOMER: "trade_customer",
+    MANAGER: "manager",
+    SELLER: "seller",
     CUSTOMER: "customer",
-    DRIVER: "driver"
+    TRADE_CUSTOMER: "trade_customer",
+    DELIVERY_HERO: "delivery_hero",
+    STAFF: "staff",
+    WALK_IN: "walk_in"
 };

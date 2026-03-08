@@ -9,8 +9,8 @@ const SidebarItem = ({ item }) => {
         return (
             <li>
                 <Link to={item.path}>
-                    <i className={item.icon}></i>
-                    <span>{item.title}</span>
+                    <i className={item.icon || "bx bx-circle"}></i>
+                    <span style={{ whiteSpace: "nowrap" }}>{item.title}</span>
                 </Link>
             </li>
         );
@@ -21,11 +21,8 @@ const SidebarItem = ({ item }) => {
         <li>
 
             <a href="#" className="has-arrow">
-
-                <i className={item.icon}></i>
-
-                <span>{item.title}</span>
-
+                <i className={item.icon || "bx bx-circle"}></i>
+                <span style={{ whiteSpace: "nowrap" }}>{item.title}</span>
             </a>
 
             <ul className="sub-menu">
@@ -43,8 +40,8 @@ const SidebarItem = ({ item }) => {
                                 to={child.path}
                                 className={isChildActive ? "active" : ""}
                             >
-                                <i className={child.icon}></i>
-                                {child.title}
+                                <i className={child.icon || "bx bx-circle"}></i>
+                                <span style={{ whiteSpace: "nowrap" }}>{child.title}</span>
                             </Link>
                         </li>
                     );
