@@ -28,7 +28,7 @@ const Login = props => {
 
   const [rememberable, setRememberable] = useState(false)
 
-  // auto login
+  // auto login or pre-fill remembered credentials
   useEffect(() => {
     const token = localStorage.getItem('token');
     const last_login_user = localStorage.getItem('last-login');
@@ -37,9 +37,15 @@ const Login = props => {
       dispatch(setToken(token))
     } else {
       if (last_login_user) {
-        const user = JSON.parse(last_login_user);
-        setEmail(user.email);
-        setPassword(user.password);
+        try {
+          const user = JSON.parse(last_login_user);
+          if (user?.email && user?.password) {
+            setEmail(user.email);
+            setPassword(user.password);
+          }
+        } catch (_) {
+          localStorage.removeItem('last-login');
+        }
       }
     }
   }, [])
@@ -49,12 +55,14 @@ const Login = props => {
     setPassword(demoUser.password);
   };
 
-  const handleRememberable = () => {
-    if (rememberable) {
+  const handleRememberable = (values) => {
+    if (rememberable && values) {
       localStorage.setItem('last-login', JSON.stringify({
-        email: email,
-        password: password,
+        email: values.email,
+        password: values.password,
       }));
+    } else {
+      localStorage.removeItem('last-login');
     }
   }
 
@@ -72,7 +80,7 @@ const Login = props => {
     }),
     onSubmit: (values) => {
       dispatch(loginUser(values, props.router.navigate));
-      handleRememberable();
+      handleRememberable(values);
     }
   });
 
@@ -166,7 +174,7 @@ const Login = props => {
                           className="form-check-input"
                           id="customControlInline"
                           checked={rememberable}
-                          onChange={(e) => setRememberable(e.target.checked)}
+                          onClick={() => setRememberable((prev) => !prev)}
                         />
                         <label
                           className="form-check-label"
