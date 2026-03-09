@@ -30,6 +30,7 @@ import {
   deleteProductRequest,
   getStoresRequest,
 } from "../../store/e-commerce/actions";
+import { useRoleAwareFetch } from "../../hooks/useRoleAwareFetch";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import api from "../../store/api";
 import { GET_PRODUCT_CATEGORIES_API } from "../../store/endpoints";
@@ -48,6 +49,7 @@ const ProductsBreakdown = () => {
 
   const { subdomain } = useParams();
   const dispatch = useDispatch();
+  const { buildQuery } = useRoleAwareFetch();
   const [products, setProducts] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -83,13 +85,12 @@ const ProductsBreakdown = () => {
   }, [subdomain]);
 
   useEffect(() => {
-    dispatch(
-      getProducts({
-        subdomain: query.subdomain === "all" ? "" : query.subdomain,
-        keyword: query.keyword,
-      })
-    );
-  }, [dispatch, query.subdomain, query.keyword]);
+    const roleQuery = buildQuery("products", {
+      subdomain: query.subdomain === "all" ? "" : query.subdomain,
+      keyword: query.keyword,
+    });
+    dispatch(getProducts(roleQuery));
+  }, [dispatch, query.subdomain, query.keyword, buildQuery]);
 
   useEffect(() => {
     setProducts(allProducts);
@@ -105,18 +106,21 @@ const ProductsBreakdown = () => {
     });
   }, []);
 
-  const getRefetchQuery = () => ({
-    subdomain: queryRef.current.subdomain === "all" ? "" : queryRef.current.subdomain,
-    keyword: queryRef.current.keyword,
-  });
+  const getRefetchQuery = () =>
+    buildQuery("products", {
+      subdomain: queryRef.current.subdomain === "all" ? "" : queryRef.current.subdomain,
+      keyword: queryRef.current.keyword,
+    });
 
   const handleSearch = () => {
     setQuery((prev) => ({ ...prev, keyword }));
     dispatch(
-      getProducts({
-        subdomain: queryRef.current.subdomain === "all" ? "" : queryRef.current.subdomain,
-        keyword,
-      })
+      getProducts(
+        buildQuery("products", {
+          subdomain: queryRef.current.subdomain === "all" ? "" : queryRef.current.subdomain,
+          keyword,
+        })
+      )
     );
   };
 

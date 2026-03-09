@@ -181,25 +181,20 @@ import OrdersBreakdown from "../pages/OrdersBreakdown";
 import DriversBreakdown from "../pages/DriversBeakdown";
 
 const authProtectedRoutes = [
-  //Index Main
-  {
-    path: "/",
-    exact: true,
-    component: <Dashboard />,
-  },
-
+  /* ========== PLATFORM ========== */
+  { path: "/", exact: true, component: <Dashboard /> },
   { path: "/dashboard", component: <Dashboard /> },
-  // sellers
+
+  /* ========== MARKETPLACE ========== */
   { path: "/sellers/:subdomain", component: <SellersBreakdown /> },
-  // stores
   { path: "/stores/:subdomain", component: <StoresBreakdown /> },
-  // customers
-  { path: "/customers/:subdomain", component: <CustomersBreakdown /> },
-  // products
   { path: "/products/:subdomain?", component: <ProductsBreakdown /> },
-  // orders
+
+  /* ========== CONSUMER CMS ========== */
+  { path: "/customers/:subdomain", component: <CustomersBreakdown /> },
+
+  /* ========== LOGISTICS ========== */
   { path: "/orders/:subdomain", component: <OrdersBreakdown /> },
-  // drivers
   { path: "/drivers/:subdomain", component: <DriversBreakdown /> },
 
   { path: "/sellers-breakdown", component: <SellersBreakdown /> },

@@ -10,6 +10,7 @@ import { GET_CURRENT_USER, LOGIN_USER, LOGOUT_USER } from "./actionTypes";
 import { apiError, logoutUserSuccess, setToken, setUser } from "./actions";
 import { GET_CURRENT_USER_API, LOGIN_API } from "../../endpoints";
 import { fetchConfig } from "../../config/actions";
+import { getDashboardPathForRole } from "../../../helpers/appRedirect";
 
 // NOTE:
 // For MVP we do NOT call any backend or database.
@@ -41,16 +42,21 @@ function* loginUser({ payload: { user, history } }) {
       position: "top-right",
       autoClose: 1500,
     });
-    const authorized_user = response.data?.data
+    const authorized_user = response.data?.data;
     // set token value in state
-    yield put(setToken(authorized_user.token))
+    yield put(setToken(authorized_user.token));
     // set user
-    yield put(setUser(authorized_user))
+    yield put(setUser(authorized_user));
     // fetch app config (e.g. seller_system) for menu and UI
-    yield put(fetchConfig())
+    yield put(fetchConfig());
 
-    // navigate to dashboard
-    history('/dashboard');
+    // redirect to role-specific app dashboard (micro-frontend)
+    const dashboardPath = getDashboardPathForRole(authorized_user?.role);
+    if (dashboardPath.startsWith("/admin") || dashboardPath.startsWith("/seller") || dashboardPath.startsWith("/driver")) {
+      window.location.href = dashboardPath;
+    } else {
+      history("/dashboard");
+    }
   } catch (error) {
     toast.error(error.response?.data?.message || "Invalid email or password for login.", {
       position: "top-right",
@@ -62,10 +68,19 @@ function* loginUser({ payload: { user, history } }) {
 
 function* logoutUser({ payload: { history } }) {
   try {
+    const path = window.location.pathname;
+    const loginPath = path.startsWith("/admin") ? "/admin/login"
+      : path.startsWith("/seller") ? "/seller/login"
+      : path.startsWith("/driver") ? "/driver/login"
+      : "/login";
     yield logoutUserSuccess();
-    localStorage.removeItem('token')
-    axios.defaults.headers.common['Authorization'] = '';
-    history('/login');
+    localStorage.removeItem("token");
+    axios.defaults.headers.common["Authorization"] = "";
+    if (loginPath !== "/login") {
+      window.location.href = loginPath;
+    } else {
+      history("/login");
+    }
   } catch (error) {
     yield put(apiError(error));
   }

@@ -36,12 +36,15 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      const path = window.location.pathname;
+      const loginPath = path.startsWith("/admin") ? "/admin/login"
+        : path.startsWith("/seller") ? "/seller/login"
+        : path.startsWith("/driver") ? "/driver/login"
+        : "/login";
+      if (!path.includes("/login")) {
+        window.location.href = loginPath;
       }
     }
-
     return Promise.reject(error);
   }
 );

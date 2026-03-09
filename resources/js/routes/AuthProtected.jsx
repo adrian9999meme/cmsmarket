@@ -1,26 +1,34 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { createSelector } from "reselect";
+import { getAppRedirectIfWrong } from "../helpers/appGuard";
 
 const AuthProtected = (props) => {
-  // Get token from store
-  // If Account is used store for auth, else replace with the correct reducer
+  const location = useLocation();
   const tokenSelector = createSelector(
-    state => state.Login,
-    login => login && login.token
+    (state) => state.Login,
+    (login) => login && login.token
+  );
+  const userSelector = createSelector(
+    (state) => state.Login,
+    (login) => login?.user?.role
   );
   const token = useSelector(tokenSelector);
+  const role = useSelector(userSelector);
 
   if (token === null) {
-    return (
-      <Navigate to={{ pathname: "/login", state: { from: props.location } }} />
-    );
+    return <Navigate to={{ pathname: "/login", state: { from: location } }} />;
   }
-  return (
-  <React.Fragment>
-    {props.children}
-  </React.Fragment>);
+
+  // Micro-frontend: redirect to correct app if user landed in wrong one
+  const redirectUrl = getAppRedirectIfWrong(window.location.pathname, role);
+  if (redirectUrl) {
+    window.location.href = redirectUrl;
+    return null;
+  }
+
+  return <>{props.children}</>;
 };
 
 export default AuthProtected;

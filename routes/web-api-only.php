@@ -4,26 +4,23 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API-Only Mode: Minimal web routes (no UI)
+| API-Only Mode: Micro-frontend routes
 |--------------------------------------------------------------------------
-| When APP_API_ONLY=true, only these routes are loaded.
-| Your frontend should be a separate app (e.g. SPA, mobile) calling /api/*.
+| Path-based app routing:
+|   /admin, /admin/*  -> Admin CMS
+|   /seller, /seller/* -> Seller CMS
+|   /driver, /driver/* -> Driver App
+|   /*               -> Customer App
 |
 */
 
-// Route::get('/', function () {
-//     return response()->json([
-//         'message' => 'API-only backend',
-//         'version' => 'v100',
-//         'docs'    => url('api/v100/configs'),
-//         'health'  => url('health'),
-//     ], 200, [], JSON_UNESCAPED_SLASHES);
-// });
+Route::get('/admin', fn () => view('apps.admin'))->name('admin.app');
+Route::get('/admin/{any}', fn () => view('apps.admin'))->where('any', '.*')->name('admin.app.any');
 
-// Route::get('health', function () {
-//     return response()->json(['status' => 'ok', 'timestamp' => now()->toIso8601String()]);
-// });
+Route::get('/seller', fn () => view('apps.seller'))->name('seller.app');
+Route::get('/seller/{any}', fn () => view('apps.seller'))->where('any', '.*')->name('seller.app.any');
 
-Route::get('/{any}', function () {
-    return view('home');
-})->where('any', '.*');
+Route::get('/driver', fn () => view('apps.driver'))->name('driver.app');
+Route::get('/driver/{any}', fn () => view('apps.driver'))->where('any', '.*')->name('driver.app.any');
+
+Route::get('/{any?}', fn () => view('apps.customer'))->where('any', '.*')->name('customer.app');
