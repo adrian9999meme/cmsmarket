@@ -68,6 +68,10 @@ class StoreController extends Controller
                     $q->where('seller_id', $user->id);
                 });
             }
+            // When user is manager (store admin), only show their own store
+            if ($user && $user->user_type === 'manager') {
+                $query->where('id', $user->id);
+            }
 
             // Status filter
             if ($subdomain === "pending") {

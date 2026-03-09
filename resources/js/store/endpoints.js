@@ -32,6 +32,14 @@ export const SET_TRADE_REJECTED_API = API_VERSION + 'customers/trade-reject/';
 // orders
 export const GET_ORDERS_API = API_VERSION + 'orders/fetch'
 
+// products
+export const GET_PRODUCTS_API = API_VERSION + 'products/fetch'
+export const GET_PRODUCT_API = API_VERSION + 'products/'
+export const GET_PRODUCT_CATEGORIES_API = API_VERSION + 'products/categories/list'
+export const ADD_PRODUCT_API = API_VERSION + 'products/create'
+export const EDIT_PRODUCT_API = API_VERSION + 'products/edit/'
+export const DELETE_PRODUCT_API = API_VERSION + 'products/delete/'
+
 // drivers
 export const GET_DRIVERS_API = API_VERSION + 'drivers/fetch'
 export const ADD_NEW_DRIVER_API = API_VERSION + 'drivers/add'

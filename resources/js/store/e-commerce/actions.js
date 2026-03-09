@@ -17,6 +17,15 @@ import {
   GET_PRODUCTS,
   GET_PRODUCTS_FAIL,
   GET_PRODUCTS_SUCCESS,
+  ADD_PRODUCT_REQUEST,
+  ADD_PRODUCT_SUCCESS,
+  ADD_PRODUCT_FAIL,
+  EDIT_PRODUCT_REQUEST,
+  EDIT_PRODUCT_SUCCESS,
+  EDIT_PRODUCT_FAIL,
+  DELETE_PRODUCT_REQUEST,
+  DELETE_PRODUCT_SUCCESS,
+  DELETE_PRODUCT_FAIL,
   GET_CUSTOMERS,
   GET_CUSTOMERS_FAIL,
   GET_CUSTOMERS_SUCCESS,
@@ -93,8 +102,9 @@ import {
   SET_TRADE_REJECTED,
 } from "./actionTypes";
 
-export const getProducts = () => ({
+export const getProducts = (query = {}) => ({
   type: GET_PRODUCTS,
+  payload: query,
 });
 
 export const getProductsSuccess = products => ({
@@ -104,6 +114,48 @@ export const getProductsSuccess = products => ({
 
 export const getProductsFail = error => ({
   type: GET_PRODUCTS_FAIL,
+  payload: error,
+});
+
+export const addProductRequest = (product) => ({
+  type: ADD_PRODUCT_REQUEST,
+  payload: product,
+});
+
+export const addProductSuccess = () => ({
+  type: ADD_PRODUCT_SUCCESS,
+});
+
+export const addProductFail = (error) => ({
+  type: ADD_PRODUCT_FAIL,
+  payload: error,
+});
+
+export const editProductRequest = (id, product) => ({
+  type: EDIT_PRODUCT_REQUEST,
+  payload: { id, product },
+});
+
+export const editProductSuccess = () => ({
+  type: EDIT_PRODUCT_SUCCESS,
+});
+
+export const editProductFail = (error) => ({
+  type: EDIT_PRODUCT_FAIL,
+  payload: error,
+});
+
+export const deleteProductRequest = (id, refetchQuery = {}) => ({
+  type: DELETE_PRODUCT_REQUEST,
+  payload: { id, refetchQuery },
+});
+
+export const deleteProductSuccess = () => ({
+  type: DELETE_PRODUCT_SUCCESS,
+});
+
+export const deleteProductFail = (error) => ({
+  type: DELETE_PRODUCT_FAIL,
   payload: error,
 });
 

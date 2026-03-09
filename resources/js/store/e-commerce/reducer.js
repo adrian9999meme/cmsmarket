@@ -56,6 +56,9 @@ import {
   GET_CATEGORIES,
   GET_CATEGORIES_SUCCESS,
   GET_CATEGORIES_FAIL,
+  ADD_PRODUCT_SUCCESS,
+  EDIT_PRODUCT_SUCCESS,
+  DELETE_PRODUCT_SUCCESS,
   GET_BLOCKED_CUSTOMERS_SUCCESS,
   GET_SELLER_LIST_SUCCESS,
   GET_SELLER_LIST_REQUEST,
@@ -93,6 +96,11 @@ const Ecommerce = (state = INIT_STATE, action) => {
         ...state,
         error: action.payload,
       };
+
+    case ADD_PRODUCT_SUCCESS:
+    case EDIT_PRODUCT_SUCCESS:
+    case DELETE_PRODUCT_SUCCESS:
+      return { ...state };
 
     case GET_PRODUCT_DETAIL_SUCCESS:
       return {
