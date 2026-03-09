@@ -84,17 +84,13 @@ class RouteServiceProvider extends ServiceProvider
 
     /**
      * Minimal web routes: root + health (no Blade UI).
-     * When APP_ENV=production and APP_ROUTE_PREFIX set, routes are under /cms96501/...
+     * Note: APP_ROUTE_PREFIX is for frontend URL building only. The server typically
+     * strips the prefix before passing to Laravel (e.g. /cms96501/dashboard → /dashboard),
+     * so we do NOT add the prefix to Laravel routes.
      */
     protected function mapWebRoutesApiOnly()
     {
-        $prefix = config('app.route_prefix', '');
-        if ($prefix) {
-            Route::prefix($prefix)->middleware('web')
-                ->group(base_path('routes/web-api-only.php'));
-        } else {
-            Route::middleware('web')
-                ->group(base_path('routes/web-api-only.php'));
-        }
+        Route::middleware('web')
+            ->group(base_path('routes/web-api-only.php'));
     }
 }
