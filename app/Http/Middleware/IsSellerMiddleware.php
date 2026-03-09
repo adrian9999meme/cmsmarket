@@ -17,9 +17,10 @@ class IsSellerMiddleware
             Sentinel::loginAndRemember($user);
         }
         if (Sentinel::check()):
-            if (Sentinel::getUser()->user_type == 'seller'):
+            $userType = Sentinel::getUser()->user_type;
+            if ($userType == 'seller' || $userType == 'manager'):
                 return $next($request);
-            elseif(Sentinel::getUser()->user_type == 'admin' || Sentinel::getUser()->user_type == 'staff'):
+            elseif($userType == 'admin' || $userType == 'staff'):
                 return redirect()->route('home');
             else:
                 return redirect()->route('home');

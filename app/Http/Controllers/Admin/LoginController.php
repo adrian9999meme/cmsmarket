@@ -399,13 +399,14 @@ class LoginController extends Controller
                 Toastr::error(__('User not found'));
                 return back()->withInput();
             endif;
-            if($request->request_path == "seller/login" && $user->user_type != 'seller'){
+            if($request->request_path == "seller/login" && $user->user_type != 'seller' && $user->user_type != 'manager'){
                 Toastr::error(__('You are not allowed to login here'));
                 return back()->withInput();
-            }if($request->request_path == "admin/login" && $user->user_type == 'seller'){
+            }            if($request->request_path == "admin/login" && $user->user_type == 'seller'){
                 Toastr::error(__('You are not allowed to login here'));
                 return back()->withInput();
-            }if($request->request_path == "admin/login" && $user->user_type == 'customer'){
+            }
+            if($request->request_path == "admin/login" && $user->user_type == 'customer'){
                 Toastr::error(__('You are not allowed to login here'));
                 return back()->withInput();
             }
@@ -467,7 +468,7 @@ class LoginController extends Controller
             $log['user_id'] = $user->id;
             LogActivityModel::create($log);
 
-            if ($user->user_type == 'admin' || $user->user_type == 'staff'):
+            if ($user->user_type == 'admin' || $user->user_type == 'staff' || $user->user_type == 'manager'):
                 return redirect()->route('dashboard');
             else:
                 return redirect()->route('seller.dashboard');

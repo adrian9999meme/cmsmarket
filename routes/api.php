@@ -102,7 +102,12 @@ Route::prefix('v1')->group(function () {
             // orders
             Route::get('orders/fetch', [OrderController::class, 'index']);
             // products
-            Route::get('products/fetch', [ProductController::class, 'index']);
+            Route::get('products/fetch', [ProductController::class, 'fetch']);
+            Route::get('products/categories/list', [ProductController::class, 'apiCategories']);
+            Route::get('products/{id}', [ProductController::class, 'apiShow']);
+            Route::post('products/create', [ProductController::class, 'apiStore']);
+            Route::put('products/edit/{id}', [ProductController::class, 'apiUpdate']);
+            Route::delete('products/delete/{id}', [ProductController::class, 'apiDelete']);
             // drivers
             Route::get('drivers/fetch', [DriverController::class, 'index']);
             Route::post('drivers/add', [DriverController::class, 'create']);

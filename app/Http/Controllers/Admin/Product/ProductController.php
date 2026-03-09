@@ -54,6 +54,243 @@ class ProductController extends Controller
         $this->sellers          = $sellers;
         $this->stores           = $store;
     }
+    /**
+     * API fetch for React CMS - returns JSON product list
+     */
+    public function fetch(Request $request)
+    {
+        try {
+            $status = $request->get('subdomain', 'all');
+            $request->merge(['q' => $request->get('keyword', '')]);
+            $products = $this->products->paginate($request, $status === 'all' ? null : $status, 50, '');
+            $products->getCollection()->load('storeProfile');
+            $data = $products->getCollection()->map(function ($product) {
+                $lang = $product->productLanguages->first();
+                return [
+                    'id' => $product->id,
+                    'name' => $lang ? $lang->name : ($product->name ?? '-'),
+                    'slug' => $product->slug,
+                    'price' => $product->price,
+                    'current_stock' => $product->current_stock ?? 0,
+                    'status' => $product->status,
+                    'stores_id' => $product->stores_id,
+                    'store_name' => $product->storeProfile?->store_name ?? (string) $product->stores_id,
+                    'thumbnail' => $product->thumbnail ?? [],
+                    'created_at' => $product->created_at?->toIso8601String(),
+                ];
+            });
+            return response()->json([
+                'success' => true,
+                'message' => 'Products retrieved successfully',
+                'data' => $data,
+                'meta' => [
+                    'current_page' => $products->currentPage(),
+                    'last_page' => $products->lastPage(),
+                    'per_page' => $products->perPage(),
+                    'total' => $products->total(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
+    /**
+     * API create product - simplified for React CMS
+     */
+    public function apiStore(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|max:190',
+                'price' => 'required|numeric|min:0',
+                'store' => 'required',
+                'category' => 'required',
+                'current_stock' => 'nullable|numeric|min:0',
+                'unit' => 'nullable|string|max:50',
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                ], 422);
+            }
+            $request->merge([
+                'slug' => null,
+                'images' => '',
+                'thumbnail' => null,
+                'description_images' => [],
+                'status' => 1,
+                'minimum_order_quantity' => 1,
+                'barcode' => \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(16)),
+                'has_variant' => 0,
+                'sku' => 'SKU-' . strtoupper(uniqid()),
+                'unit' => $request->unit ?? 'pc',
+            ]);
+            $this->products->store($request);
+            return response()->json([
+                'success' => true,
+                'message' => __('Product created successfully'),
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API update product - simplified for React CMS
+     */
+    public function apiUpdate(Request $request, $id)
+    {
+        try {
+            $product = $this->products->get($id);
+            if (!$product) {
+                return response()->json(['success' => false, 'message' => 'Product not found'], 404);
+            }
+            $validator = Validator::make($request->all(), [
+                'name' => 'sometimes|required|max:190',
+                'price' => 'sometimes|required|numeric|min:0',
+                'current_stock' => 'nullable|numeric|min:0',
+                'status' => 'nullable|in:0,1',
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                ], 422);
+            }
+            if ($request->has('name')) {
+                $product->slug = \Illuminate\Support\Str::slug($request->name);
+            }
+            if ($request->has('price')) {
+                $product->price = priceFormatUpdate($request->price, settingHelper('default_currency'));
+            }
+            if ($request->has('current_stock')) {
+                $product->current_stock = $request->current_stock;
+                $stock = $product->stock()->first();
+                if ($stock) {
+                    $stock->current_stock = $request->current_stock;
+                    $stock->save();
+                }
+            }
+            if ($request->has('status')) {
+                $product->status = (int) $request->status === 1 ? 'published' : 'unpublished';
+            }
+            $product->save();
+            if ($request->has('name')) {
+                $lang = $product->productLanguages->first();
+                if ($lang) {
+                    $lang->name = $request->name;
+                    $lang->save();
+                }
+            }
+            return response()->json([
+                'success' => true,
+                'message' => __('Product updated successfully'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API delete product (soft delete)
+     */
+    public function apiDelete($id)
+    {
+        try {
+            $product = $this->products->get($id);
+            if (!$product) {
+                return response()->json(['success' => false, 'message' => 'Product not found'], 404);
+            }
+            $product->delete();
+            return response()->json([
+                'success' => true,
+                'message' => __('Product deleted successfully'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * API get categories for product form
+     */
+    public function apiCategories(Request $request)
+    {
+        try {
+            $categories = $this->categories->allCategory()
+                ->where('parent_id', null)
+                ->where('status', 1);
+            $data = $categories->map(function ($cat) {
+                $lang = $cat->categoryLanguage->first();
+                return [
+                    'id' => $cat->id,
+                    'title' => $lang ? $lang->title : (string) $cat->id,
+                ];
+            })->values();
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
+    /**
+     * API get single product for edit
+     */
+    public function apiShow($id)
+    {
+        try {
+            $product = $this->products->get($id);
+            if (!$product) {
+                return response()->json(['success' => false, 'message' => 'Product not found'], 404);
+            }
+            $lang = $product->productLanguages->first();
+            $stock = $product->stock()->first();
+            $productName = $lang ? $lang->name : ($product->name ?? '-');
+            $productUnit = $lang ? $lang->unit : 'pc';
+            $productSku = $stock ? $stock->sku : null;
+            $data = [
+                'id' => $product->id,
+                'name' => $productName,
+                'slug' => $product->slug,
+                'price' => $product->price,
+                'current_stock' => $product->current_stock ?? 0,
+                'status' => $product->status,
+                'stores_id' => $product->stores_id,
+                'category_id' => $product->category_id,
+                'unit' => $productUnit,
+                'sku' => $productSku,
+            ];
+            return response()->json(['success' => true, 'data' => $data]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function index(Request $request, $status = null){
         try {
             $products           = $this->products->paginate($request, $status ,get_pagination('pagination'),'');

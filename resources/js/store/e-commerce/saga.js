@@ -56,6 +56,15 @@ import {
   SET_CUSTOMER_APPROVED,
   SET_TRADE_APPROVED,
   SET_TRADE_REJECTED,
+  ADD_PRODUCT_REQUEST,
+  ADD_PRODUCT_SUCCESS,
+  ADD_PRODUCT_FAIL,
+  EDIT_PRODUCT_REQUEST,
+  EDIT_PRODUCT_SUCCESS,
+  EDIT_PRODUCT_FAIL,
+  DELETE_PRODUCT_REQUEST,
+  DELETE_PRODUCT_SUCCESS,
+  DELETE_PRODUCT_FAIL,
 } from "./actionTypes";
 
 import {
@@ -69,6 +78,12 @@ import {
   getProductDetailSuccess,
   getProductsFail,
   getProductsSuccess,
+  addProductSuccess,
+  addProductFail,
+  editProductSuccess,
+  editProductFail,
+  deleteProductSuccess,
+  deleteProductFail,
   getShopsFail,
   getShopsSuccess,
   addOrderFail,
@@ -124,7 +139,7 @@ import {
   getSellersListSuccess,
 } from "./actions";
 
-import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API, EDIT_STORE_API, DELETE_STORE_API, HOME_STORE_CATEGORIES_API, GET_ORDERS_API, SET_TRADE_APPROVED_API, SET_TRADE_REJECTED_API } from "../endpoints";
+import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, ADD_PRODUCT_API, EDIT_PRODUCT_API, DELETE_PRODUCT_API, DELETE_CUSTOMER_API, DELETE_SELLER_API, EDIT_CUSTOMER_API, EDIT_SELLER_API, GET_CUSTOMERS_API, GET_SELLERS_API, GET_STORES_API, SET_ACTIVE_CUSTOMER_API, SET_ACTIVE_SELLER_API, SET_STORE_ACTIVE_API, EDIT_STORE_API, DELETE_STORE_API, HOME_STORE_CATEGORIES_API, GET_ORDERS_API, GET_PRODUCTS_API, SET_TRADE_APPROVED_API, SET_TRADE_REJECTED_API } from "../endpoints";
 
 //Include Both Helper File with needed methods
 // import {
@@ -148,12 +163,16 @@ import { ADD_NEW_CUSTOMER_API, ADD_NEW_SELLER_API, ADD_NEW_STORE_API, DELETE_CUS
 // } from "../../helpers/fakebackend_helper";
 
 
-function* fetchProducts() {
+function* fetchProducts({ payload: query = {} }) {
   try {
-    const response = yield call(getProducts);
-    yield put(getProductsSuccess(response));
+    const response = yield api.get(GET_PRODUCTS_API, { params: query });
+    if (response.data?.success) {
+      yield put(getProductsSuccess(response.data?.data || []));
+    } else {
+      yield put(getProductsFail(response.data?.message || "Failed to fetch products"));
+    }
   } catch (error) {
-    yield put(getProductsFail(error));
+    yield put(getProductsFail(error?.response?.data?.message || error?.message || "Failed to fetch products"));
   }
 }
 
@@ -549,6 +568,61 @@ function* onSetActiveStore({ payload: store }) {
   }
 }
 
+function* onAddProduct({ payload: product }) {
+  try {
+    const { refetchQuery, ...productData } = product || {};
+    const response = yield api.post(ADD_PRODUCT_API, productData);
+    if (response.data?.success) {
+      yield put(addProductSuccess());
+      yield put(getProducts(refetchQuery || {}));
+      toast.success(response.data?.message || "Product created successfully", { autoClose: 2000 });
+    } else {
+      yield put(addProductFail(response.data?.message || "Failed"));
+      toast.error(response.data?.message || "Product create failed", { autoClose: 2000 });
+    }
+  } catch (error) {
+    yield put(addProductFail(error?.response?.data?.message || error?.message));
+    toast.error(error?.response?.data?.message || "Product create failed", { autoClose: 2000 });
+  }
+}
+
+function* onEditProduct({ payload: { id, product } }) {
+  try {
+    const { refetchQuery, ...productData } = product || {};
+    const response = yield api.put(`${EDIT_PRODUCT_API}${id}`, productData);
+    if (response.data?.success) {
+      yield put(editProductSuccess());
+      yield put(getProducts(refetchQuery || {}));
+      toast.success(response.data?.message || "Product updated successfully", { autoClose: 2000 });
+    } else {
+      yield put(editProductFail(response.data?.message || "Failed"));
+      toast.error(response.data?.message || "Product update failed", { autoClose: 2000 });
+    }
+  } catch (error) {
+    yield put(editProductFail(error?.response?.data?.message || error?.message));
+    toast.error(error?.response?.data?.message || "Product update failed", { autoClose: 2000 });
+  }
+}
+
+function* onDeleteProduct({ payload }) {
+  try {
+    const id = typeof payload === 'object' ? payload.id : payload;
+    const refetchQuery = typeof payload === 'object' ? (payload.refetchQuery || {}) : {};
+    const response = yield api.delete(`${DELETE_PRODUCT_API}${id}`);
+    if (response.data?.success) {
+      yield put(deleteProductSuccess());
+      yield put(getProducts(refetchQuery || {}));
+      toast.success(response.data?.message || "Product deleted successfully", { autoClose: 2000 });
+    } else {
+      yield put(deleteProductFail(response.data?.message || "Failed"));
+      toast.error(response.data?.message || "Product delete failed", { autoClose: 2000 });
+    }
+  } catch (error) {
+    yield put(deleteProductFail(error?.response?.data?.message || error?.message));
+    toast.error(error?.response?.data?.message || "Product delete failed", { autoClose: 2000 });
+  }
+}
+
 function* ecommerceSaga() {
   yield takeEvery(GET_PRODUCTS, fetchProducts);
   yield takeEvery(GET_PRODUCT_DETAIL, fetchProductDetail);
@@ -582,6 +656,9 @@ function* ecommerceSaga() {
   yield takeEvery(SET_STORE_ACTIVE_REQUEST, onSetActiveStore);
   yield takeEvery(DELETE_STORE_REQUEST, onDeleteStore);
   yield takeEvery(GET_CATEGORIES_REQUEST, fetchCategories);
+  yield takeEvery(ADD_PRODUCT_REQUEST, onAddProduct);
+  yield takeEvery(EDIT_PRODUCT_REQUEST, onEditProduct);
+  yield takeEvery(DELETE_PRODUCT_REQUEST, onDeleteProduct);
 }
 
 export default ecommerceSaga;

@@ -103,6 +103,13 @@ export const menuConfig = [
         },
 
         {
+            title: "Blocked Sellers",
+            icon: "bx bx-block",
+            path: "/sellers/blocked",
+            roles: [ROLES.ADMIN]
+        },
+
+        {
             title: "Add Seller",
             icon: "bx bx-user-plus",
             path: "/sellers/add",
@@ -139,10 +146,24 @@ export const menuConfig = [
         },
 
         {
+            title: "Pending Approvals",
+            icon: "bx bx-time-five",
+            path: "/stores/pending",
+            roles: [ROLES.ADMIN]
+        },
+
+        {
+            title: "Blocked Stores",
+            icon: "bx bx-block",
+            path: "/stores/blocked",
+            roles: [ROLES.ADMIN]
+        },
+
+        {
             title: "My Stores",
             icon: "bx bx-store",
             path: "/stores/my",
-            roles: [ROLES.SELLER]
+            roles: [ROLES.SELLER, ROLES.MANAGER]
         },
 
         {

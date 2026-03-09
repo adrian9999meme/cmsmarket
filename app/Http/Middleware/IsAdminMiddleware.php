@@ -18,7 +18,7 @@ class IsAdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (Sentinel::check()):
-            if (Sentinel::getUser()->user_type == 'admin' || Sentinel::getUser()->user_type == 'staff'):
+            if (in_array(Sentinel::getUser()->user_type, ['admin', 'staff', 'manager'])):
                 return $next($request);
             else:
                 return response()->json([
