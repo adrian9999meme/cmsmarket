@@ -10,6 +10,7 @@
     <meta content="Themesbrand" name="author" />
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="app-route-prefix" content="{{ config('app.route_prefix', '') }}">
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ asset('build/images/CMS_icon2.png') }}">
 

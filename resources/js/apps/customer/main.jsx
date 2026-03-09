@@ -12,12 +12,13 @@ import { Provider } from "react-redux";
 import store from "../../store";
 import App from "../../setup";
 import "../../i18n";
+import { getBasePath } from "../../config/routeConfig";
 
 if (document.getElementById("react-app")) {
   const root = ReactDOM.createRoot(document.getElementById("react-app"));
   root.render(
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter basename={getBasePath("")}>
         <App />
       </BrowserRouter>
     </Provider>

@@ -10,12 +10,13 @@ import { Provider } from "react-redux";
 import store from "../../store";
 import AdminApp from "./App";
 import "../../i18n";
+import { getBasePath } from "../../config/routeConfig";
 
 if (document.getElementById("react-app")) {
   const root = ReactDOM.createRoot(document.getElementById("react-app"));
   root.render(
     <Provider store={store}>
-      <BrowserRouter basename="/admin">
+      <BrowserRouter basename={getBasePath("/admin")}>
         <AdminApp />
       </BrowserRouter>
     </Provider>

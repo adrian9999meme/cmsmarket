@@ -24,6 +24,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Browser Route Prefix (production subpath)
+    |--------------------------------------------------------------------------
+    | When APP_ENV=production, set APP_ROUTE_PREFIX (e.g. cms96501) so the app
+    | is served at /cms96501/admin, /cms96501/seller, etc.
+    */
+
+    'route_prefix' => env('APP_ENV') === 'production' ? (env('APP_ROUTE_PREFIX', '') ?: $path) : '',
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
