@@ -11,6 +11,7 @@ import { apiError, logoutUserSuccess, setToken, setUser } from "./actions";
 import { GET_CURRENT_USER_API, LOGIN_API } from "../../endpoints";
 import { fetchConfig } from "../../config/actions";
 import { getDashboardPathForRole } from "../../../helpers/appRedirect";
+import { getBasePath } from "../../../config/routeConfig";
 
 // NOTE:
 // For MVP we do NOT call any backend or database.
@@ -52,7 +53,7 @@ function* loginUser({ payload: { user, history } }) {
 
     // redirect to role-specific app dashboard (micro-frontend)
     const dashboardPath = getDashboardPathForRole(authorized_user?.role);
-    if (dashboardPath.startsWith("/admin") || dashboardPath.startsWith("/seller") || dashboardPath.startsWith("/driver")) {
+    if (dashboardPath.includes("/admin") || dashboardPath.includes("/seller") || dashboardPath.includes("/driver")) {
       window.location.href = dashboardPath;
     } else {
       history("/dashboard");
@@ -69,14 +70,14 @@ function* loginUser({ payload: { user, history } }) {
 function* logoutUser({ payload: { history } }) {
   try {
     const path = window.location.pathname;
-    const loginPath = path.startsWith("/admin") ? "/admin/login"
-      : path.startsWith("/seller") ? "/seller/login"
-      : path.startsWith("/driver") ? "/driver/login"
-      : "/login";
+    const loginPath = path.includes("/admin") ? getBasePath("/admin/login")
+      : path.includes("/seller") ? getBasePath("/seller/login")
+      : path.includes("/driver") ? getBasePath("/driver/login")
+      : getBasePath("/login");
     yield logoutUserSuccess();
     localStorage.removeItem("token");
     axios.defaults.headers.common["Authorization"] = "";
-    if (loginPath !== "/login") {
+    if (loginPath.includes("/admin") || loginPath.includes("/seller") || loginPath.includes("/driver")) {
       window.location.href = loginPath;
     } else {
       history("/login");

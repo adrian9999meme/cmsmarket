@@ -84,6 +84,9 @@ class RouteServiceProvider extends ServiceProvider
 
     /**
      * Minimal web routes: root + health (no Blade UI).
+     * Note: APP_ROUTE_PREFIX is for frontend URL building only. The server typically
+     * strips the prefix before passing to Laravel (e.g. /cms96501/dashboard → /dashboard),
+     * so we do NOT add the prefix to Laravel routes.
      */
     protected function mapWebRoutesApiOnly()
     {

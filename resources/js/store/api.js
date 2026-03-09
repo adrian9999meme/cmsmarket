@@ -1,7 +1,8 @@
 import axios from "axios";
+import { getBasePath } from "../config/routeConfig";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_APP_URL, // for Vite
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
   // baseURL: process.env.REACT_APP_API_URL, // for CRA
   headers: {
@@ -37,10 +38,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
       const path = window.location.pathname;
-      const loginPath = path.startsWith("/admin") ? "/admin/login"
-        : path.startsWith("/seller") ? "/seller/login"
-        : path.startsWith("/driver") ? "/driver/login"
-        : "/login";
+      const loginPath = path.includes("/admin") ? getBasePath("/admin/login")
+        : path.includes("/seller") ? getBasePath("/seller/login")
+        : path.includes("/driver") ? getBasePath("/driver/login")
+        : getBasePath("/login");
       if (!path.includes("/login")) {
         window.location.href = loginPath;
       }

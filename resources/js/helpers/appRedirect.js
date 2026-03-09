@@ -1,15 +1,25 @@
 /**
  * Role-based app redirect for micro-frontend
  * Maps user role to the correct app dashboard URL
+ * Uses route prefix when APP_ENV=production (e.g. /cms96501/admin)
  */
 
 import { ROLES } from "../common/roles";
+import { getBasePath } from "../config/routeConfig";
 
 const APP_BASE = {
-  admin: "/admin",
-  seller: "/seller",
-  driver: "/driver",
-  customer: "/",
+  get admin() {
+    return getBasePath("/admin");
+  },
+  get seller() {
+    return getBasePath("/seller");
+  },
+  get driver() {
+    return getBasePath("/driver");
+  },
+  get customer() {
+    return getBasePath("");
+  },
 };
 
 /**
@@ -27,7 +37,7 @@ export function getDashboardPathForRole(role) {
     case ROLES.CUSTOMER:
     case ROLES.TRADE_CUSTOMER:
     default:
-      return "/dashboard";
+      return `${APP_BASE.customer ? APP_BASE.customer + "/" : "/"}dashboard`;
   }
 }
 
@@ -44,6 +54,6 @@ export function getLoginPathForRole(role) {
     case ROLES.DELIVERY_HERO:
       return `${APP_BASE.driver}/login`;
     default:
-      return "/login";
+      return `${APP_BASE.customer ? APP_BASE.customer + "/" : "/"}login`;
   }
 }

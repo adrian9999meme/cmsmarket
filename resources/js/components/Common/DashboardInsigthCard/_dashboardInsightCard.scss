@@ -19,6 +19,11 @@
     &__icon {
       font-size: 4rem;
       color: white;
+      opacity: 1;
+
+      i, .bi {
+        font-size: inherit;
+      }
     }
   
     // Variants
