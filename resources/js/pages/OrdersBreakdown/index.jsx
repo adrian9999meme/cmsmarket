@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createSelector } from "reselect";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 
 import OrdersHeader from "./OrdersHeader";
 import OrdersFilters from "./OrdersFilters";
 import OrdersTable from "./OrdersTable";
 
 import { DELIVERY_STATUS_ALL, SORT_LATEST } from "./ordersConstant";
-// action
+import { useRoleAwareFetch } from "../../hooks/useRoleAwareFetch";
 import { getOrders } from "../../store/e-commerce/actions";
 
 const initialFilters = {
@@ -19,19 +20,22 @@ const initialFilters = {
 };
 
 const OrdersBreakdown = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const { subdomain } = useParams();
+  const { buildQuery } = useRoleAwareFetch();
+
   const [filters, setFilters] = useState(initialFilters);
   const [query, setQuery] = useState({
     ...initialFilters,
-    keyword: '',
+    keyword: "",
   });
   const [keyword, setKeyword] = useState("");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const ecommerceSelector = createSelector(
-    state => state.ecommerce,
-    state => state.config?.appConfig,
+    (state) => state.ecommerce,
+    (state) => state.config?.appConfig,
     (ecommerce, appConfig) => ({
       allOrders: ecommerce.orders,
       sellerSystemEnabled: !!appConfig?.seller_system,
@@ -49,19 +53,27 @@ const OrdersBreakdown = () => {
     queryRef.current = query;
   }, [query]);
 
-  // 📡 Fetch orders whenever filters change
   useEffect(() => {
     setQuery((prev) => ({
       ...prev,
       ...filters,
-      keyword: keyword,
-    }))
-    console.log("filters changes:", query)
+      keyword,
+    }));
   }, [filters, keyword]);
-  // fetch orders data whenever filters change and render at first
+
+  // Role-aware fetch: merge role defaults with URL subdomain + filters
   useEffect(() => {
-    dispatch(getOrders(queryRef.current))
-  }, [dispatch, filters])
+    const roleQuery = buildQuery("orders", {
+      subdomain: subdomain || undefined,
+      sellerId: queryRef.current.sellerId || undefined,
+      deliveryStatus: queryRef.current.deliveryStatus !== DELIVERY_STATUS_ALL ? queryRef.current.deliveryStatus : undefined,
+      date_from: queryRef.current.date_from || undefined,
+      date_to: queryRef.current.date_to || undefined,
+      sortingQuery: queryRef.current.sortingQuery || undefined,
+      keyword: queryRef.current.keyword || undefined,
+    });
+    dispatch(getOrders(roleQuery));
+  }, [dispatch, filters, subdomain, buildQuery, keyword]);
 
 
   // 🔁 Handle filter change
@@ -100,7 +112,13 @@ const OrdersBreakdown = () => {
           filters={query}
           onChange={handleFilterChange}
           onReset={handleReset}
-          onSearch={(searchKeyword) => dispatch(getOrders({ ...queryRef.current, keyword: searchKeyword }))}
+          onSearch={(searchKeyword) => {
+            const roleQuery = buildQuery("orders", {
+              ...queryRef.current,
+              keyword: searchKeyword,
+            });
+            dispatch(getOrders(roleQuery));
+          }}
           sellers={sellers}
         />
 

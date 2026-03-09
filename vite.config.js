@@ -30,6 +30,10 @@ export default defineConfig({
             input: [
                 'resources/scss/theme.scss',
                 'resources/js/app.js',
+                'resources/js/apps/admin/main.jsx',
+                'resources/js/apps/seller/main.jsx',
+                'resources/js/apps/driver/main.jsx',
+                'resources/js/apps/customer/main.jsx',
             ],
             refresh: true,
         }),

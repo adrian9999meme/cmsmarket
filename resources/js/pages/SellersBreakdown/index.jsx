@@ -28,6 +28,7 @@ import {
   getSellersRequest,
   setActiveSellerRequest,
 } from "../../store/actions";
+import { useRoleAwareFetch } from "../../hooks/useRoleAwareFetch";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import defaultLogoImg from "../../../images/companies/img-1.png";
 
@@ -57,6 +58,7 @@ const SellersBreakdown = () => {
   const { subdomain } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { buildQuery, canAccess } = useRoleAwareFetch();
   const appConfig = useSelector((state) => state.config?.appConfig);
 
   useEffect(() => {
@@ -95,9 +97,13 @@ const SellersBreakdown = () => {
       subdomain: subdomain === 'all' ? '' : subdomain,
     }));
   }, [subdomain])
-  // Fetch sellers when status or query changes
+  // Role-aware fetch: merge role defaults with URL subdomain
   useEffect(() => {
-    dispatch(getSellersRequest({ ...queryRef.current }));
+    const roleQuery = buildQuery("sellers", {
+      subdomain: queryRef.current.subdomain === "all" ? "" : queryRef.current.subdomain,
+      searchKeyword: queryRef.current.searchKeyword || "",
+    });
+    dispatch(getSellersRequest(roleQuery));
     if (query.subdomain === "add") {
       setModalOpen(true)
     }
@@ -115,7 +121,7 @@ const SellersBreakdown = () => {
       // Toggle seller_profile status directly
       seller.status = seller.status === 1 ? 0 : 1;
       dispatch(setActiveSellerRequest(seller));
-      dispatch(getSellersRequest({ ...queryRef.current }))
+      dispatch(getSellersRequest(buildQuery("sellers", { subdomain: queryRef.current.subdomain === "all" ? "" : queryRef.current.subdomain, searchKeyword: queryRef.current.searchKeyword || "" })))
     }
   };
 
@@ -253,7 +259,7 @@ const SellersBreakdown = () => {
                   className="form-control"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      dispatch(getSellersRequest({ ...queryRef.current }));
+                      dispatch(getSellersRequest(buildQuery("sellers", { subdomain: queryRef.current.subdomain === "all" ? "" : queryRef.current.subdomain, searchKeyword: queryRef.current.searchKeyword || "" })));
                     }
                   }}
                 />
