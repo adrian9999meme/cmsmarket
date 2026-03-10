@@ -14,16 +14,15 @@ export const filterMenuByRole = (menu, role, appConfig = {}) => {
             return true;
         })
         .map(item => {
-
             if (!item.children) return item;
-
-            return {
-                ...item,
-                children: item.children.filter(child =>
-                    child.roles.includes(role)
-                )
-            };
-
+            const filteredChildren = item.children.filter(child =>
+                child.roles.includes(role)
+            );
+            return { ...item, children: filteredChildren };
+        })
+        .filter(item => {
+            if (!item.children) return true;
+            return item.children.length > 0;
         });
 
 };
