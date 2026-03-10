@@ -36,12 +36,12 @@ const LanguageDropdown = () => {
   return (
     <>
       <Dropdown isOpen={menu} toggle={toggle} className="d-inline-block">
-        <DropdownToggle className="btn header-item " tag="button">
+        <DropdownToggle className="btn header-item" tag="button">
           <img
             src={get(languages, `${selectedLang}.flag`)}
             alt="Lekit"
             height="16"
-            className="me-1"
+            className="me-1 mb-1"
           />
         </DropdownToggle>
         <DropdownMenu className="language-switch dropdown-menu-end">
