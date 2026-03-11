@@ -79,8 +79,8 @@
 
 
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "reselect";
 
 import SimpleBar from "simplebar-react";
@@ -89,8 +89,11 @@ import MetisMenu from "metismenujs";
 import SidebarItem from "./SidebarItem";
 import { menuConfig } from "../../common/menu.config";
 import { filterMenuByRole } from "../../helpers/rbac";
+import { logoutUser } from "../../store/actions";
 
 const SidebarContent = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const userSelector = createSelector(
     state => state.Login,
@@ -136,37 +139,29 @@ const SidebarContent = () => {
   }, [menu]);
 
   return (
-
-    <SimpleBar className="h-100">
-
-      <div id="sidebar-menu">
-
-        <ul className="metismenu list-unstyled" id="side-menu">
-
-          <li className="menu-title">Menu</li>
-
-          {menu.map((item, index) => (
-            <SidebarItem key={index} item={item} />
-          ))}
-
-          <li className="mt-auto position-absolute bottom-0">
-
-            <Link to="/logout">
-
-              <i className="bx bx-power-off"></i>
-
-              <span>Logout</span>
-
-            </Link>
-
-          </li>
-
-        </ul>
-
+    <div className="d-flex flex-column h-100">
+      <SimpleBar className="flex-grow-1" style={{ minHeight: 0 }}>
+        <div id="sidebar-menu">
+          <ul className="metismenu list-unstyled" id="side-menu">
+            <li className="menu-title">Menu</li>
+            {menu.map((item, index) => (
+              <SidebarItem key={index} item={item} />
+            ))}
+          </ul>
+        </div>
+      </SimpleBar>
+      <div className="sidebar-footer flex-shrink-0">
+        <button
+          type="button"
+          className="sidebar-footer-btn d-flex align-items-center w-100 border-0 bg-transparent text-start"
+          style={{ padding: "0.625rem 1.5rem", cursor: "pointer", pointerEvents: "auto" }}
+          onClick={() => dispatch(logoutUser(navigate))}
+        >
+          <i className="bx bx-power-off me-2" style={{ minWidth: "1.75rem", fontSize: "1.25rem" }}></i>
+          <span>Logout</span>
+        </button>
       </div>
-
-    </SimpleBar>
-
+    </div>
   );
 
 };
