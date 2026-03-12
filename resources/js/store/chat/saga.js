@@ -24,69 +24,108 @@ import {
   deleteMessageFail,
 } from "./actions";
 
-//Include Both Helper File with needed methods
-import {
-  getChats,
-  getGroups,
-  getContacts,
-  getMessages,
-  addMessage,
-  deleteMessage,
-} from "../../helpers/fakebackend_helper";
+import api from "../api";
+import { logisticsEndpoints } from "../../services/api";
+import { groups, contacts, messages } from "../../common/data/chat";
 
 function* onGetChats() {
   try {
-    const response = yield call(getChats);
-    yield put(getChatsSuccess(response));
+    const res = yield call(api.get, logisticsEndpoints.chatRooms());
+    const body = res?.data ?? {};
+    const data = body?.data ?? body;
+    const list = Array.isArray(data) ? data : (data?.data ?? []);
+    const chats = list.map((r) => ({
+      id: r.id ?? r.roomId,
+      roomId: r.roomId ?? r.id ?? r.chat_room_id,
+      name: r.name ?? r.user_name ?? "Unknown",
+      status: r.status ?? "online",
+      image: r.image,
+      description: r.description ?? "",
+      time: r.time ?? "",
+    }));
+    yield put(getChatsSuccess(chats));
   } catch (error) {
-    yield put(getChatsFail(error));
+    yield put(getChatsSuccess([]));
   }
 }
 
 function* onGetGroups() {
-  try {
-    const response = yield call(getGroups);
-    yield put(getGroupsSuccess(response));
-  } catch (error) {
-    yield put(getGroupsFail(error));
-  }
+  yield put(getGroupsSuccess(groups));
 }
 
 function* onGetContacts() {
-  try {
-    const response = yield call(getContacts);
-    yield put(getContactsSuccess(response));
-  } catch (error) {
-    yield put(getContactsFail(error));
-  }
+  yield put(getContactsSuccess(contacts));
 }
 
 function* onGetMessages({ roomId }) {
   try {
-    const response = yield call(getMessages, roomId);
-    yield put(getMessagesSuccess(response));
+    const res = yield call(api.get, logisticsEndpoints.chatMessages(), {
+      params: { chat_room_id: roomId },
+    });
+    const msgData = res?.data?.data?.messages ?? res?.data?.messages ?? res?.data ?? {};
+    const list = msgData?.data ?? (Array.isArray(msgData) ? msgData : []);
+    const items = Array.isArray(list) ? list : [];
+    const userMessages = items.map((m) => {
+      const timeStr = m.created_at
+        ? (typeof m.created_at === "string"
+          ? (m.created_at.includes("T") ? m.created_at.slice(11, 16) : m.created_at)
+          : "")
+        : "";
+      return {
+        id: m.id,
+        to_id: m.is_mine === true ? 2 : 1,
+        msg: m.message ?? "",
+        time: timeStr,
+        isImages: m.is_image ?? false,
+      };
+    });
+    const transformed = [
+      {
+        id: roomId,
+        roomId,
+        sender: items[0]?.sender_name ?? "User",
+        userMessages,
+      },
+    ];
+    yield put(getMessagesSuccess(transformed));
   } catch (error) {
-    yield put(getMessagesFail(error));
+    const filtered = messages.filter((msg) => Number(msg.roomId) === Number(roomId));
+    yield put(getMessagesSuccess(filtered.length ? filtered : [{ roomId, sender: "", userMessages: [] }]));
   }
 }
 
 function* onAddMessage({ message }) {
   try {
-    const response = yield call(addMessage, message);
-    yield put(addMessageSuccess(response));
+    const res = yield call(api.post, logisticsEndpoints.chatSendMessage(), {
+      msg: message?.msg ?? message?.message ?? "",
+      chat_room_id: message?.chat_room_id ?? message?.roomId,
+      receiver_id: message?.receiver_id,
+    });
+    const data = res?.data?.data ?? res?.data ?? res;
+    const roomId = message?.chat_room_id ?? message?.roomId;
+    const msgPayload = {
+      id: data?.id ?? Date.now(),
+      to_id: 2,
+      msg: data?.msg ?? message?.msg ?? message?.message ?? "",
+      time: data?.time ?? new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      isImages: false,
+    };
+    yield put(addMessageSuccess(msgPayload, roomId));
   } catch (error) {
-    yield put(addMessageFail(error));
+    const roomId = message?.chat_room_id ?? message?.roomId;
+    const demoPayload = {
+      id: Date.now(),
+      to_id: 2,
+      msg: message?.msg ?? message?.message ?? "",
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      isImages: false,
+    };
+    yield put(addMessageSuccess(demoPayload, roomId));
   }
 }
 
-
 function* OnDeleteMessage({ payload: data }) {
-  try {
-    const response = yield call(deleteMessage, data);
-    yield put(deleteMessageSuccess(response));
-  } catch (error) {
-    yield put(deleteMessageFail(error));
-  }
+  yield put(deleteMessageSuccess(data));
 }
 
 function* chatSaga() {

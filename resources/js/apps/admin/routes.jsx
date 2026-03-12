@@ -25,6 +25,7 @@ import ForgetPwd from "../../pages/Authentication/ForgetPassword";
 import Register from "../../pages/Authentication/Register";
 import ResetPassword from "../../pages/Authentication/ResetPassword";
 import Pages404 from "../../pages/Utility/pages-404";
+import Chat from "../../pages/Chat/Chat";
 
 export const adminPublicRoutes = [
   { path: "/login", component: <Login /> },
@@ -52,6 +53,7 @@ export const adminProtectedRoutes = [
   { path: "/notifications/:subdomain", component: <NotificationsBreakdown /> },
   { path: "/statistics/:subdomain", component: <StatisticsBreakdown /> },
   { path: "/settings", component: <SettingsBreakdown /> },
+  { path: "/chat", component: <Chat /> },
 ];
 
 export { Pages404 };

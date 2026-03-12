@@ -81,9 +81,9 @@ export const addMessage = message => ({
   message,
 })
 
-export const addMessageSuccess = message => ({
+export const addMessageSuccess = (message, roomId) => ({
   type: POST_ADD_MESSAGE_SUCCESS,
-  payload: message,
+  payload: { message, roomId },
 })
 
 export const addMessageFail = error => ({

@@ -36,7 +36,13 @@ const ChatList = ({ userChatOpen, currentRoomId }) => {
         })
     );
 
+    const loginSelector = createSelector(
+        (state) => state.Login,
+        (Login) => ({ user: Login.user })
+    );
+
     const { chats, groups, contacts, loading } = useSelector(selectProperties);
+    const { user } = useSelector(loginSelector);
     const [isLoading, setLoading] = useState(loading)
 
     useEffect(() => {
@@ -45,9 +51,8 @@ const ChatList = ({ userChatOpen, currentRoomId }) => {
         dispatch(onGetContacts());
     }, [dispatch]);
 
-    // eslint-disable-next-line no-unused-vars
     const currentUser = {
-        name: "Henry Wells",
+        name: user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "User" : "User",
         isActive: true,
     };
 
@@ -84,7 +89,7 @@ const ChatList = ({ userChatOpen, currentRoomId }) => {
                     <div className="py-4 border-bottom">
                         <div className="d-flex">
                             <div className="align-self-center me-3">
-                                <img src={avatar1} className="avatar-xs rounded-circle" alt="" />
+                                <img src={user?.image || avatar1} className="avatar-xs rounded-circle" alt="" />
                             </div>
                             <div className="flex-grow-1">
                                 <h5 className="font-size-15 mt-0 mb-1"> {currentUser.name}</h5>
@@ -144,7 +149,7 @@ const ChatList = ({ userChatOpen, currentRoomId }) => {
                                         {
                                             isLoading ? <Spinners setLoading={setLoading} /> :
                                                 <SimpleBar style={{ height: "410px" }}>
-                                                    {(chats || [])?.map((chat) => (
+                                                    {(Array.isArray(chats) ? chats : []).map((chat) => (
                                                         <li key={chat.id + chat.status} className={currentRoomId === chat.roomId ? "active" : ''}>
                                                             <Link to="#" onClick={() => userChatOpen(chat)}>
                                                                 <div className="d-flex">
@@ -158,7 +163,7 @@ const ChatList = ({ userChatOpen, currentRoomId }) => {
                                                                     </div>
                                                                         :
                                                                         <div className="align-self-center me-3">
-                                                                            <img src={chat.image} className="rounded-circle avatar-xs" alt="" />
+                                                                            <img src={chat.image || avatar1} className="rounded-circle avatar-xs" alt="" />
                                                                         </div>
                                                                     }
 
@@ -183,8 +188,7 @@ const ChatList = ({ userChatOpen, currentRoomId }) => {
                                 <h5 className="font-size-14 mb-3">Group</h5>
                                 <ul className="list-unstyled chat-list">
                                     <SimpleBar style={{ height: "410px" }}>
-                                        {groups &&
-                                            (groups || [])?.map((group) => (
+                                        {(Array.isArray(groups) ? groups : []).map((group) => (
                                                 <li key={"test" + group.image} className={currentRoomId === group.roomId ? "active" : ""}>
                                                     <Link to="#" onClick={() => { userChatOpen(group) }}>
                                                         <div className="d-flex align-items-center">
@@ -209,8 +213,7 @@ const ChatList = ({ userChatOpen, currentRoomId }) => {
                                 <h5 className="font-size-14 mb-3">Contact</h5>
                                 <div>
                                     <SimpleBar style={{ height: "410px" }}>
-                                        {contacts &&
-                                            (contacts || [])?.map((contact) => (
+                                        {(Array.isArray(contacts) ? contacts : []).map((contact) => (
                                                 <div key={"test_" + contact.category} className={contact.category === "A" ? "" : "mt-4"}>
                                                     <div className="avatar-xs mb-3">
                                                         <span className="avatar-title rounded-circle bg-primary-subtle text-primary">
