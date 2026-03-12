@@ -26,7 +26,7 @@ const Calendar = (state = INIT_STATE, action) => {
     case GET_CHATS_SUCCESS:
       return {
         ...state,
-        chats: action.payload,
+        chats: Array.isArray(action.payload) ? action.payload : [],
       };
 
     case GET_CHATS_FAIL:
@@ -38,7 +38,7 @@ const Calendar = (state = INIT_STATE, action) => {
     case GET_GROUPS_SUCCESS:
       return {
         ...state,
-        groups: action.payload,
+        groups: Array.isArray(action.payload) ? action.payload : [],
       };
 
     case GET_GROUPS_FAIL:
@@ -50,7 +50,7 @@ const Calendar = (state = INIT_STATE, action) => {
     case GET_CONTACTS_SUCCESS:
       return {
         ...state,
-        contacts: action.payload,
+        contacts: Array.isArray(action.payload) ? action.payload : [],
       };
 
     case GET_CONTACTS_FAIL:
@@ -62,7 +62,7 @@ const Calendar = (state = INIT_STATE, action) => {
     case GET_MESSAGES_SUCCESS:
       return {
         ...state,
-        messages: action.payload,
+        messages: Array.isArray(action.payload) ? action.payload : [],
       };
 
     case GET_MESSAGES_FAIL:
@@ -71,14 +71,24 @@ const Calendar = (state = INIT_STATE, action) => {
         error: action.payload,
       };
 
-    case POST_ADD_MESSAGE_SUCCESS:
-      return {
-        ...state,
-        messages: state.messages.map((item) => ({
-          ...item,
-          userMessages: [...item.userMessages, action.payload]
-        }))
-      };
+    case POST_ADD_MESSAGE_SUCCESS: {
+        const payload = action.payload;
+        const isObj = payload && typeof payload === "object" && "message" in payload;
+        const msg = isObj ? payload.message : payload;
+        const targetRoomId = isObj ? payload.roomId : undefined;
+        return {
+          ...state,
+          messages: (Array.isArray(state.messages) ? state.messages : []).map((item) => {
+            const matches = targetRoomId == null || String(item.roomId) === String(targetRoomId) || String(item.id) === String(targetRoomId);
+            return {
+              ...item,
+              userMessages: matches
+                ? [...(Array.isArray(item.userMessages) ? item.userMessages : []), msg]
+                : (item.userMessages || []),
+            };
+          }),
+        };
+      }
 
     case POST_ADD_MESSAGE_FAIL:
       return {
@@ -89,9 +99,9 @@ const Calendar = (state = INIT_STATE, action) => {
     case DELETE_MESSAGE_SUCCESS:
       return {
         ...state,
-        messages: state.messages.map((item) => ({
+        messages: (Array.isArray(state.messages) ? state.messages : []).map((item) => ({
           ...item,
-          userMessages: item.userMessages.filter(data => data.id !== action.payload)
+          userMessages: (Array.isArray(item.userMessages) ? item.userMessages : []).filter(data => data.id !== action.payload)
         }))
       };
     case DELETE_MESSAGE_FAIL:

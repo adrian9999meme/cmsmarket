@@ -127,4 +127,33 @@ class ChatSystemRepository
                 });
             })->paginate(25);
     }
+
+    /**
+     * Chat rooms for admin/staff - all platform conversations, or for seller - their conversations.
+     */
+    public function cmsChatRooms($user, $data = []): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $query = ChatRoom::with('user', 'receiver', 'lastMessage')
+            ->whereHas('lastMessage');
+
+        if (in_array($user->user_type ?? '', ['admin', 'staff', 'manager'])) {
+            $query->latest();
+        } else {
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)->orWhere('receiver_id', $user->id);
+            })->latest();
+        }
+
+        return $query->when(arrayCheck('search', $data), function ($q) use ($data) {
+            $q->whereHas('user', function ($uq) use ($data) {
+                $uq->where('first_name', 'like', '%' . $data['search'] . '%')
+                    ->orWhere('email', 'like', '%' . $data['search'] . '%')
+                    ->orWhere('last_name', 'like', '%' . $data['search'] . '%');
+            })->orWhereHas('receiver', function ($uq) use ($data) {
+                $uq->where('first_name', 'like', '%' . $data['search'] . '%')
+                    ->orWhere('email', 'like', '%' . $data['search'] . '%')
+                    ->orWhere('last_name', 'like', '%' . $data['search'] . '%');
+            });
+        })->paginate(25);
+    }
 }

@@ -14,6 +14,7 @@ import ForgetPwd from "../../pages/Authentication/ForgetPassword";
 import Register from "../../pages/Authentication/Register";
 import ResetPassword from "../../pages/Authentication/ResetPassword";
 import Pages404 from "../../pages/Utility/pages-404";
+import Chat from "../../pages/Chat/Chat";
 
 export const sellerPublicRoutes = [
   { path: "/login", component: <Login /> },
@@ -30,6 +31,7 @@ export const sellerProtectedRoutes = [
   { path: "/products/:subdomain?", component: <ProductsBreakdown /> },
   { path: "/orders/:subdomain", component: <OrdersBreakdown /> },
   { path: "/payments/:subdomain", component: <OrdersBreakdown /> },
+  { path: "/chat", component: <Chat /> },
 ];
 
 export { Pages404 };

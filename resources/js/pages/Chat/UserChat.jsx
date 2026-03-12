@@ -12,7 +12,7 @@ import {
 import Spinners from "../../components/Common/Spinner";
 
 
-const UserChat = ({ Chat_Box_Username, Chat_Box_User_Status, messages, loading }) => {
+const UserChat = ({ Chat_Box_Username, Chat_Box_User_Status, messages, loading, currentRoomId }) => {
 
     const dispatch = useDispatch();
     const scrollRef = useRef(null);
@@ -122,6 +122,8 @@ const UserChat = ({ Chat_Box_Username, Chat_Box_User_Status, messages, loading }
                 isSameTime: true,
                 images: selectedImage,
                 time: time,
+                chat_room_id: currentRoomId,
+                roomId: currentRoomId,
             };
             dispatch(onAddMessage(newMessage));
             setCurMessage("");
@@ -132,13 +134,25 @@ const UserChat = ({ Chat_Box_Username, Chat_Box_User_Status, messages, loading }
     };
 
     const onKeyPress = (e) => {
-        const { key, value } = e;
-        if (key === "Enter") {
-            setCurMessage(value);
+        if (e.key === "Enter") {
+            e.preventDefault();
             setDisable(true);
             addMessage();
         }
     };
+
+    if (!currentRoomId) {
+        return (
+            <div className="w-100 user-chat">
+                <Card>
+                    <div className="p-5 text-center text-muted">
+                        <i className="bx bx-message-detail font-size-48 mb-3" />
+                        <p className="mb-0">Select a conversation or start a new one from the list.</p>
+                    </div>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <React.Fragment>
@@ -147,7 +161,7 @@ const UserChat = ({ Chat_Box_Username, Chat_Box_User_Status, messages, loading }
                     <div className="p-4 border-bottom ">
                         <Row>
                             <Col md={4} xs={9}>
-                                <h5 className="font-size-15 mb-1">{Chat_Box_Username} </h5>
+                                <h5 className="font-size-15 mb-1">{Chat_Box_Username || "Chat"} </h5>
 
                                 <p className="text-muted mb-0">
                                     <i
@@ -218,11 +232,11 @@ const UserChat = ({ Chat_Box_Username, Chat_Box_User_Status, messages, loading }
                                 {isLoading ? <Spinners setLoading={setLoading} /> :
                                     <ul className="list-unstyled" id="users-conversation">
                                         {
-                                            messages && (messages || [])?.map((message, inx) => {
+                                            (Array.isArray(messages) ? messages : []).map((message, inx) => {
                                                 return (
                                                     <React.Fragment key={inx}>
                                                         {
-                                                            (message.userMessages || [])?.map((userMsg, index) => {
+                                                            (Array.isArray(message?.userMessages) ? message.userMessages : []).map((userMsg, index) => {
                                                                 return (
                                                                     <li
                                                                         key={index}
@@ -317,7 +331,7 @@ const UserChat = ({ Chat_Box_Username, Chat_Box_User_Status, messages, loading }
                                     </div>
                                 </Col>
                                 <Col className="col-auto">
-                                    <Button type="button" color="primary" disabled={!isDisable} onClick={() => addMessage()} className="btn btn-primary btn-rounded chat-send w-md ">
+                                    <Button type="button" color="primary" disabled={!curMessage && !selectedImage} onClick={() => addMessage()} className="btn btn-primary btn-rounded chat-send w-md ">
                                         <span className="d-none d-sm-inline-block me-2"> Send</span>
                                         <i className="mdi mdi-send" />
                                     </Button>

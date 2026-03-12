@@ -44,6 +44,8 @@ class UserMessageResource extends ResourceCollection
                 }
 
                 $file_types = explode('/', $data->file_type);
+                $authId = authUser($request)?->id ?? 0;
+                $isMine = ($data->type == 1 && $chat_room->user_id == $authId) || ($data->type == 2 && $chat_room->receiver_id == $authId);
 
                 return [
                     'id'                => $data->id,
@@ -54,6 +56,7 @@ class UserMessageResource extends ResourceCollection
                     'receiver_image'    => $receiver->profile_image,
                     'message'           => $data->message,
                     'type'              => $data->type,
+                    'is_mine'           => $isMine,
                     'page'              => (int)$request->page,
                     'last_page'         => (int)$this->lastPage(),
                     'is_file'           => (bool)$data->is_file,
